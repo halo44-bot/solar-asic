@@ -1,8 +1,8 @@
 # ☀️ Solar ASIC — Solar-Mining-Dashboard für Home Assistant
 
 <p align="center">
-  <a href="README.md">Français</a> | 
-  <a href="README.en.md">English</a> | 
+  <a href="README.fr.md">Français</a> | 
+  <a href="README.md">English</a> | 
   <a href="README.es.md">Español</a> | 
   <a href="README.de.md">Deutsch</a>
 </p>
