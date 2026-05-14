@@ -1,0 +1,3396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico">
+<!-- Cache géré côté serveur -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar ASIC — Automatisation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+:root{--bg:#f0f2f5;--bg2:#fff;--bg3:#f7f8fa;--border:#e4e8ef;--solar:#f59e0b;--solar2:#d97706;--solar-bg:#fffbeb;--inject:#10b981;--inject-bg:#ecfdf5;--gridc:#ef4444;--grid-bg:#fef2f2;--asic:#0ea5e9;--asic-bg:#f0f9ff;--home:#8b5cf6;--home-bg:#f5f3ff;--text:#1e293b;--text2:#64748b;--text3:#94a3b8;--shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow2:0 2px 8px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.06);--mono:'DM Mono',monospace;--sans:'Outfit',sans-serif;--r:14px;}
+[data-theme="dark"]{--bg:#0f1117;--bg2:#1a1d27;--bg3:#21242f;--border:#2d3146;--solar-bg:#2d2410;--inject-bg:#0d2318;--grid-bg:#2d1515;--asic-bg:#0d1f2d;--home-bg:#1a1528;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--shadow:0 1px 3px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2);--shadow2:0 2px 8px rgba(0,0,0,.4),0 8px 32px rgba(0,0,0,.3);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;min-height:100vh;}
+.page{max-width:1200px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:16px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 22px;box-shadow:var(--shadow);flex-wrap:wrap;gap:10px;row-gap:10px;}
+.logo{display:flex;align-items:center;gap:12px;min-width:0;flex-shrink:1;}
+.logo-sun{width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-title{font-size:19px;font-weight:800;letter-spacing:-.3px;}
+.logo-title span{color:var(--solar);}
+.topbar-r{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end;min-width:0;}
+.live-pill{display:flex;align-items:center;gap:6px;background:var(--inject-bg);border:1px solid rgba(16,185,129,.2);border-radius:20px;padding:5px 13px;font-family:var(--mono);font-size:10px;color:var(--inject);letter-spacing:2px;white-space:nowrap;flex-shrink:0;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--inject);animation:blink 1.4s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.conn-status{font-family:var(--mono);font-size:10px;padding:5px 13px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;}
+.conn-ok{background:var(--inject-bg);color:var(--inject);border:1px solid rgba(16,185,129,.2);}
+.conn-err{background:var(--grid-bg);color:var(--gridc);border:1px solid rgba(239,68,68,.2);}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-width:0;}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;min-width:0;}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow2);}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0;}
+.s-solar::before{background:linear-gradient(90deg,#f59e0b,#d97706);}
+.s-inject::before{background:linear-gradient(90deg,#10b981,#059669);}
+.s-gridc::before{background:linear-gradient(90deg,#ef4444,#dc2626);}
+.s-asic::before{background:linear-gradient(90deg,#0ea5e9,#0284c7);}
+.stat-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px;}
+.s-solar .stat-icon{background:var(--solar-bg);}
+.s-inject .stat-icon{background:var(--inject-bg);}
+.s-gridc .stat-icon{background:var(--grid-bg);}
+.s-asic .stat-icon{background:var(--asic-bg);}
+.stat-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;overflow-wrap:break-word;word-break:break-word;hyphens:auto;}
+.stat-val{font-size:28px;font-weight:800;line-height:1;letter-spacing:-1px;}
+.s-solar .stat-val{color:var(--solar);}
+.s-inject .stat-val{color:var(--inject);}
+.s-gridc .stat-val{color:var(--gridc);}
+.s-asic .stat-val{color:var(--asic);}
+.stat-unit{font-size:13px;font-weight:500;color:var(--text3);margin-left:2px;}
+.stat-sub{margin-top:5px;font-family:var(--mono);font-size:10px;color:var(--text3);}
+.finance-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.mining-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.fin-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;}
+.fin-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.fi-green{background:var(--inject-bg);}.fi-red{background:var(--grid-bg);}.fi-blue{background:var(--asic-bg);}
+.fin-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+.fin-val{font-size:20px;font-weight:800;line-height:1;letter-spacing:-.5px;}
+.fv-green{color:#059669;}.fv-red{color:var(--gridc);}.fv-blue{color:var(--asic);}
+.fin-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:3px;}
+.main{display:grid;grid-template-columns:1fr 360px;gap:16px;}
+.col-l{display:flex;flex-direction:column;gap:16px;min-width:0;}
+.col-r{display:flex;flex-direction:column;gap:16px;min-width:0;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;min-width:0;}
+.card-head{padding:13px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.card-title{font-size:13px;font-weight:700;color:var(--text);min-width:0;overflow-wrap:break-word;word-break:break-word;}
+.badge{font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;font-weight:500;}
+.b-ok{background:var(--inject-bg);color:var(--inject);border:1px solid rgba(16,185,129,.2);}
+.b-asic{background:var(--asic-bg);color:var(--asic);border:1px solid rgba(14,165,233,.2);}
+.flow-canvas{position:relative;width:100%;height:520px;overflow:hidden;}
+#flow-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+.node{position:absolute;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:2;transform:translate(-50%,-50%);max-width:30%;}
+.node-circle{border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid;transition:all .4s;flex-shrink:0;}
+.node-emoji{font-size:28px;line-height:1;margin-bottom:2px;}
+.node-watt{font-family:var(--mono);font-size:13px;font-weight:500;line-height:1;white-space:nowrap;}
+.node-name{font-size:12px;font-weight:700;color:var(--text2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.node-sub{font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.n-solar .node-circle{width:100px;height:100px;border-color:var(--solar);background:var(--solar-bg);box-shadow:0 0 0 6px rgba(245,158,11,.1),0 6px 20px rgba(245,158,11,.2);}
+.n-solar .node-watt{color:var(--solar2);}
+.n-solar .node-circle.active{animation:psolar 2.5s ease-in-out infinite;}
+@keyframes psolar{0%,100%{box-shadow:0 0 0 6px rgba(245,158,11,.1),0 6px 20px rgba(245,158,11,.2);}50%{box-shadow:0 0 0 14px rgba(245,158,11,.08),0 6px 28px rgba(245,158,11,.35);}}
+.n-home .node-circle{width:90px;height:90px;border-color:var(--home);background:var(--home-bg);}
+.n-home .node-watt{color:var(--home);}
+.n-grid .node-circle{width:84px;height:84px;border-color:var(--gridc);background:var(--grid-bg);transition:border-color .5s,background .5s;}
+.n-grid .node-watt{color:var(--gridc);transition:color .5s;}
+.n-grid.inject .node-circle{border-color:var(--inject);background:var(--inject-bg);}
+.n-grid.inject .node-watt{color:var(--inject);}
+.n-asic .node-circle{width:90px;height:90px;border-color:var(--asic);background:var(--asic-bg);}
+.n-asic .node-watt{color:var(--asic);}
+.n-asic .node-circle.active{animation:pasic 2s ease-in-out infinite;}
+@keyframes pasic{0%,100%{box-shadow:0 0 0 4px rgba(14,165,233,.1),0 4px 14px rgba(14,165,233,.15);}50%{box-shadow:0 0 0 10px rgba(14,165,233,.08),0 4px 22px rgba(14,165,233,.3);}}
+.n-solar{left:50%;top:18%;}
+.n-home{left:50%;top:62%;}
+.n-grid{left:13%;top:62%;}
+.n-asic{left:87%;top:62%;}
+.flow-line{fill:none;stroke-width:3;stroke-linecap:round;}
+.dash-anim{stroke-dasharray:10 8;}
+@keyframes dfwd{to{stroke-dashoffset:-36;}}
+.anim-fwd{animation:dfwd 1s linear infinite;}
+.chart-tabs-row{display:flex;gap:6px;}
+.chart-tab{font-family:var(--mono);font-size:10px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all .2s;background:var(--bg3);color:var(--text3);}
+.chart-tab.active{background:var(--solar-bg);color:var(--solar);border-color:rgba(245,158,11,.3);}
+.chart-outer{position:relative;padding:12px 16px 16px;}
+.chart-svg-wrap{position:relative;}
+#chart-svg{width:100%;height:150px;display:block;}
+.chart-tooltip{position:absolute;background:rgba(30,41,59,.92);color:#fff;border-radius:8px;padding:8px 12px;font-family:var(--mono);font-size:11px;line-height:1.8;pointer-events:none;display:none;white-space:nowrap;z-index:10;box-shadow:0 4px 16px rgba(0,0,0,.2);}
+.chart-tooltip-line{display:flex;align-items:center;gap:6px;}
+.chart-tooltip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+#chart-crosshair{stroke:#94a3b8;stroke-width:1;stroke-dasharray:3 3;pointer-events:none;opacity:0;}
+#chart-hover-area{fill:transparent;cursor:crosshair;}
+.stats-table{width:100%;border-collapse:collapse;font-size:12px;}
+.stats-table th{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;padding:8px 12px;border-bottom:2px solid var(--border);text-align:left;background:var(--bg3);white-space:nowrap;}
+.stats-table td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;}
+.stats-table tr:last-child td{border-bottom:none;}
+.stats-table tr:hover td{background:var(--bg3);}
+.td-month{font-weight:700;color:var(--text2);}
+.td-solar{color:var(--solar);font-family:var(--mono);}
+.td-inject{color:var(--inject);font-family:var(--mono);}
+.td-asic{color:var(--asic);font-family:var(--mono);}
+.td-asic-h{color:var(--home);font-family:var(--mono);}
+.next-box{background:linear-gradient(135deg,var(--asic-bg),var(--bg3));border:1px solid rgba(14,165,233,.2);border-radius:11px;padding:14px;display:flex;align-items:center;gap:12px;}
+.next-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--asic),#0284c7);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(14,165,233,.3);flex-shrink:0;}
+.next-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px;}
+.next-name{font-size:22px;font-weight:800;color:var(--asic);letter-spacing:-.5px;}
+.cond-row{display:flex;gap:8px;margin-top:10px;}
+.cond-box{flex:1;border-radius:10px;padding:10px;border:1px solid;}
+.cond-on{background:var(--inject-bg);border-color:rgba(16,185,129,.2);}
+.cond-off{background:var(--grid-bg);border-color:rgba(239,68,68,.2);}
+.cond-title{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;font-weight:500;}
+.cond-on .cond-title{color:var(--inject);}
+.cond-off .cond-title{color:var(--gridc);}
+.cond-line{font-size:11px;color:var(--text);line-height:1.9;}
+.cond-line span{font-weight:700;}
+.cond-on .cond-line span{color:var(--inject);}
+.cond-off .cond-line span{color:var(--gridc);}
+.surplus-bar{margin-top:12px;}
+.surplus-head{display:flex;justify-content:space-between;margin-bottom:4px;}
+.surplus-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;}
+.surplus-val{font-family:var(--mono);font-size:10px;color:var(--solar);font-weight:500;}
+.surplus-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.surplus-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--solar),var(--inject));border-radius:3px;transition:width .5s ease;}
+.asic-scroll{padding:10px 14px;}
+.asic-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.asic-item{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:9px;transition:all .25s;min-width:0;}
+.asic-item.on{background:var(--asic-bg);border-color:rgba(14,165,233,.3);}
+.asic-item.off{opacity:.45;}
+.asic-led{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.asic-led.on{background:var(--asic);box-shadow:0 0 7px rgba(14,165,233,.5);}
+.asic-led.off{background:var(--border);}
+.asic-info{flex:1;min-width:0;overflow:hidden;}
+.asic-name{font-size:11px;font-weight:700;color:var(--text);}
+.asic-ent{font-family:var(--mono);font-size:8px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.asic-ww{font-family:var(--mono);font-size:9px;color:var(--solar);font-weight:500;flex-shrink:0;}
+.footer{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--text3);flex-wrap:wrap;gap:6px;padding:0 4px;}
+
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.fan{transform-origin:center;animation:spin 2s linear infinite;transform-box:fill-box;}
+.lang-btn{padding:5px 10px;font-size:10px;font-weight:600;border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:20px;cursor:pointer;font-family:var(--mono);letter-spacing:1px;transition:all .15s;line-height:1;white-space:nowrap;flex-shrink:0;}
+.lang-btn.active{background:var(--solar)!important;color:#fff!important;border-color:var(--solar)!important;}
+.lang-btn:hover{opacity:0.8;}
+.topbar-l{display:flex;align-items:center;gap:10px;}
+.topbar-r{display:flex;align-items:center;gap:8px;}
+.notif-bar{display:flex;gap:8px;align-items:center;padding:8px 0 4px;flex-wrap:wrap;}
+.notif-btn{font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);cursor:pointer;letter-spacing:1px;text-transform:uppercase;background:var(--bg3);color:var(--text3);}
+.notif-btn.active{background:var(--solar);color:#fff;border-color:var(--solar);}
+.mining-coin-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;flex:1;min-width:140px;}
+.table-wrap{width:100%;overflow-x:auto;}
+
+/* ═══ RESPONSIVE ════════════════════════════════════════════ */
+
+/* Empêche tout défilement horizontal */
+html,body{overflow-x:hidden;}
+.page{overflow-x:hidden;}
+
+/* ── Tablette large (960px): sidebar sous le contenu ── */
+@media(max-width:960px){
+  .main{grid-template-columns:1fr;}
+  .stats{grid-template-columns:repeat(4,1fr);}
+}
+
+/* ── Tablette (768px): flux plus petit ── */
+@media(max-width:768px){
+  .flow-canvas{height:360px;}
+  .n-solar .node-circle{width:80px;height:80px;}
+  .n-home  .node-circle{width:74px;height:74px;}
+  .n-grid  .node-circle{width:68px;height:68px;}
+  .n-asic  .node-circle{width:74px;height:74px;}
+  .node-emoji{font-size:22px;}
+  .node-watt{font-size:11px;}
+  .node-name{font-size:11px;}
+}
+
+/* ── Mobile large (640px): topbar empilé + tuiles 2 col ── */
+@media(max-width:640px){
+  /* Page */
+  .page{padding:12px 10px 40px;}
+
+  /* Topbar : logo + boutons sur 2 lignes */
+  .topbar{flex-wrap:wrap;gap:10px;padding:12px 14px;}
+  .logo-sun{width:36px;height:36px;flex-shrink:0;}
+  .logo-sun svg{width:36px;height:36px;}
+  .logo-title{font-size:15px;}
+  .topbar-r{flex-wrap:wrap;gap:6px;justify-content:flex-end;}
+  .topbar-r > div{gap:4px;}
+  .lang-btn{padding:4px 8px;font-size:9px;letter-spacing:.5px;}
+  .conn-status{font-size:9px;padding:4px 10px;letter-spacing:.5px;}
+  .live-pill{font-size:9px;padding:4px 10px;letter-spacing:1px;}
+
+  /* Grilles */
+  .stats{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .finance-row{grid-template-columns:1fr;}
+  .mining-row{grid-template-columns:1fr;}
+
+  /* Tuiles stat : tailles réduites pour textes longs (DE/EN/ES) */
+  .stat{padding:12px 13px;}
+  .stat-icon{width:30px;height:30px;font-size:15px;margin-bottom:8px;}
+  .stat-lbl{font-size:8px;letter-spacing:1px;margin-bottom:2px;}
+  .stat-val{font-size:22px;letter-spacing:-.5px;}
+  .stat-unit{font-size:11px;}
+  .stat-sub{font-size:9px;}
+
+  /* Cartes financières */
+  .fin-card{padding:12px 13px;gap:10px;}
+  .fin-icon{width:36px;height:36px;font-size:17px;}
+  .fin-lbl{font-size:8px;letter-spacing:1px;}
+  .fin-val{font-size:17px;}
+  .fin-sub{font-size:9px;}
+
+  /* Titres de cartes (Flux Énergie, Statistiques, etc.) */
+  .card-head{padding:11px 14px;}
+  .card-title{font-size:12px;}
+  .badge{font-size:8px;padding:2px 8px;}
+
+  /* Flux énergie */
+  .flow-canvas{height:300px;}
+  .n-solar .node-circle{width:64px;height:64px;}
+  .n-home  .node-circle{width:60px;height:60px;}
+  .n-grid  .node-circle{width:54px;height:54px;}
+  .n-asic  .node-circle{width:60px;height:60px;}
+  .node-emoji{font-size:18px;}
+  .node-watt{font-size:9px;}
+  .node-name{font-size:9px;}
+  .node-sub{font-size:8px;}
+  .n-grid{left:14%;}
+  .n-asic{left:86%;}
+  .node{max-width:28%;}
+
+  /* col-r : cond-row côte à côte réduit */
+  .cond-box{padding:8px;}
+  .cond-title{font-size:8px;}
+  .cond-line{font-size:10px;}
+  .chrono-time{font-size:18px;}
+  .asic-grid{grid-template-columns:1fr 1fr;}
+
+  /* Stats table */
+  .stats-table{font-size:10px;}
+  .stats-table th,.stats-table td{padding:6px 7px;}
+}
+
+/* ── Mobile très petit (400px): textes encore plus compacts ── */
+@media(max-width:400px){
+  .stats{grid-template-columns:1fr 1fr;}
+  .topbar{padding:10px 12px;}
+  .logo-sun{width:30px;height:30px;}
+  .logo-sun svg{width:30px;height:30px;}
+  .logo-title{font-size:13px;}
+  .lang-btn{padding:3px 6px;font-size:8px;}
+  .conn-status{font-size:8px;padding:3px 8px;}
+  .live-pill{font-size:8px;padding:3px 8px;}
+  .stat{padding:10px 11px;}
+  .stat-lbl{font-size:7px;letter-spacing:.5px;}
+  .stat-val{font-size:19px;}
+  .stat-sub{font-size:8px;}
+  .fin-lbl{font-size:7px;letter-spacing:.5px;}
+  .fin-val{font-size:15px;}
+  .card-title{font-size:11px;}
+}
+
+/* BANNIERE CAROUSEL */
+.banner{display:none;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);animation:slideDown .4s ease;position:relative;background:var(--bg2);}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+.banner-slide{display:none;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.banner-slide.active{display:block;animation:fadeSlide .35s ease;}
+@keyframes fadeSlide{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+.banner-img-wrap{width:100%;max-height:180px;overflow:hidden;cursor:pointer;}
+.banner-img-wrap img{width:100%;height:180px;object-fit:cover;display:block;transition:transform .3s;}
+.banner-img-wrap img:hover{transform:scale(1.02);}
+.banner-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 20px;background:var(--bg2);}
+.banner-text{display:flex;flex-direction:column;gap:3px;flex:1;}
+.banner-title{font-size:13px;font-weight:700;color:var(--text);}
+.banner-sub{font-size:11px;color:var(--text2);}
+.banner-btn{font-family:var(--mono);font-size:10px;font-weight:600;padding:7px 16px;border-radius:20px;text-decoration:none;white-space:nowrap;letter-spacing:.5px;transition:opacity .2s;flex-shrink:0;}
+.banner-btn:hover{opacity:.8;}
+.banner-nav{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 0 12px;}
+.banner-dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:none;cursor:pointer;padding:0;transition:all .2s;}
+.banner-dot.active{background:var(--solar);transform:scale(1.3);}
+.banner-arrows{position:absolute;top:50%;transform:translateY(-50%);width:100%;display:flex;justify-content:space-between;pointer-events:none;padding:0 8px;}
+.banner-arrow{width:28px;height:28px;border-radius:50%;background:rgba(255, 255, 255, 0.9);border:1px solid var(--border);cursor:pointer;pointer-events:all;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:var(--shadow);transition:all .2s;}
+.banner-arrow:hover{background:var(--solar);color:rgb(255, 255, 255);border-color:var(--solar);}
+
+/* Utilitaires */
+.mono-xs{font-family:var(--mono);font-size:9px;color:var(--text3);}
+.mono-sm{font-family:var(--mono);font-size:10px;color:var(--text3);}
+
+/* CHRONO */
+.chrono-box{margin-top:12px;border-radius:10px;padding:12px 14px;border:1.5px solid;background:var(--bg3);border-color:var(--border);}
+.chrono-box.chrono-start{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-color:rgba(16,185,129,.35);}
+.chrono-box.chrono-stop{background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:rgba(239,68,68,.35);}
+[data-theme="dark"] .chrono-box.chrono-start{background:linear-gradient(135deg,#0d2318,#0d3322);border-color:rgba(16,185,129,.4);}
+[data-theme="dark"] .chrono-box.chrono-stop{background:linear-gradient(135deg,#2d1515,#3d1010);border-color:rgba(239,68,68,.4);}
+.chrono-box.chrono-wait{background:var(--bg3);border-color:var(--border);}
+.chrono-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.chrono-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;font-weight:600;}
+.chrono-start .chrono-label{color:var(--inject);}
+.chrono-stop .chrono-label{color:var(--gridc);}
+.chrono-wait .chrono-label{color:var(--text3);}
+.chrono-time{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:2px;}
+.chrono-start .chrono-time{color:var(--inject);}
+.chrono-stop .chrono-time{color:var(--gridc);}
+.chrono-wait .chrono-time{color:var(--text3);}
+.chrono-bar-track{height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;}
+.chrono-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.chrono-start .chrono-bar-fill{background:linear-gradient(90deg,#10b981,#059669);}
+.chrono-stop .chrono-bar-fill{background:linear-gradient(90deg,#ef4444,#dc2626);}
+.chrono-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:5px;}
+
+/* ── Classes utilitaires manquantes ─────────────────────────── */
+.f2pool-badge{font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;font-weight:500;background:var(--asic-bg);color:var(--asic);border:1px solid rgba(14,165,233,.2);}
+.mining-hr{font-family:var(--mono);font-size:10px;color:var(--text3);}
+
+/* ── Cartes mining (créées dynamiquement par renderMiningCoin) ── */
+.mining-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  min-height:120px;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  transition:transform .15s, box-shadow .15s;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  overflow:hidden;
+  word-wrap:break-word;
+}
+.mining-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08);}
+.mining-symbol{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:1px;}
+.mining-amount{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1.1;margin-top:2px;}
+.mining-eur{font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:4px;}
+.mining-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px;min-height:11px;}
+
+/* Sur mobile, cartes plus compactes */
+@media(max-width:640px){
+  .mining-card{min-height:auto;padding:10px 12px;}
+  .mining-amount{font-size:16px;}
+}
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// I18N — Dictionnaire multi-langue Solar ASIC
+// Pour ajouter une langue: copier un bloc et traduire les valeurs
+// ═══════════════════════════════════════════════════════════════
+const MONTHS_I18N = {
+  fr: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
+  en: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  de: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+  es: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+};
+const I18N = {
+  fr: {
+    // Connexion
+    connected:'CONNECTÉ', disconnected:'DÉCONNECTÉ', loading:'Chargement…',
+    // Tuiles énergie
+    solar_prod:'Production solaire', grid_inject:'Injection EDF', grid_import:'Import EDF',
+    tt_prod:'Prod. solaire', tt_inject:'Injection EDF', tt_ferme:'Ferme conso.', tt_import:'Import EDF', tt_asic_n:'ASIC actifs',
+    asic_active_n:'ASIC actifs', consumed:'consommé', farm_conso:'Ferme', surplus:'Surplus',
+    eco_today:'Économie EDF aujourd\u0027hui', rachat_sub:'rachat EDF',
+    edf_today:'Coût EDF aujourd\u0027hui', auto_kwh:'kWh automatisation aujourd\u0027hui',
+    power_est:'puissance estimée', ct_real:'CT4-5-6 réel',
+    // Mining
+    mining_title:'⛏\uFE0F Revenus Minage Temps Réel',
+    unpaid:'Non payé', hier:'hier', no_data:'—',
+    pool_live:'⚡ Pool LIVE',
+    // Bilan
+    bilan:'Bilan hier', revenues:'revenus', edf_cost:'coût EDF',
+    bilan_waiting:'Bilan hier : en attente des données de minage…',
+    waiting:'EN ATTENTE', asic_offline:'EN ATTENTE — ASIC HORS LIGNE',
+    asic_stops_in:'ASIC ARRETE DANS', asics_start_in:'ASIC DEMARRENT DANS', asics_stop_in:'ASIC ARRETENT DANS',
+    surplus_surveil:'Surveillance du surplus...', surplus_seuil:'Surplus {w}W — seuil: {s}W',
+    chrono_offline:'En attente — ASIC hors ligne',
+    // Flux énergie
+    flux_title:'⚡ Flux Énergie — Temps Réel',
+    solar_label:'Solaire', solar_sub:'production',
+    grid_label:'Réseau EDF', grid_sub_inject:'← injection', grid_sub_import:'→ import',
+    farm_label:'Ferme', farm_sub:'consommation',
+    asic_label:'ASIC Mining',
+    asics_of:'actifs', asics_label:'actifs',
+    // Prochain ASIC
+    next_asic:'▶ Prochain démarrage',
+    start_if:'✅ Démarrage si', surplus_above:'Surplus > seuil', stable:'Stable 5 min',
+    stop_if:'🛑 Arrêt si', surplus_zero:'Surplus ≤ 0W', absent:'Absent 5 min',
+    surplus_dispo:'Surplus disponible', next_thresh:'Seuil prochain',
+    asic_starts_in:'ASIC DEMARRE DANS',
+    // Historique
+    history_title:'📈 Historique', day:'Jour', week_tab:'Semaine', month_tab:'Mois',
+    prod_sol:'Prod. solaire', inject_edf:'Injection EDF', farm_kwh_col:'Ferme conso.',
+    import_kwh_col:'Import EDF', asics_col:'ASIC actifs',
+    // Stats
+    stats_title:'📊 Statistiques — Automatisation',
+    period:'Période', solar_prod_kwh:'Prod. solaire', farm_kwh:'Ferme',
+    import_kwh:'Import EDF', inject_kwh:'Inject. EDF', asic_kwh:'ASIC kWh',
+    today:'Aujourd\u0027hui', this_week:'Cette semaine', total:'TOTAL',
+    kwh_produced:'kWh produits', kwh_injected:'injectés', kwh_imported:'importés',
+    // Automatisation
+    auto_title:'⛏\uFE0F État de l\u0027automatisation',
+    on_off_label:'ON · OFF',
+    notifs_label:'NOTIFS :',
+    value_lbl:'valeur',
+    next_lbl:'Prochain ASIC',
+    all_active:'TOUS ACTIFS',
+    running:'en cours',
+    page_title:'Solar ASIC — Automatisation',
+    updated:'Mis à jour',
+  },
+  en: {
+    connected:'CONNECTED', disconnected:'DISCONNECTED', loading:'Loading…',
+    solar_prod:'Solar production', grid_inject:'Grid export', grid_import:'Grid import',
+    tt_prod:'Solar prod.', tt_inject:'Grid export', tt_ferme:'Farm use', tt_import:'Grid import', tt_asic_n:'Active ASICs',
+    asic_active_n:'active ASICs', consumed:'consumed', farm_conso:'Farm', surplus:'Surplus',
+    eco_today:'Grid savings today', rachat_sub:'feed-in tariff',
+    edf_today:'Grid cost today', auto_kwh:'automation kWh today', power_est:'estimated power', ct_real:'CT4-5-6 actual',
+    mining_title:'⛏\uFE0F Mining Revenue Live',
+    unpaid:'Unpaid', hier:'yesterday', no_data:'—', pool_live:'⚡ Pool LIVE',
+    bilan:'Yesterday balance', revenues:'revenues', edf_cost:'grid cost',
+    bilan_waiting:'Yesterday balance: waiting for mining data…',
+    waiting:'WAITING', asic_offline:'WAITING — ASIC OFFLINE',
+    asic_stops_in:'ASIC STOPS IN', asics_start_in:'ASICs START IN', asics_stop_in:'ASICs STOP IN',
+    surplus_surveil:'Monitoring surplus...', surplus_seuil:'Surplus {w}W — threshold: {s}W',
+    chrono_offline:'Waiting — ASIC offline',
+    flux_title:'⚡ Energy Flow — Live',
+    solar_label:'Solar', solar_sub:'production',
+    grid_label:'Grid EDF', grid_sub_inject:'← export', grid_sub_import:'→ import',
+    farm_label:'Farm', farm_sub:'consumption',
+    asic_label:'ASIC Mining', asics_of:'active', asics_label:'active',
+    next_asic:'▶ Next startup',
+    start_if:'✅ Start if', surplus_above:'Surplus > threshold', stable:'Stable 5 min',
+    stop_if:'🛑 Stop if', surplus_zero:'Surplus ≤ 0W', absent:'Absent 5 min',
+    surplus_dispo:'Available surplus', next_thresh:'Next threshold',
+    asic_starts_in:'ASIC STARTS IN',
+    history_title:'📈 History', day:'Day', week_tab:'Week', month_tab:'Month',
+    prod_sol:'Solar prod.', inject_edf:'Grid export', farm_kwh_col:'Farm conso.',
+    import_kwh_col:'Grid import', asics_col:'Active ASICs',
+    stats_title:'📊 Statistics — Automation',
+    period:'Period', solar_prod_kwh:'Solar prod.', farm_kwh:'Farm',
+    import_kwh:'Grid import', inject_kwh:'Grid export', asic_kwh:'ASIC kWh',
+    today:'Today', this_week:'This week', total:'TOTAL',
+    kwh_produced:'kWh produced', kwh_injected:'exported', kwh_imported:'imported',
+    auto_title:'⛏\uFE0F Automation status',
+    on_off_label:'ON · OFF',
+    notifs_label:'NOTIFS:',
+    value_lbl:'value',
+    next_lbl:'Next ASIC',
+    all_active:'ALL ACTIVE',
+    running:'running',
+    page_title:'Solar ASIC — Automation',
+    updated:'Updated',
+  },
+  de: {
+    connected:'VERBUNDEN', disconnected:'GETRENNT', loading:'Laden…',
+    solar_prod:'Solarertrag', grid_inject:'Netzeinspeisung', grid_import:'Netzbezug',
+    tt_prod:'Solarertrag', tt_inject:'Einspeisung', tt_ferme:'Farm-Verbrauch', tt_import:'Netzbezug', tt_asic_n:'Aktive ASICs',
+    asic_active_n:'aktive ASICs', consumed:'verbraucht', farm_conso:'Farm', surplus:'Überschuss',
+    eco_today:'Netzeinsparung heute', rachat_sub:'Einspeisevergütung',
+    edf_today:'Netzkosten heute', auto_kwh:'Automatisierung kWh heute', power_est:'geschätzte Leistung', ct_real:'CT4-5-6 aktuell',
+    mining_title:'⛏\uFE0F Mining-Einnahmen Live',
+    unpaid:'Ausstehend', hier:'gestern', no_data:'—', pool_live:'⚡ Pool LIVE',
+    bilan:'Bilanz gestern', revenues:'Einnahmen', edf_cost:'Netzkosten',
+    bilan_waiting:'Bilanz gestern: Mining-Daten werden geladen…',
+    waiting:'WARTEN', asic_offline:'WARTEN — ASIC OFFLINE',
+    asic_stops_in:'ASIC STOPPT IN', asics_start_in:'ASICs STARTEN IN', asics_stop_in:'ASICs STOPPEN IN',
+    surplus_surveil:'Überschuss-Überwachung...', surplus_seuil:'Überschuss {w}W — Schwelle: {s}W',
+    chrono_offline:'Warten — ASIC offline',
+    flux_title:'⚡ Energiefluss — Live',
+    solar_label:'Solar', solar_sub:'Produktion',
+    grid_label:'Stromnetz', grid_sub_inject:'← Einspeisung', grid_sub_import:'→ Bezug',
+    farm_label:'Farm', farm_sub:'Verbrauch',
+    asic_label:'ASIC Mining', asics_of:'aktiv', asics_label:'aktiv',
+    next_asic:'▶ Nächster Start',
+    start_if:'✅ Start wenn', surplus_above:'Überschuss > Schwelle', stable:'Stabil 5 Min',
+    stop_if:'🛑 Stopp wenn', surplus_zero:'Überschuss ≤ 0W', absent:'Fehlend 5 Min',
+    surplus_dispo:'Verfügbarer Überschuss', next_thresh:'Nächste Schwelle',
+    asic_starts_in:'ASIC STARTET IN',
+    history_title:'📈 Verlauf', day:'Tag', week_tab:'Woche', month_tab:'Monat',
+    prod_sol:'Solarertrag', inject_edf:'Einspeisung', farm_kwh_col:'Farm-Verbrauch',
+    import_kwh_col:'Netzbezug', asics_col:'Aktive ASICs',
+    stats_title:'📊 Statistiken — Automatisierung',
+    period:'Zeitraum', solar_prod_kwh:'Solarertrag', farm_kwh:'Farm',
+    import_kwh:'Netzbezug', inject_kwh:'Einspeisung', asic_kwh:'ASIC kWh',
+    today:'Heute', this_week:'Diese Woche', total:'GESAMT',
+    kwh_produced:'kWh erzeugt', kwh_injected:'eingespeist', kwh_imported:'bezogen',
+    auto_title:'⛏\uFE0F Automatisierungsstatus',
+    on_off_label:'EIN · AUS',
+    notifs_label:'BENACHR.:',
+    value_lbl:'Wert',
+    next_lbl:'Nächster ASIC',
+    all_active:'ALLE AKTIV',
+    running:'laufend',
+    page_title:'Solar ASIC — Automatisierung',
+    updated:'Aktualisiert',
+  },
+  es: {
+    connected:'CONECTADO', disconnected:'DESCONECTADO', loading:'Cargando…',
+    solar_prod:'Producción solar', grid_inject:'Exportación red', grid_import:'Importación red',
+    tt_prod:'Producción solar', tt_inject:'Exportación', tt_ferme:'Granja', tt_import:'Importación', tt_asic_n:'ASICs activos',
+    asic_active_n:'ASICs activos', consumed:'consumido', farm_conso:'Granja', surplus:'Excedente',
+    eco_today:'Ahorro red hoy', rachat_sub:'tarifa de inyección',
+    edf_today:'Coste red hoy', auto_kwh:'kWh automatización hoy', power_est:'potencia estimada', ct_real:'CT4-5-6 real',
+    mining_title:'⛏\uFE0F Ingresos Minería En Vivo',
+    unpaid:'Sin cobrar', hier:'ayer', no_data:'—', pool_live:'⚡ Pool LIVE',
+    bilan:'Balance ayer', revenues:'ingresos', edf_cost:'coste red',
+    bilan_waiting:'Balance ayer: esperando datos de minería…',
+    waiting:'EN ESPERA', asic_offline:'EN ESPERA — ASIC FUERA DE LÍNEA',
+    asic_stops_in:'ASIC SE DETIENE EN', asics_start_in:'ASICs INICIAN EN', asics_stop_in:'ASICs SE DETIENEN EN',
+    surplus_surveil:'Monitoreo del excedente...', surplus_seuil:'Excedente {w}W — umbral: {s}W',
+    chrono_offline:'En espera — ASIC fuera de línea',
+    flux_title:'⚡ Flujo de Energía — En Vivo',
+    solar_label:'Solar', solar_sub:'producción',
+    grid_label:'Red EDF', grid_sub_inject:'← inyección', grid_sub_import:'→ importación',
+    farm_label:'Granja', farm_sub:'consumo',
+    asic_label:'ASIC Mining', asics_of:'activos', asics_label:'activos',
+    next_asic:'▶ Próximo inicio',
+    start_if:'✅ Inicio si', surplus_above:'Excedente > umbral', stable:'Estable 5 min',
+    stop_if:'🛑 Parada si', surplus_zero:'Excedente ≤ 0W', absent:'Ausente 5 min',
+    surplus_dispo:'Excedente disponible', next_thresh:'Umbral siguiente',
+    asic_starts_in:'ASIC INICIA EN',
+    history_title:'📈 Historial', day:'Día', week_tab:'Semana', month_tab:'Mes',
+    prod_sol:'Prod. solar', inject_edf:'Exportación red', farm_kwh_col:'Consumo granja',
+    import_kwh_col:'Import. red', asics_col:'ASICs activos',
+    stats_title:'📊 Estadísticas — Automatización',
+    period:'Período', solar_prod_kwh:'Prod. solar', farm_kwh:'Granja',
+    import_kwh:'Import. red', inject_kwh:'Export. red', asic_kwh:'ASIC kWh',
+    today:'Hoy', this_week:'Esta semana', total:'TOTAL',
+    kwh_produced:'kWh producidos', kwh_injected:'exportados', kwh_imported:'importados',
+    auto_title:'⛏\uFE0F Estado automatización',
+    on_off_label:'ON · OFF',
+    notifs_label:'NOTIF.:',
+    value_lbl:'valor',
+    next_lbl:'Próximo ASIC',
+    all_active:'TODOS ACTIVOS',
+    running:'en marcha',
+    page_title:'Solar ASIC — Automatización',
+    updated:'Actualizado',
+  }
+};
+
+let _lang = localStorage.getItem('solar_lang') || 'fr';
+function t(key){
+  return (I18N[_lang] && I18N[_lang][key]) || (I18N['fr'] && I18N['fr'][key]) || key;
+}
+function tMonth(idx){
+  return (MONTHS_I18N[_lang] || MONTHS_I18N['fr'])[idx];
+}
+function setLang(lang){
+  _lang = lang;
+  localStorage.setItem('solar_lang', lang);
+  applyTranslations();
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
+  if(typeof loadTodayStats==='function') loadTodayStats();
+  if(typeof loadWeekStats==='function')  loadWeekStats();
+  if(typeof loadYearStats==='function')  loadYearStats();
+  if(typeof loadMiningRevenue==='function') loadMiningRevenue();
+  if(typeof updateChrono==='function') updateChrono();
+  applyTranslations(); // second pass pour les éléments rechargés
+  // Recharger les slides du banner (textes multilingues)
+  if(typeof bannerData!=='undefined' && bannerData.length){
+    const slidesDiv = document.getElementById('banner-slides');
+    if(slidesDiv){ slidesDiv.innerHTML=''; bannerData.forEach(b=>slidesDiv.appendChild(buildSlide(b))); showSlide(0); }
+  }
+}
+function applyTranslations(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.dataset.i18n;
+    if(el.tagName==='INPUT') el.placeholder = t(key);
+    else el.textContent = t(key);
+  });
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  applyTranslations();
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===_lang));
+  // Thème sauvegardé — initialisé tôt pour éviter le flash
+  (function(){
+    const saved = localStorage.getItem('solar_theme');
+    if(saved === 'dark'){
+      document.documentElement.setAttribute('data-theme','dark');
+      const btn = document.getElementById('theme-toggle');
+      if(btn) btn.textContent = '☀️';
+    }
+    const btn = document.getElementById('theme-toggle');
+    if(btn) btn.addEventListener('click', function(){
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+      btn.textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('solar_theme', isDark ? 'light' : 'dark');
+    });
+  })();
+});
+</script>
+
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-sun"><svg width="56" height="56" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+<rect x="5" y="5" width="90" height="110" fill="#000" rx="2"/>
+<rect x="8" y="15" width="55" height="97" fill="#4B4B4B"/>
+<g class="fan"><circle cx="35" cy="40" r="22" fill="none" stroke="#222" stroke-width="4"/><path d="M20 40 L50 40 M35 25 L35 55" stroke="#111" stroke-width="6" stroke-linecap="round"/></g>
+<g class="fan"><circle cx="35" cy="85" r="22" fill="none" stroke="#222" stroke-width="4"/><path d="M20 85 L50 85 M35 70 L35 100" stroke="#111" stroke-width="6" stroke-linecap="round"/></g>
+<rect x="66" y="15" width="26" height="97" fill="#C0C0C0"/>
+<circle cx="79" cy="30" r="8" fill="#333"/><circle cx="79" cy="55" r="8" fill="#333"/><circle cx="79" cy="80" r="8" fill="#333"/>
+<rect x="74" y="95" width="10" height="10" fill="#FFB300"/>
+<rect x="25" y="8" width="6" height="4" fill="#9575CD"/>
+<rect x="45" y="8" width="6" height="4" fill="#00E5FF"/>
+</svg></div>
+      <div><div class="logo-title"><span>Solar</span> ASIC</div><div style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;">AUTOMATISATION</div></div>
+    </div>
+    <div class="topbar-r">
+      <div style="display:flex;gap:3px;align-items:center;">
+        <button class="lang-btn" data-lang="fr" onclick="setLang('fr')" title="Français">FR</button>
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')" title="English">EN</button>
+        <button class="lang-btn" data-lang="de" onclick="setLang('de')" title="Deutsch">DE</button>
+        <button class="lang-btn" data-lang="es" onclick="setLang('es')" title="Español">ES</button>
+      </div>
+      <button id="theme-toggle" class="lang-btn" title="Mode clair/sombre">🌙</button>
+      <span class="conn-status conn-err" id="conn-status"><span data-i18n="loading">Chargement…</span></span>
+      <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+    </div>
+  </div>
+
+
+
+  <div class="stats">
+    <div class="stat s-solar"><div class="stat-icon" style="display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="5" width="26" height="18" rx="2" fill="#1e40af" stroke="#3b82f6" stroke-width="1.2"/>
+  <line x1="1" y1="10" x2="27" y2="10" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="1" y1="15" x2="27" y2="15" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="7" y1="5" x2="7" y2="23" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="14" y1="5" x2="14" y2="23" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="21" y1="5" x2="21" y2="23" stroke="#60a5fa" stroke-width="0.8"/>
+  <rect x="11" y="23" width="6" height="2" fill="#94a3b8"/>
+  <rect x="8" y="25" width="12" height="1.5" rx="0.5" fill="#94a3b8"/>
+</svg></div><div class="stat-lbl"><span data-i18n="solar_prod">Production solaire</span></div><div class="stat-val"><span id="st-solar">—</span><span class="stat-unit">W</span></div><div class="stat-sub" id="st-solar-sub">— kWh estimé</div></div>
+    <div class="stat s-inject"><div class="stat-icon">⚡</div><div class="stat-lbl"><span data-i18n="grid_inject">Injection EDF</span></div><div class="stat-val"><span id="st-inject">—</span><span class="stat-unit">W</span></div><div class="stat-sub" id="st-inject-kwh">— kWh injectés</div></div>
+    <div class="stat s-gridc"><div class="stat-icon">🗼</div><div class="stat-lbl"><span data-i18n="grid_import">Import EDF</span></div><div class="stat-val"><span id="st-grid">—</span><span class="stat-unit">W</span></div><div class="stat-sub" id="st-grid-kwh">— kWh importés</div></div>
+    <div class="stat s-asic"><div class="stat-icon">⛏️</div><div class="stat-lbl"><span data-i18n="asics_col">ASIC actifs</span></div><div class="stat-val"><span id="st-asic-n">—</span><span class="stat-unit" id="total-asic-count">/ --</span></div><div class="stat-sub" id="st-asic-w">— W consommé</div></div>
+  </div>
+
+  <div class="finance-row">
+    <div class="fin-card"><div class="fin-icon fi-green">💰</div><div><div class="fin-lbl"><span data-i18n="eco_today">Économie EDF aujourd'hui</span></div><div class="fin-val fv-green" id="fin-eco">—</div><div class="fin-sub" id="fin-eco-sub">kWh · 0.04€/kWh rachat</div></div></div>
+    <div class="fin-card"><div class="fin-icon fi-red">🗼</div><div><div class="fin-lbl"><span data-i18n="edf_today">Coût EDF aujourd'hui</span></div><div class="fin-val fv-red" id="fin-cost">—</div><div class="fin-sub" id="fin-cost-sub">kWh · 0.20€/kWh</div></div></div>
+    <div class="fin-card"><div class="fin-icon fi-blue">⛏️</div><div><div class="fin-lbl" data-i18n="auto_kwh">kWh automatisation aujourd'hui</div><div class="fin-val fv-blue" id="fin-asic">—</div><div class="fin-sub" id="fin-asic-sub">valeur — · 0.20€/kWh</div></div></div>
+  </div>
+
+  <!-- REVENUS MINAGE F2Pool -->
+  <div class="card" id="mining-revenue-card" style="display:none;">
+    <div class="card-head">
+      <span class="card-title"><span data-i18n="mining_title">⛏️ Revenus Minage Temps Réel</span></span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="f2pool-badge">⚡ Pool LIVE</span>
+        <span class="badge b-asic" id="mining-total-eur" style="font-size:11px;">— €/hier</span>
+      </div>
+    </div>
+    <div style="padding:12px 16px 14px;">
+      <div class="mining-row" id="mining-coins-grid"></div>
+      <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div class="mining-hr" id="mining-net-profit">Bilan net (revenus − coût EDF) : calcul en cours…</div>
+        <div class="notif-bar">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;"><span data-i18n="notifs_label">NOTIFS :</span></span>
+          <button class="notif-btn" id="notif-btn-telegram" onclick="toggleNotif('telegram',this)">✈ Telegram</button>
+          <button class="notif-btn" id="notif-btn-ntfy" onclick="toggleNotif('ntfy',this)">📱 ntfy</button>
+          <button class="notif-btn" id="notif-btn-ha" onclick="toggleNotif('ha',this)">🏠 HA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="col-l">
+      <div class="card">
+        <div class="card-head"><span class="card-title"><span data-i18n="flux_title">⚡ Flux Énergie — Temps Réel</span></span><span class="badge b-ok">LIVE</span></div>
+        <div style="padding:8px 16px 12px;">
+          <div class="flow-canvas" id="flow-canvas">
+            <svg id="flow-svg" viewBox="0 0 700 520" preserveAspectRatio="none">
+              <defs>
+                <marker id="m-s" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#f59e0b"/></marker>
+                <marker id="m-a" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#0ea5e9"/></marker>
+                <marker id="m-i" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#10b981"/></marker>
+                <marker id="m-g" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L0,5 L7,2.5 z" fill="#ef4444"/></marker>
+              </defs>
+              <line id="bg-sh" x1="350" y1="125" x2="350" y2="270" stroke="#f59e0b" stroke-width="5" opacity=".1" stroke-linecap="round"/>
+              <line id="bg-ha" x1="398" y1="325" x2="516" y2="325" stroke="#0ea5e9" stroke-width="5" opacity=".1" stroke-linecap="round"/>
+              <line id="bg-hg" x1="302" y1="315" x2="184" y2="315" stroke="#10b981" stroke-width="5" opacity=".1" stroke-linecap="round"/>
+              <line id="bg-gh" x1="184" y1="335" x2="302" y2="335" stroke="#ef4444" stroke-width="5" opacity=".1" stroke-linecap="round"/>
+              <line id="anim-sh" class="flow-line dash-anim anim-fwd" x1="350" y1="125" x2="350" y2="270" stroke="#f59e0b" marker-end="url(#m-s)" opacity="0"/>
+              <line id="anim-ha" class="flow-line dash-anim anim-fwd" x1="398" y1="325" x2="516" y2="325" stroke="#0ea5e9" marker-end="url(#m-a)" opacity="0"/>
+              <line id="anim-hg" class="flow-line dash-anim anim-fwd" x1="302" y1="315" x2="184" y2="315" stroke="#10b981" marker-end="url(#m-i)" opacity="0"/>
+              <line id="anim-gh" class="flow-line dash-anim anim-fwd" x1="184" y1="335" x2="302" y2="335" stroke="#ef4444" marker-end="url(#m-g)" opacity="0"/>
+              <g id="pill-sh" opacity="0"><rect x="310" y="188" width="80" height="24" rx="6" fill="var(--bg2)" stroke="#f59e0b" stroke-width="1.5"/><text id="ptxt-sh" x="350" y="200" fill="#d97706" font-family="DM Mono, monospace" font-size="13" text-anchor="middle" dominant-baseline="middle">0 W</text></g>
+              <g id="pill-ha" opacity="0"><rect x="416" y="307" width="80" height="24" rx="6" fill="var(--bg2)" stroke="#0ea5e9" stroke-width="1.5"/><text id="ptxt-ha" x="456" y="319" fill="#0284c7" font-family="DM Mono, monospace" font-size="13" text-anchor="middle" dominant-baseline="middle">0 W</text></g>
+              <g id="pill-hg" opacity="0"><rect x="210" y="297" width="80" height="24" rx="6" fill="var(--bg2)" stroke="#10b981" stroke-width="1.5"/><text id="ptxt-hg" x="250" y="309" fill="#059669" font-family="DM Mono, monospace" font-size="13" text-anchor="middle" dominant-baseline="middle">0 W</text></g>
+              <g id="pill-gh" opacity="0"><rect x="210" y="330" width="80" height="24" rx="6" fill="var(--bg2)" stroke="#ef4444" stroke-width="1.5"/><text id="ptxt-gh" x="250" y="342" fill="#dc2626" font-family="DM Mono, monospace" font-size="13" text-anchor="middle" dominant-baseline="middle">0 W</text></g>
+            </svg>
+            <div class="node n-solar"><div class="node-name" style="margin-bottom:1px;" data-i18n="solar_label">Solaire</div><div class="node-sub" style="margin-bottom:15px;" data-i18n="solar_sub">production</div><div class="node-circle" id="circle-solar"><div class="node-emoji" style="line-height:1;display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="5" width="26" height="18" rx="2" fill="#1e40af" stroke="#3b82f6" stroke-width="1.2"/>
+  <line x1="1" y1="10" x2="27" y2="10" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="1" y1="15" x2="27" y2="15" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="7" y1="5" x2="7" y2="23" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="14" y1="5" x2="14" y2="23" stroke="#60a5fa" stroke-width="0.8"/>
+  <line x1="21" y1="5" x2="21" y2="23" stroke="#60a5fa" stroke-width="0.8"/>
+  <rect x="11" y="23" width="6" height="2" fill="#94a3b8"/>
+  <rect x="8" y="25" width="12" height="1.5" rx="0.5" fill="#94a3b8"/>
+</svg></div><div class="node-watt" id="nval-solar">— W</div></div></div>
+            <div class="node n-home"><div class="node-circle"><div class="node-emoji">🏭</div><div class="node-watt" id="nval-home">— W</div></div><div class="node-name" data-i18n="farm_label">Ferme</div><div class="node-sub" data-i18n="farm_sub">consommation</div></div>
+            <div class="node n-grid"><div class="node-circle"><div class="node-emoji">🗼</div><div class="node-watt" id="nval-grid">— W</div></div><div class="node-name" data-i18n="grid_label">Réseau EDF</div><div class="node-sub" id="grid-sub">—</div></div>
+            <div class="node n-asic"><div class="node-circle" id="circle-asic"><div class="node-emoji">⛏️</div><div class="node-watt" id="nval-asic">— W</div></div><div class="node-name" data-i18n="asic_label">ASIC Mining</div><div class="node-sub" id="asic-sub"><span id="asic-sub-count">0/--</span> <span data-i18n="asics_label">actifs</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title"><span data-i18n="history_title">📈 Historique</span></span>
+          <div class="chart-tabs-row">
+            <span class="chart-tab active" onclick="setPeriod('day',this)"><span data-i18n="day">Jour</span></span>
+            <span class="chart-tab" onclick="setPeriod('week',this)"><span data-i18n="week_tab">Semaine</span></span>
+            <span class="chart-tab" onclick="setPeriod('month',this)"><span data-i18n="month_tab">Mois</span></span>
+            <span class="chart-tab" id="btn-refresh-hist" onclick="refreshHistBtn(this)">↻</span>
+          </div>
+        </div>
+        <div class="chart-outer">
+          <div style="display:flex;gap:16px;margin-bottom:8px;">
+            <span style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;"></span><span data-i18n="prod_sol">Prod. solaire</span></span>
+            <span style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span><span data-i18n="grid_inject">Injection EDF</span></span>
+            <span style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:50%;background:#0ea5e9;display:inline-block;"></span><span data-i18n="farm_kwh_col">Ferme conso.</span></span>
+            <span style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);"><span style="width:14px;height:3px;border-top:2px dashed #ef4444;display:inline-block;"></span><span data-i18n="grid_import">Import EDF</span></span>
+            <span style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;color:var(--text2);"><span style="width:10px;height:10px;border-radius:2px;background:rgba(139,92,246,0.55);display:inline-block;"></span><span data-i18n="asics_col">ASIC actifs</span></span>
+          </div>
+          <div class="chart-svg-wrap" id="chart-wrap">
+            <svg id="chart-svg" viewBox="0 0 560 130" preserveAspectRatio="none">
+              <line x1="0" y1="20" x2="560" y2="20" stroke="#e4e8ef" stroke-width="1" stroke-dasharray="4 4"/>
+              <line x1="0" y1="55" x2="560" y2="55" stroke="#e4e8ef" stroke-width="1" stroke-dasharray="4 4"/>
+              <line x1="0" y1="90" x2="560" y2="90" stroke="#e4e8ef" stroke-width="1" stroke-dasharray="4 4"/>
+              <text id="chart-ytop" x="555" y="22" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;text-anchor:end;">—</text>
+              <text id="chart-ymid" x="555" y="57" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;text-anchor:end;">—</text>
+              <text id="chart-ybot" x="555" y="92" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;text-anchor:end;">—</text>
+              <path id="ca-p" fill="rgba(245,158,11,.12)" d=""/><path id="cl-p" fill="none" stroke="#f59e0b" stroke-width="2" d=""/>
+              <path id="ca-i" fill="rgba(16,185,129,.1)" d=""/><path id="cl-i" fill="none" stroke="#10b981" stroke-width="1.5" stroke-dasharray="5 3" d=""/>
+              <path id="ca-a" fill="rgba(14,165,233,.1)" d=""/><path id="cl-a" fill="none" stroke="#0ea5e9" stroke-width="1.5" d=""/>
+              <path id="cl-edf" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3 2" d=""/>
+              <g id="meteo-overlay"></g>
+              <g id="asic-bars"></g>
+              <text id="chart-placeholder" x="280" y="55" text-anchor="middle" style="font-family:var(--mono);font-size:11px;fill:#94a3b8;">Cliquez sur JOUR / SEMAINE / MOIS pour charger</text>
+              <line id="chart-crosshair" x1="0" y1="0" x2="0" y2="110" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>
+              <rect id="chart-hover-area" x="0" y="0" width="560" height="110" fill="transparent"/>
+              <text id="cx0" x="2" y="122" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;">00h</text>
+              <text id="cx1" x="132" y="122" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;">06h</text>
+              <text id="cx2" x="272" y="122" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;">12h</text>
+              <text id="cx3" x="412" y="122" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;">18h</text>
+              <text id="cx4" x="542" y="122" style="font-family:var(--mono);font-size:9px;fill:#94a3b8;">24h</text>
+            </svg>
+            <div class="chart-tooltip" id="chart-tooltip">
+              <div style="font-family:var(--mono);font-size:10px;color:#94a3b8;margin-bottom:5px;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:4px;" id="tt-time">--:--</div>
+              <div class="chart-tooltip-line"><span class="chart-tooltip-dot" style="background:#f59e0b"></span><span id="tt-solar">Prod: — W</span></div>
+              <div class="chart-tooltip-line"><span class="chart-tooltip-dot" style="background:#10b981"></span><span id="tt-inject">Inject: — W</span></div>
+              <div class="chart-tooltip-line"><span class="chart-tooltip-dot" style="background:#0ea5e9"></span><span id="tt-asic">Ferme: — W</span></div>
+              <div class="chart-tooltip-line"><span class="chart-tooltip-dot" style="background:#ef4444"></span><span id="tt-edf">Import EDF: — W</span></div>
+              <div class="chart-tooltip-line"><span class="chart-tooltip-dot" style="background:rgba(139,92,246,0.8)"></span><span id="tt-asic-n">ASIC: —</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><span class="card-title"><span data-i18n="stats_title">📊 Statistiques — Automatisation</span></span><span style="font-family:var(--mono);font-size:10px;color:var(--text3);" id="stats-year">2026</span></div>
+        <div style="overflow-x:auto;">
+          <div class="table-wrap"><table class="stats-table">
+            <thead><tr><th><span data-i18n="period">Période</span></th><th><span data-i18n="solar_prod_kwh">Prod. solaire</span></th><th><span data-i18n="farm_kwh">Ferme</span></th><th><span data-i18n="import_kwh">Import EDF</span></th><th><span data-i18n="inject_kwh">Inject. EDF</span></th><th><span data-i18n="asic_kwh">ASIC kWh</span></th></tr></thead>
+            <tbody id="stats-body-day" style="border-top:2px solid var(--border);">
+              <tr><td colspan="6" style="text-align:center;color:var(--text3)">Aujourd'hui: chargement…</td></tr>
+            </tbody>
+            <tbody id="stats-body-week" style="border-top:2px solid var(--border);">
+              <tr><td colspan="6" style="text-align:center;color:var(--text3)">7 jours: chargement…</td></tr>
+            </tbody>
+            <tbody id="stats-tbody" style="border-top:2px solid var(--solar);"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div><!-- /col-l -->
+
+    <div class="col-r">
+      <div class="card">
+        <div class="card-head"><span class="card-title"><span data-i18n="next_asic">▶ Prochain démarrage</span></span></div>
+        <div style="padding:14px;">
+          <div class="next-box">
+            <div class="next-icon">⚡</div>
+            <div><div class="next-lbl" data-i18n="next_lbl">Prochain ASIC</div><div class="next-name" id="next-name">—</div></div>
+          </div>
+          <div class="cond-row">
+            <div class="cond-box cond-on">
+              <div class="cond-title" data-i18n="start_if">✅ Démarrage si</div>
+              <div class="cond-line"><span data-i18n="surplus_above">Surplus &gt; seuil</span><br><span data-i18n="stable">Stable 5 min</span></div>
+            </div>
+            <div class="cond-box cond-off">
+              <div class="cond-title" data-i18n="stop_if">🛑 Arrêt si</div>
+              <div class="cond-line"><span data-i18n="surplus_zero">Surplus ≤ 0W</span><br><span data-i18n="absent">Absent 5 min</span></div>
+            </div>
+          </div>
+          <div class="surplus-bar">
+            <div class="surplus-head"><span class="surplus-lbl"><span data-i18n="surplus_dispo">Surplus disponible</span></span><span class="surplus-val" id="surplus-val">— W</span></div>
+            <div class="surplus-track"><div class="surplus-fill" id="surplus-fill"></div></div>
+            <div style="margin-top:4px;font-family:var(--mono);font-size:9px;color:var(--text3);">Seuil prochain : <span id="next-threshold">—</span> W</div>
+          </div>
+          <div class="chrono-box chrono-wait" id="chrono-box">
+            <div class="chrono-head">
+              <span class="chrono-label" id="chrono-label" data-i18n="waiting">EN ATTENTE</span>
+              <span class="chrono-time" id="chrono-time">--:--</span>
+            </div>
+            <div class="chrono-bar-track"><div class="chrono-bar-fill" id="chrono-bar" style="width:0%"></div></div>
+            <div class="chrono-sub" id="chrono-sub" data-i18n="surplus_surveil">Surveillance du surplus...</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="flex:1;">
+        <div class="card-head">
+          <span class="card-title"><span data-i18n="auto_title">⛏️ État de l’automatisation</span></span>
+          <span class="badge b-asic" id="asic-sum">— ON · — OFF</span>
+        </div>
+        <div class="asic-scroll"><div class="asic-grid" id="asic-grid"></div></div>
+      </div>
+    </div>
+  </div><!-- /main -->
+
+  <div class="footer">
+    <span data-i18n="page_title">Solar ASIC — Automatisation</span> &nbsp;
+    <span id="last-up"><span data-i18n="updated">Mis à jour</span>: —</span><span id="next-refresh" style="font-family:var(--mono);font-size:10px;color:var(--text3);">⟳ 15:00</span>
+  </div>
+
+  <!-- BANNIERE CAROUSEL PILOTEE A DISTANCE -->
+  <div class="banner" id="site-banner">
+    <div id="banner-slides"></div>
+    <div class="banner-arrows" id="banner-arrows" style="display:none;">
+      <button class="banner-arrow" id="banner-prev">◀</button>
+      <button class="banner-arrow" id="banner-next">▶</button>
+    </div>
+    <div class="banner-nav" id="banner-dots" style="display:none;"></div>
+
+</div><!-- /banner -->
+
+</div><!-- /page -->
+
+<script>
+// Stubs préventifs — définis AVANT secrets.js pour éviter ReferenceError
+window.updateF2PoolUI    = function(){};
+window.updateNotifBadges = function(){};
+window.updateMiningUI    = function(){};
+</script>
+<script src="secrets.js"></script>
+<script>
+// === CONFIGURATION ===
+// Les variables HA_URL_LOCAL, HA_URL_VPN, HA_TOKEN, MINING_COINS, etc.
+// sont définies dans secrets.js (fichier séparé, ne pas commiter)
+let HA_URL = '';
+if(typeof HA_URL_LOCAL !== 'undefined' && typeof HA_URL_VPN !== 'undefined'){
+  const hostname = window.location.hostname;
+  const isLocal = hostname === 'localhost'
+               || hostname === 'homeassistant.local'
+               || hostname.startsWith('192.168.')
+               || hostname.startsWith('10.')
+               || hostname.startsWith('172.');
+  HA_URL = isLocal ? HA_URL_LOCAL : HA_URL_VPN;
+} else {
+  document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif;"><h1 style="color:#ef4444;">Configuration manquante</h1><p>Le fichier <code>secrets.js</code> est introuvable ou mal configuré.</p></div>';
+  throw new Error('secrets.js manquant');
+}
+if(typeof HA_TOKEN === 'undefined' || !HA_TOKEN){
+  document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif;"><h1 style="color:#ef4444;">Token manquant</h1><p>Configure <code>HA_TOKEN</code> dans <code>secrets.js</code>.</p></div>';
+  throw new Error('HA_TOKEN manquant');
+}
+
+// Compat ancien format secrets.js : F2POOL_COINS = ['alph', 'bitcoin', ...]
+// Si MINING_COINS n'est pas défini dans secrets.js mais que F2POOL_COINS l'est,
+// on convertit automatiquement en utilisant COIN_LABELS défini ci-dessous.
+// (Ce bloc s'exécute APRÈS secrets.js et APRÈS la définition de COIN_LABELS)
+
+const PRIX=0.20, PRIX_RACHAT=0.04;
+const MINING_REFRESH_MS = 5 * 60 * 1000; // refresh revenus toutes les 5min
+const COIN_LABELS = {
+  bitcoin: {name:'Bitcoin', symbol:'BTC', color:'#f7931a', icon:'₿', cg:'bitcoin'},
+  alph:    {name:'Alephium', symbol:'ALPH', color:'#fa792b', icon:'⚡', cg:'alephium'},
+  rxd:     {name:'Radiant', symbol:'RXD', color:'#ff5c57', icon:'◈', cg:'radiant'},
+  ltc:     {name:'Litecoin', symbol:'LTC', color:'#345d9d', icon:'Ł', cg:'litecoin'},
+  eth:     {name:'Ethereum', symbol:'ETH', color:'#627eea', icon:'Ξ', cg:'ethereum'},
+  kas:     {name:'Kaspa',    symbol:'KAS', color:'#49dbc0', icon:'K',  cg:'kaspa'},
+  kda:     {name:'Kadena',   symbol:'KDA', color:'#e41d63', icon:'K',  cg:'kadena'},
+};
+
+// Compat ancien secrets.js : F2POOL_COINS = ['alph', 'bitcoin', ...]
+// Convertit automatiquement en MINING_COINS si l'ancien format est détecté
+if(typeof MINING_COINS === 'undefined' && typeof F2POOL_COINS !== 'undefined' && Array.isArray(F2POOL_COINS)){
+  const DECIMALS_MAP = {bitcoin:8, ltc:6, eth:6, alph:3, kas:3, rxd:4, kda:4};
+  window.MINING_COINS = F2POOL_COINS.map(id=>{
+    const meta = COIN_LABELS[id.toLowerCase()];
+    if(!meta) return null;
+    return { id: id.toLowerCase(), symbol: meta.symbol, color: meta.color,
+             decimals: DECIMALS_MAP[id.toLowerCase()] || 4, coingecko: meta.cg };
+  }).filter(Boolean);
+}
+const DATA_REFRESH_MS = 20000;      // données fraîches toutes les 20s
+const UI_REFRESH_MS = 15*60*1000;   // countdown UI affiché (15 min)
+const REFRESH_MS = UI_REFRESH_MS;   // compat ancien code
+
+const ASICS=[
+  {name:'AL0 1',       entity:'switch.iceriver_al0_1_socket_1',     w:100},
+  {name:'AL0 2',       entity:'switch.iceriver_al0_2_switch_1',     w:100},
+  {name:'AL0 3',       entity:'switch.iceriver_al0_3_switch_1',     w:100},
+  {name:'AL0 4',       entity:'switch.iceriver_al0_4_switch_1',     w:100},
+  {name:'AL0 5',       entity:'switch.iceriver_al0_5_switch_1',     w:100},
+  {name:'AL0 6',       entity:'switch.iceriver_al0_6_switch_1',     w:100},
+  {name:'AL0 7',       entity:'switch.iceriver_al0_7_switch_1',     w:100},
+  {name:'AL0 8',       entity:'switch.iceriver_al0_8_switch_1',     w:100},
+  {name:'AL0 9',       entity:'switch.iceriver_al0_9_switch_1',     w:100},
+  {name:'AL0 11',      entity:'switch.iceriver_al0_11_switch_1',    w:100},
+  {name:'AL0 12',      entity:'switch.iceriver_al0_12_switch_1',    w:100},
+  {name:'AL0 13',      entity:'switch.iceriver_al0_13_switch_1',    w:100},
+  {name:'KS0',         entity:'switch.iceriver_ks0_switch_1',       w:100},
+  {name:'RX0 1',       entity:'switch.iceriver_rx0_1_switch_1',     w:100},
+  {name:'RX0 2',       entity:'switch.iceriver_rx0_2_switch_1',     w:100},
+  {name:'Goldsh AL',   entity:'switch.goldshell_al_box_ii_switch_1',w:480},
+  {name:'Goldsh KD',   entity:'switch.goldshell_kd_box_ii_switch_1',w:360},
+  {name:'Antminer S19', entity:'switch.antminer_s19_switch',             w:3400},
+];
+
+// Sélection intelligente ASIC par puissance réelle
+// Matche la logique de l'automation HA "ASIC V17 - PETITS D'ABORD + BASCULE S19" :
+// 1. Petits ASIC démarrent d'abord (100W puis goldshell selon le budget)
+// 2. Si surplus ≥ 3550W → bascule sur S19 et éteint les petits qui ne tiennent plus
+// 3. Si surplus < 3200W (5 min) → éteint S19, rallume des petits
+// 4. Descente progressive 1-par-1 le soir, garde 1 petit tant que surplus ≥ 120W
+function getNextAsicsToStart(surplusW){
+  const SEUIL_S19    = 3550;   // surplus mini pour basculer sur S19
+  const MARGE_PETIT  = 20;     // marge sécu par petit ASIC
+  const SEUIL_MIN    = 120;    // surplus mini pour 1 petit ASIC (soir)
+  const selected = [];
+
+  // ── Cas BASCULE : surplus suffisant pour S19 ──
+  // On allume le S19 et c'est l'automation qui éteint les petits ASIC
+  const s19 = ASICS.find(a => a.name === 'Antminer S19');
+  if(s19 && !s19.on && surplusW >= SEUIL_S19){
+    selected.push(s19);
+    return selected; // le S19 prend le relais
+  }
+
+  // ── Sinon : petits ASIC d'abord (100W puis goldshell selon budget) ──
+  let remaining = surplusW;
+  const petitsOff = ASICS.filter(a => !a.on && a.name !== 'Antminer S19');
+  // Trier : IceRiver/KS0/RX0 (100W) d'abord, puis Goldshell KD (360W), puis Goldshell AL (480W)
+  const iceriver = petitsOff.filter(a => a.w === 100);
+  const goldKd   = petitsOff.filter(a => a.name === 'Goldsh KD');
+  const goldAl   = petitsOff.filter(a => a.name === 'Goldsh AL');
+  const ordered  = [...iceriver, ...goldKd, ...goldAl];
+
+  for(const a of ordered){
+    if(remaining >= (a.w + MARGE_PETIT) && remaining >= SEUIL_MIN){
+      selected.push(a);
+      remaining -= a.w;
+    }
+  }
+  return selected;
+}
+
+const ENTITIES=[
+  'sensor.injection_reseau','sensor.consommation_reseau','sensor.consommation_maison',
+  'sensor.asic_allumes_count','sensor.asic_puissance_estimee','sensor.prochain_asic',
+  'sensor.surplus_solaire',
+  'binary_sensor.rpi_power_status',
+  'sensor.production_solaire','sensor.consommation_ferme',
+  'sensor.refoss_smart_energy_monitor_em_channel_1_today_energy','sensor.refoss_smart_energy_monitor_em_channel_1_today_return_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_2_today_energy','sensor.refoss_smart_energy_monitor_em_channel_2_today_return_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_3_today_energy','sensor.refoss_smart_energy_monitor_em_channel_3_today_return_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_4_today_energy','sensor.refoss_smart_energy_monitor_em_channel_4_today_return_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_5_today_energy','sensor.refoss_smart_energy_monitor_em_channel_5_today_return_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_6_today_energy','sensor.refoss_smart_energy_monitor_em_channel_6_today_return_energy',
+  // Semaine et mois Refoss pour stats
+  'sensor.refoss_smart_energy_monitor_em_channel_1_this_week_energy','sensor.refoss_smart_energy_monitor_em_channel_2_this_week_energy','sensor.refoss_smart_energy_monitor_em_channel_3_this_week_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_4_this_week_energy','sensor.refoss_smart_energy_monitor_em_channel_5_this_week_energy','sensor.refoss_smart_energy_monitor_em_channel_6_this_week_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_1_this_week_return_energy','sensor.refoss_smart_energy_monitor_em_channel_2_this_week_return_energy','sensor.refoss_smart_energy_monitor_em_channel_3_this_week_return_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_1_this_month_energy','sensor.refoss_smart_energy_monitor_em_channel_2_this_month_energy','sensor.refoss_smart_energy_monitor_em_channel_3_this_month_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_4_this_month_energy','sensor.refoss_smart_energy_monitor_em_channel_5_this_month_energy','sensor.refoss_smart_energy_monitor_em_channel_6_this_month_energy',
+  'sensor.refoss_smart_energy_monitor_em_channel_1_this_month_return_energy','sensor.refoss_smart_energy_monitor_em_channel_2_this_month_return_energy','sensor.refoss_smart_energy_monitor_em_channel_3_this_month_return_energy',
+  ...ASICS.map(a=>a.entity),
+  // Sensors de puissance réelle (prises connectées)
+  'sensor.iceriver_al0_1_puissance',
+  'sensor.iceriver_al0_2_puissance',
+  'sensor.iceriver_al0_3_puissance',
+  'sensor.iceriver_al0_4_puissance',
+  'sensor.iceriver_al0_5_puissance',
+  'sensor.iceriver_al0_6_puissance',
+  'sensor.iceriver_al0_7_puissance',
+  'sensor.iceriver_al0_8_puissance',
+  'sensor.iceriver_al0_9_puissance',
+  'sensor.iceriver_al0_11_puissance',
+  'sensor.iceriver_al0_12_puissance',
+  'sensor.iceriver_al0_13_puissance',
+  'sensor.iceriver_ks0_puissance',
+  'sensor.iceriver_rx0_1_puissance',
+  'sensor.iceriver_rx0_2_puissance',
+  'sensor.goldshell_al_box_ii_puissance',
+  'sensor.goldshell_kd_box_ii_puissance',
+  'sensor.antminer_s19_puissance_phase_a',
+  // F2Pool (proxy HA — chargés dynamiquement depuis MINING_COINS)
+  // Ajouter les sensors si tu changes les cryptos dans MINING_COINS ci-dessus
+  'sensor.f2pool_btc_day',  'sensor.f2pool_btc_unpaid',  'sensor.f2pool_btc_yesterday', 'sensor.f2pool_btc_workers', 'sensor.f2pool_alph_day', 'sensor.f2pool_alph_unpaid', 'sensor.f2pool_alph_yesterday','sensor.f2pool_alph_workers',
+  'sensor.f2pool_kas_day',  'sensor.f2pool_kas_unpaid',  'sensor.f2pool_kas_yesterday', 'sensor.f2pool_kas_workers',
+  'sensor.f2pool_ltc_day',  'sensor.f2pool_ltc_unpaid',  'sensor.f2pool_ltc_yesterday', 'sensor.f2pool_ltc_workers',
+  'sensor.f2pool_rxd_day',  'sensor.f2pool_rxd_unpaid',  'sensor.f2pool_rxd_yesterday', 'sensor.f2pool_rxd_workers',
+  // Antpool (KDA — Kadena)
+  'sensor.antpool_kda_day', 'sensor.antpool_kda_unpaid', 'sensor.antpool_kda_yesterday','sensor.antpool_kda_workers','sensor.antpool_kda_raw',
+  // K1Pool (RXD — Radiant)
+  'sensor.k1pool_rxd_raw',
+];
+
+// Calcul puissance réelle totale des ASIC depuis les prises
+function getRealAsicPower(){
+  // Utiliser a.realW déjà calculé dans le forEach (puissance réelle ou théorique)
+  const total = ASICS.reduce((s,a) => s + (a.realW||0), 0);
+  return total > 0 ? total : v('sensor.asic_puissance_estimee');
+}
+
+let hd={}, todayFermeKwh=0, period='day', todayImport=0, todayInject=0, todayProd=0, asicKwhToday=0, countdown=REFRESH_MS/1000, chartData={p:[],i:[],a:[]};
+// Chrono — doit matcher l'automation HA "ASIC V16 - TEMPO 5MIN"
+// DELAY_MS = tempo avant action (5 min comme l'automation)
+// THRESH_UP = surplus mini pour démarrer (correspond au coût d'un petit ASIC + buffer)
+// THRESH_DOWN = surplus en dessous duquel on déclenche l'arrêt
+let chronoState='idle', chronoSince=null;
+let chartMeta = { dataStart: null, dataEnd: null, period: 'day' }; // pour timestamps tooltip
+const DELAY_MS=5*60*1000, THRESH_UP=100, THRESH_DOWN=-50;
+
+
+
+
+function updateChrono(){
+  const now = Date.now();
+  const box    = document.getElementById('chrono-box');
+  if(!box) return;
+  const label  = document.getElementById('chrono-label');
+  const timeEl = document.getElementById('chrono-time');
+  const bar    = document.getElementById('chrono-bar');
+  const sub    = document.getElementById('chrono-sub');
+
+  // ─── calcMaxCanRun: matche logique automation V17 ──
+  // Si surplus ≥ 3550W → S19 prend le relais + petits qui tiennent dans (surplus - 3400)
+  // Sinon → uniquement des petits ASIC (100W IceRiver → KD 360W → AL 480W)
+  function calcMaxCanRun(surplusW){
+    const SEUIL_S19   = 3550;
+    const MARGE_PETIT = 20;
+    const SEUIL_MIN   = 120;
+    let canRun = 0;
+    const s19 = ASICS.find(a => a.name === 'Antminer S19');
+
+    // Mode S19 actif : surplus suffisant pour le S19
+    const s19Available = s19 && hd[s19.entity] !== 'unavailable' && hd[s19.entity] !== 'unknown';
+    const modeS19 = s19Available && surplusW >= SEUIL_S19;
+
+    if(modeS19){
+      canRun++; // S19 occupe sa place
+      let budget = Math.max(surplusW - 3400 - 50, 0);
+      // Petits qui tiennent dans le budget restant (ordre petits → KD → AL)
+      const iceriver = ASICS.filter(a => a.w === 100);
+      const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
+      const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
+      for(const a of [...iceriver, ...goldKd, ...goldAl]){
+        const st = hd[a.entity];
+        if(st === 'unavailable' || st === 'unknown') continue;
+        if(budget >= (a.w + MARGE_PETIT)){ canRun++; budget -= a.w; }
+      }
+    } else {
+      // Mode petits seuls
+      let budget = Math.max(surplusW - 50, 0);
+      const iceriver = ASICS.filter(a => a.w === 100);
+      const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
+      const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
+      for(const a of [...iceriver, ...goldKd, ...goldAl]){
+        const st = hd[a.entity];
+        if(st === 'unavailable' || st === 'unknown') continue;
+        if(budget >= (a.w + MARGE_PETIT) && budget >= SEUIL_MIN){ canRun++; budget -= a.w; }
+      }
+    }
+    return canRun;
+  }
+
+  // ─── Surplus utilisé pour le chrono : MÊME formule que l'automation V18 ──
+  // surplus_reel = prod_solaire - max(conso_ferme - asic_puissance_estimee, 0) - 50
+  // Pourquoi pas le sensor `surplus_solaire` brut ?
+  // → Pendant le démarrage des ASIC (boot 30s à 1 min), la ferme ne consomme pas encore
+  //   alors que `asic_estimee` est déjà à la valeur cible. Si on utilisait surplus_solaire
+  //   brut, on croirait avoir du surplus disponible et l'auto démarrerait encore des ASIC.
+  //   En utilisant la même formule que l'auto, le chrono reste cohérent.
+  const prodNow      = parseFloat(hd['_prodCalc']||0) || parseFloat(hd['sensor.production_solaire']||0);
+  const fermeReal    = parseFloat(hd['sensor.consommation_ferme']||0);
+  const asicEstimee  = parseFloat(hd['sensor.asic_puissance_estimee']||0);
+  const consoMaison  = Math.max(fermeReal - asicEstimee, 0);
+  const surplusReel  = Math.round(prodNow - consoMaison - 50);
+  // Fallback : si surplus_solaire HA est plus pessimiste (= on importe vraiment), le prendre
+  const surplusHa    = parseFloat(hd['sensor.surplus_solaire']||0);
+  const consoGridNow = parseFloat(hd['sensor.consommation_reseau']||0);
+  // Si on importe (consoGridNow > 50W) ET le calcul donne du surplus,
+  // c'est qu'on est dans la phase de démarrage des ASIC → forcer surplus à 0
+  const surplus      = (consoGridNow > 50)
+                       ? Math.min(surplusReel, 0)
+                       : Math.max(surplusReel, surplusHa);
+
+  const asicsOn    = ASICS.filter(a=>a.on).length; // source unique
+  const maxCanRun  = calcMaxCanRun(surplus); // pour démarrage uniquement
+
+  // ─── Calcul ARRÊT basé sur production solaire réelle (CT) ────────
+  // Ne PAS utiliser surplus ici: les ASIC ON faussent le surplus
+  // On recalcule combien d'ASIC peuvent tourner sur le solaire réel
+  const solarNow  = Math.max(hd['_prodCalc']||0, 0); // production CT calculée dans update()
+  const fermeNow  = parseFloat(hd['sensor.consommation_ferme'])||0;
+  const asicWNow  = ASICS.filter(a=>a.on).reduce((s,a)=>s+a.w, 0);
+  const baseLoad  = Math.max(fermeNow - asicWNow, 0); // conso hors ASIC
+  const solarBudget = Math.max(solarNow - baseLoad - 50, 0);
+  // Combien d'ASIC peuvent tourner avec ce budget solaire? (logique V17)
+  // S19 reste actif tant que solaire ≥ 3200W (seuil_off_s19)
+  // Sinon mode petits seuls jusqu'à 120W (1 dernier petit ASIC)
+  let maxOnSolar = 0, remBudget = solarBudget;
+  const s19_max = ASICS.find(a => a.name === 'Antminer S19');
+  const s19_av  = s19_max && hd[s19_max.entity] !== 'unavailable' && hd[s19_max.entity] !== 'unknown';
+  if(s19_av && remBudget >= 3200){
+    // Mode S19 : S19 prend sa place, petits avec le reste
+    maxOnSolar++; remBudget -= 3400;
+    if(remBudget < 0) remBudget = 0;
+    const iceriver = ASICS.filter(a => a.w === 100);
+    const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
+    const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
+    for(const a of [...iceriver, ...goldKd, ...goldAl]){
+      const st = hd[a.entity];
+      if(st==='unavailable'||st==='unknown') continue;
+      if(remBudget >= a.w){ maxOnSolar++; remBudget -= a.w; }
+    }
+  } else {
+    // Mode petits seuls, descendre jusqu'à 120W minimum
+    const iceriver = ASICS.filter(a => a.w === 100);
+    const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
+    const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
+    for(const a of [...iceriver, ...goldKd, ...goldAl]){
+      const st = hd[a.entity];
+      if(st==='unavailable'||st==='unknown') continue;
+      if(remBudget >= a.w && remBudget >= 120){ maxOnSolar++; remBudget -= a.w; }
+    }
+  }
+  const toStart   = Math.max(0, maxCanRun - asicsOn);
+  const toStop    = Math.max(0, asicsOn - maxOnSolar);
+  const consGrid  = parseFloat(hd['sensor.consommation_reseau'])||0;
+
+  // ─── CAS TERMINAL : tous les ASIC possibles sont ON ─────────────
+  if(surplus >= THRESH_UP && toStart === 0 && maxCanRun > 0){
+    chronoState = 'idle'; chronoSince = null;
+    localStorage.removeItem('mining_chrono_since');
+    localStorage.removeItem('mining_chrono_state');
+    localStorage.removeItem('mining_chrono_cooldown');
+    box.className = 'chrono-box chrono-wait';
+    label.textContent = t('all_active');
+    timeEl.textContent = '--:--';
+    bar.style.width = '100%';
+    sub.textContent = asicsOn + '/' + ASICS.length + ' '+t('running')+' — surplus ' + Math.round(surplus) + 'W';
+    return;
+  }
+
+  // ─── CAS TERMINAL : aucun ASIC actif et surplus insuffisant ─────
+  if(surplus <= THRESH_DOWN && asicsOn === 0){
+    chronoState = 'idle'; chronoSince = null;
+    localStorage.removeItem('mining_chrono_since');
+    localStorage.removeItem('mining_chrono_state');
+    localStorage.removeItem('mining_chrono_cooldown');
+    box.className = 'chrono-box chrono-wait';
+    label.textContent = 'AUCUN ASIC ACTIF';
+    timeEl.textContent = '--:--';
+    bar.style.width = '0%';
+    sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — en attente du soleil';
+    return;
+  }
+
+  // ─── CAS TERMINAL : surplus suffisant mais AUCUN ASIC disponible ─
+  // (tous unavailable — ex: coupure wifi) → attente silencieuse
+  if(surplus >= THRESH_UP && maxCanRun === 0){
+    chronoState = 'idle'; chronoSince = null;
+    localStorage.removeItem('mining_chrono_since');
+    localStorage.removeItem('mining_chrono_state');
+    localStorage.removeItem('mining_chrono_cooldown');
+    box.className = 'chrono-box chrono-wait';
+    label.textContent = t('asic_offline');
+    timeEl.textContent = '--:--';
+    bar.style.width = '0%';
+    sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — aucun ASIC joignable';
+    return;
+  }
+
+  // ─── Chargement localStorage ─────────────────────────────────────
+  if(chronoSince === null){
+    const savedSince = localStorage.getItem('mining_chrono_since');
+    const savedState = localStorage.getItem('mining_chrono_state');
+    if(savedSince !== null && savedState !== null){
+      chronoSince = parseInt(savedSince);
+      chronoState = savedState;
+    }
+  }
+
+  // ─── Cooldown anti-loop ──────────────────────────────────────────
+  const COOLDOWN_MS = 5 * 60 * 1000;
+  const cooldownTs  = parseInt(localStorage.getItem('mining_chrono_cooldown')||'0');
+  const inCooldown  = (now - cooldownTs) < COOLDOWN_MS;
+
+  if(inCooldown && chronoState === 'idle'){
+    // Pendant le cooldown: vérifier si un ASIC est devenu disponible
+    // Si oui → annuler le cooldown et repartir immédiatement
+    const availableNow = ASICS.filter(a=>{
+      const st = hd[a.entity];
+      return st !== 'unavailable' && st !== 'unknown' && st === 'off';
+    }).length;
+
+    // Exclure les ASIC qui ont échoué dans le cycle précédent
+    let failedEntities = [];
+    try{
+      const failedData = JSON.parse(localStorage.getItem('mining_chrono_failed')||'null');
+      if(failedData && (now - failedData.ts) < COOLDOWN_MS){
+        failedEntities = failedData.entities || [];
+      }
+    }catch(e){}
+
+    // Recalculer toStart en excluant les ASIC en échec
+    function calcMaxCanRunExcluding(surplusW, excluded){
+      let b = Math.max(surplusW - 50, 0), n = 0;
+      for(const a of ASICS){
+        if(excluded.includes(a.entity)) continue;
+        const st = hd[a.entity];
+        if(st === 'unavailable' || st === 'unknown') continue;
+        if(b >= a.w){ n++; b -= a.w; }
+      }
+      return n;
+    }
+    const maxCanRunExcl = calcMaxCanRunExcluding(surplus, failedEntities);
+    const toStartExcl = Math.max(0, maxCanRunExcl - asicsOn);
+
+    // Si de nouveaux ASIC sont disponibles (pas dans la liste d'échec) → relancer
+    if(toStartExcl > 0){
+      localStorage.removeItem('mining_chrono_cooldown');
+      localStorage.removeItem('mining_chrono_failed');
+    } else if(availableNow > 0 && toStart > 0){
+      // Nouvel ASIC disponible (ex: wifi revenu) → annuler cooldown
+      localStorage.removeItem('mining_chrono_cooldown');
+      localStorage.removeItem('mining_chrono_failed');
+    } else {
+      // Toujours en cooldown
+      const coolRemain = Math.ceil((COOLDOWN_MS - (now - cooldownTs)) / 1000);
+      const cm = Math.floor(coolRemain/60), cs = coolRemain%60;
+      box.className = 'chrono-box chrono-wait';
+      label.textContent = 'PAUSE ANTI-LOOP';
+      timeEl.textContent = cm + ':' + String(cs).padStart(2,'0');
+      bar.style.width = '0%';
+      sub.textContent = 'Reprise dans ' + cm + 'm' + String(cs).padStart(2,'0') + 's';
+      return;
+    }
+  }
+  if(!inCooldown && cooldownTs > 0) localStorage.removeItem('mining_chrono_cooldown');
+
+  // ─── Transitions d'état ──────────────────────────────────────────
+  if(surplus >= THRESH_UP && toStart > 0){
+    if(chronoState !== 'start'){
+      chronoState = 'start'; chronoSince = now;
+      localStorage.setItem('mining_chrono_since', now);
+      localStorage.setItem('mining_chrono_state', 'start');
+    }
+  } else if(toStop > 0 && consGrid > 30){ // EDF importe = confirmation arrêt
+
+    if(chronoState !== 'stop'){
+      chronoState = 'stop'; chronoSince = now;
+      localStorage.setItem('mining_chrono_since', now);
+      localStorage.setItem('mining_chrono_state', 'stop');
+    }
+  } else {
+    if(chronoState !== 'idle'){
+      chronoState = 'idle'; chronoSince = null;
+      localStorage.removeItem('mining_chrono_since');
+      localStorage.removeItem('mining_chrono_state');
+    }
+  }
+
+  // ─── État IDLE ───────────────────────────────────────────────────
+  if(chronoState === 'idle' || !chronoSince){
+    box.className = 'chrono-box chrono-wait';
+    label.textContent = t('waiting');
+    timeEl.textContent = '--:--';
+    bar.style.width = '0%';
+    sub.textContent = t('surplus_seuil').replace('{w}', Math.round(surplus)).replace('{s}', THRESH_UP);
+    return;
+  }
+
+  // ─── Calcul temps ─────────────────────────────────────────────────
+  const elapsed   = now - chronoSince;
+  const remaining = Math.max(0, DELAY_MS - elapsed);
+  const pct       = Math.min(100, (elapsed / DELAY_MS) * 100);
+  const rm  = Math.floor(remaining / 60000);
+  const rs  = Math.floor((remaining % 60000) / 1000);
+  const em  = Math.floor(elapsed / 60000);
+  const es  = Math.floor((elapsed % 60000) / 1000);
+  const POST_DELAY   = 5000;
+  const totalElapsed = Math.max(0, elapsed - DELAY_MS);
+
+  // ─── Auto-reset 5s après expiration ──────────────────────────────
+  if(remaining <= 0 && totalElapsed > POST_DELAY){
+    // Snapshot des ASIC qui étaient censés démarrer dans ce cycle
+    const expectedOn  = maxCanRun;
+    const actualOn    = asicsOn;
+    const asicsMissed = expectedOn - actualOn;
+
+    chronoState = 'idle'; chronoSince = null;
+    localStorage.removeItem('mining_chrono_since');
+    localStorage.removeItem('mining_chrono_state');
+
+    if(asicsMissed > 0){
+      // Mémoriser les ASIC non joignables (off + unavailable) pour les exclure
+      const failedAsics = ASICS
+        .filter(a => {
+          const st = hd[a.entity];
+          return st === 'off' || st === 'unavailable' || st === 'unknown';
+        })
+        .map(a => a.entity);
+      localStorage.setItem('mining_chrono_failed', JSON.stringify({
+        ts: now,
+        entities: failedAsics
+      }));
+      localStorage.setItem('mining_chrono_cooldown', now);
+      box.className = 'chrono-box chrono-wait';
+      label.textContent = 'PAUSE — ' + asicsMissed + ' ASIC SANS REPONSE';
+      timeEl.textContent = '05:00';
+      bar.style.width = '0%';
+      sub.textContent = asicsMissed + ' ASIC ignores pendant 5 min';
+    } else {
+      localStorage.removeItem('mining_chrono_failed');
+      box.className = 'chrono-box chrono-wait';
+      label.textContent = t('waiting');
+      timeEl.textContent = '--:--';
+      bar.style.width = '0%';
+      sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — cycle termine';
+    }
+    return;
+  }
+
+  // ─── Affichage DÉMARRAGE ─────────────────────────────────────────
+  if(chronoState === 'start'){
+    box.className = 'chrono-box chrono-start';
+    bar.style.width = Math.min(100, pct) + '%';
+    if(remaining > 0){
+      label.textContent = toStart > 1 ? toStart + ' ' + t('asics_start_in') : t('asic_starts_in');
+      timeEl.textContent = rm + ':' + String(rs).padStart(2,'0');
+      sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — +' + toStart + ' ASIC depuis ' + em + 'm' + String(es).padStart(2,'0') + 's';
+    } else {
+      const postSec = Math.max(0, Math.ceil((POST_DELAY - totalElapsed) / 1000));
+      label.textContent = 'DEMARRAGE EN COURS';
+      timeEl.textContent = '00:0' + postSec;
+      sub.textContent = 'Reset dans ' + postSec + 's...';
+    }
+  }
+
+  // ─── Affichage ARRÊT ─────────────────────────────────────────────
+  if(chronoState === 'stop'){
+    box.className = 'chrono-box chrono-stop';
+    bar.style.width = Math.min(100, pct) + '%';
+    if(remaining > 0){
+      label.textContent = toStop > 1 ? toStop + ' ' + t('asics_stop_in') : '1 ' + t('asic_stops_in');
+      timeEl.textContent = rm + ':' + String(rs).padStart(2,'0');
+      sub.textContent = 'Solaire ' + Math.round(solarNow) + 'W | EDF ' + Math.round(consGrid) + 'W — -' + toStop + ' ASIC depuis ' + em + 'm' + String(es).padStart(2,'0') + 's';
+    } else {
+      const postSec = Math.max(0, Math.ceil((POST_DELAY - totalElapsed) / 1000));
+      label.textContent = 'ARRET EN COURS';
+      timeEl.textContent = '00:0' + postSec;
+      sub.textContent = 'Reset dans ' + postSec + 's...';
+    }
+  }
+}
+
+
+function tick(){
+  countdown--;
+  if(countdown<=0){countdown=REFRESH_MS/1000;fetchAll();}
+  const m=Math.floor(countdown/60),s=countdown%60;
+  const el=document.getElementById('next-refresh');
+  if(el) el.textContent='⟳ '+m+':'+String(s).padStart(2,'0');
+  updateChrono();
+}
+setInterval(tick,1000);
+
+async function fetchE(id){
+  try{
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 5000);
+    const r = await fetch(`${HA_URL}/api/states/${id}`,{
+      headers:{'Authorization':'Bearer '+HA_TOKEN},
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    if(r.status === 404) return {entity_id:id, state:'unavailable'}; // silencieux
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  }catch(e){
+    // Log seulement les vraies erreurs réseau, pas les 404
+    if(e.message && !e.message.includes('404')) console.warn('fetchE:', id, e.message);
+    return {entity_id:id, state:'unavailable'};
+  }
+}
+async function fetchHist(id, hours){
+  try{
+    const startDate = new Date(Date.now() - hours * 3600000).toISOString();
+    // Sans minimal_response pour les grandes plages + significant_changes_only=false
+    const params = `filter_entity_id=${id}&minimal_response=true&significant_changes_only=true&no_attributes=true`;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 20000); // 20s timeout
+    const r = await fetch(
+      `${HA_URL}/api/history/period/${startDate}?${params}`,
+      { headers: {'Authorization': 'Bearer ' + HA_TOKEN}, signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    // Log HTTP status pour diagnostic
+    console.log('fetchHist', id, hours+'h => HTTP', r.status, r.ok ? 'OK' : 'ERREUR');
+    if(!r.ok){ 
+      if(r.status === 401) console.error('❌ 401 UNAUTHORIZED - Token invalide ou CORS non configuré');
+      if(r.status === 403) console.error('❌ 403 FORBIDDEN - Accès refusé');
+      return []; 
+    }
+    const d = await r.json();
+    if(!Array.isArray(d) || d.length === 0){
+      console.log('fetchHist', id, hours+'h => 0 pts (tableau vide)');
+      return [];
+    }
+    let arr = [];
+    for(const series of d){
+      if(Array.isArray(series) && series.length > arr.length) arr = series;
+    }
+    console.log('fetchHist', id, hours+'h =>', arr.length, 'pts ✅');
+    return arr;
+  }catch(e){
+    console.warn('fetchHist exception:', id, e.message);
+    return [];
+  }
+}
+
+async function fetchAll(){
+  try{
+    // 1 seule requête pour toutes les entités (au lieu de 50+ parallèles)
+    // Beaucoup plus rapide sur Pi 3B
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), 30000); // 30s timeout global (Pi 3B lent)
+    const r = await fetch(`${HA_URL}/api/states`, {
+      headers: {'Authorization': 'Bearer ' + HA_TOKEN},
+      signal: ctrl.signal
+    });
+    clearTimeout(timer);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const allStates = await r.json();
+    // Filtrer seulement les entités qu'on utilise
+    const entitySet = new Set(ENTITIES);
+    for(const s of allStates){
+      if(entitySet.has(s.entity_id)) hd[s.entity_id] = s.state;
+    }
+    todayImport = Math.max(0,
+               (+hd['sensor.refoss_smart_energy_monitor_em_channel_1_today_energy']||0)
+             + (+hd['sensor.refoss_smart_energy_monitor_em_channel_2_today_energy']||0)
+             + (+hd['sensor.refoss_smart_energy_monitor_em_channel_3_today_energy']||0));
+    todayInject = Math.max(0,
+               (+hd['sensor.refoss_smart_energy_monitor_em_channel_1_today_return_energy']||0)
+             + (+hd['sensor.refoss_smart_energy_monitor_em_channel_2_today_return_energy']||0)
+             + (+hd['sensor.refoss_smart_energy_monitor_em_channel_3_today_return_energy']||0));
+    // Énergie aujourd'hui — essai noms courts puis noms complets Refoss
+  todayFermeKwh = (+hd['sensor.refoss_smart_energy_monitor_em_channel_4_today_energy']||0)
+               + (+hd['sensor.refoss_smart_energy_monitor_em_channel_5_today_energy']||0)
+               + (+hd['sensor.refoss_smart_energy_monitor_em_channel_6_today_energy']||0);
+    // Production solaire = ferme + injection - import (déduit des CT)
+    // Production solaire = énergie injectée + auto-conso (ferme sans import)
+  // La nuit: inject→0 et ferme est alimentée par le réseau → production = 0
+  const autoconsoSolaire = Math.max(todayFermeKwh - todayImport, 0);
+  todayProd = Math.max(todayInject + autoconsoSolaire, 0);
+    // ASIC kWh = ferme (CT4+5+6 mesure tout le circuit ASIC)
+    asicKwhToday = todayFermeKwh;
+    document.getElementById('conn-status').textContent=t('connected');
+    document.getElementById('conn-status').className='conn-status conn-ok';
+    // Debug: log confirmation connexion
+    if(!window._connOkLogged){ console.log('✅ HA connecté:', HA_URL); window._connOkLogged=true; }
+    loadTodayStats(); // stats jour: légères, basées sur CT
+    window._errCount = 0;
+    // Alerte sous-tension Pi
+    const undervolt = hd['binary_sensor.rpi_power_status'];
+    const uvEl = document.getElementById('undervolt-alert');
+    if(uvEl) uvEl.style.display = (undervolt === 'on') ? 'block' : 'none';
+    countdown=REFRESH_MS/1000;
+    update();
+    if(typeof checkNotifEvents==="function") checkNotifEvents().catch(e=>{});
+  }catch(e){
+    const errMsg = e.message || 'réseau';
+    document.getElementById('conn-status').textContent='ERREUR';
+    document.getElementById('conn-status').className='conn-status conn-err';
+    console.error('❌ fetchAll erreur:', errMsg, '| HA_URL:', HA_URL);
+    // Si le token est invalide → 401
+    if(errMsg.includes('401')) console.error('→ Token HA expiré ou invalide');
+    // Si réseau inaccessible
+    if(errMsg.includes('Failed to fetch')) console.error('→ HA inaccessible sur', HA_URL);
+    // Compter les erreurs consécutives
+    window._errCount = (window._errCount||0) + 1;
+    if(window._errCount >= 8){ // ~2 min d'erreurs → reload auto
+      console.warn('HA injoignable depuis 2 min — rechargement...');
+      window._errCount = 0;
+      setTimeout(()=>location.reload(), 3000);
+    }
+  }
+}
+
+function v(e){return parseFloat(hd[e])||0;}
+function fmt(w){return Math.abs(w)>=1000?(w/1000).toFixed(1)+' kW':Math.round(w)+' W';}
+function fE(e){return e.toFixed(2)+' €';}
+function fK(k){return k.toFixed(2)+' kWh';}
+
+function getNodeCenter(nodeEl,canvas){
+  const nr=nodeEl.getBoundingClientRect(),cr=canvas.getBoundingClientRect();
+  const px=nr.left-cr.left+nr.width/2,py=nr.top-cr.top+nr.height/2;
+  return{x:px/canvas.offsetWidth*700,y:py/canvas.offsetHeight*520};
+}
+function getRadius(nodeEl,canvas){
+  const circle=nodeEl.querySelector('.node-circle');
+  if(!circle) return 45;
+  return(circle.offsetWidth/2)/canvas.offsetWidth*700;
+}
+function setLinePos(id,x1,y1,x2,y2){
+  ['anim-','bg-'].forEach(p=>{
+    const el=document.getElementById(p+id);
+    if(el){el.setAttribute('x1',x1);el.setAttribute('y1',y1);el.setAttribute('x2',x2);el.setAttribute('y2',y2);}
+  });
+}
+function movePill(id,cx,cy){
+  const g=document.getElementById('pill-'+id);
+  if(!g) return;
+  const r=g.querySelector('rect'),t=g.querySelector('text');
+  if(!r||!t) return;
+  const w=parseFloat(r.getAttribute('width'))||80,h=parseFloat(r.getAttribute('height'))||24;
+  r.setAttribute('x',cx-w/2);r.setAttribute('y',cy-h/2);
+  t.setAttribute('x',cx);t.setAttribute('y',cy);
+}
+function updateLines(){
+  const canvas=document.getElementById('flow-canvas');
+  const nSolar=document.querySelector('.n-solar'),nHome=document.querySelector('.n-home');
+  const nGrid=document.querySelector('.n-grid'),nAsic=document.querySelector('.n-asic');
+  if(!canvas||!nSolar||!nHome||!nGrid||!nAsic) return;
+  const solar=getNodeCenter(nSolar,canvas),home=getNodeCenter(nHome,canvas);
+  const grid=getNodeCenter(nGrid,canvas),asic=getNodeCenter(nAsic,canvas);
+  const rSolar=getRadius(nSolar,canvas),rHome=getRadius(nHome,canvas);
+  const rGrid=getRadius(nGrid,canvas),rAsic=getRadius(nAsic,canvas);
+  const shY1=solar.y+rSolar,shY2=home.y-rHome;
+  setLinePos('sh',solar.x,shY1,solar.x,shY2);movePill('sh',solar.x,(shY1+shY2)/2);
+  const haX1=home.x+rHome,haX2=asic.x-rAsic;
+  setLinePos('ha',haX1,home.y,haX2,home.y);movePill('ha',(haX1+haX2)/2,home.y-18);
+  const hgX1=home.x-rHome,hgX2=grid.x+rGrid;
+  setLinePos('hg',hgX1,home.y-6,hgX2,home.y-6);movePill('hg',(hgX1+hgX2)/2,home.y-22);
+  setLinePos('gh',grid.x+rGrid,home.y+6,home.x-rHome,home.y+6);movePill('gh',(hgX1+hgX2)/2,home.y+18);
+}
+window.addEventListener('resize',()=>{setTimeout(updateLines,50);});
+
+function setPill(id,show,val){
+  document.getElementById('pill-'+id).setAttribute('opacity',show?1:0);
+  document.getElementById('anim-'+id).setAttribute('opacity',show?1:0);
+  if(val!==undefined) document.getElementById('ptxt-'+id).textContent=fmt(val);
+  updateLines();
+}
+
+function update(){
+  // Production solaire déduite depuis CT (plus fiable que le sensor dérivé)
+  // prod = CT456(ferme) + injection_EDF - import_EDF
+  // Quand panneaux coupés: import_EDF = CT456 → prod = 0W ✅
+  const inject    = v('sensor.injection_reseau');
+  const consGrid  = v('sensor.consommation_reseau');
+  const ferme     = v('sensor.consommation_ferme');
+  const prodCalc  = Math.max(ferme + inject - consGrid, 0);
+  // Utiliser le max entre le sensor HA et le calcul CT (anti-erreur)
+  const prodHA    = v('sensor.production_solaire');
+  const prod      = (consGrid > 50) ? prodCalc : Math.max(prodCalc, prodHA);
+  const surplus=v('sensor.surplus_solaire');
+  hd['_prodCalc'] = prod; // partager avec updateChrono
+  const prochain=hd['sensor.prochain_asic']||'Aucun';
+
+  // ── Détecter état ASIC via puissance réelle OU switch HA ────
+  const prevOnCount = ASICS.filter(a=>a.on).length; // avant mise à jour
+  ASICS.forEach(a=>{
+    // Dériver le sensor de puissance depuis le nom du switch
+    const ps = a.entity
+      .replace('switch.','sensor.')
+      .replace('_socket_1','_puissance')   // AL0 1
+      .replace('_switch_1','_puissance');  // autres
+    const pw = parseFloat(String(hd[ps]||'0').replace(',','.'));
+    // kW→W pour le S19
+    const pwW = (ps.includes('antminer') && pw < 100 && pw > 0) ? pw*1000 : pw;
+    // ON si puissance > 20W OU switch HA = 'on'
+    const switchOn = hd[a.entity]==='on';
+    const powerOn  = !isNaN(pwW) && pwW > 20;
+    a.on   = switchOn || powerOn;
+    // Si switch ON mais puissance pas encore mesurée → puissance théorique
+    // Évite l'affichage "0W" pendant les 20-30s de démarrage Tuya
+    a.realW = (pwW > 20) ? pwW : (a.on ? a.w : 0);
+  });
+
+  // ── Détection changement d'état ASIC → refresh rapide dans 5s ──
+  const asicN = ASICS.filter(a=>a.on).length;
+  if(asicN !== prevOnCount){
+    clearTimeout(window._quickRefresh);
+    window._quickRefresh = setTimeout(fetchAll, 5000);
+  }
+  const asicW = getRealAsicPower();
+
+  document.getElementById('st-solar').textContent=Math.round(prod);
+  document.getElementById('st-inject').textContent=Math.round(inject);
+  document.getElementById('st-grid').textContent=Math.round(consGrid);
+  document.getElementById('st-asic-n').textContent=asicN;
+  document.getElementById('st-asic-w').textContent=Math.round(asicW)+' W '+t('consumed');
+  document.getElementById('st-solar-sub').textContent=fK(todayProd)+' '+t('kwh_produced');
+  document.getElementById('st-inject-kwh').textContent=fK(todayInject)+' '+t('kwh_injected');
+  document.getElementById('st-grid-kwh').textContent=fK(todayImport)+' '+t('kwh_imported');
+  document.getElementById('fin-eco').textContent=fE(todayInject*PRIX_RACHAT);
+  document.getElementById('fin-eco-sub').textContent=fK(todayInject)+' · 0.04€/kWh '+t('rachat_sub');
+  document.getElementById('fin-cost').textContent=fE(todayImport*PRIX);
+  document.getElementById('fin-cost-sub').textContent=fK(todayImport)+' · 0.20€/kWh';
+  const realKwh=todayFermeKwh>0?todayFermeKwh:asicKwhToday;
+  document.getElementById('fin-asic').textContent=fK(realKwh);
+  const sourceLabel = todayFermeKwh > 0 ? t('ct_real') : t('power_est');
+  document.getElementById('fin-asic-sub').textContent=t('value_lbl')+' '+fE(realKwh*PRIX)+' · '+sourceLabel;
+  document.getElementById('nval-solar').textContent=fmt(prod);
+  document.getElementById('nval-home').textContent=fmt(ferme); // prises réelles
+  document.getElementById('nval-grid').textContent=fmt(inject>0?inject:consGrid);
+  document.getElementById('nval-asic').textContent=fmt(asicW);
+  const asicSubCount = document.getElementById('asic-sub-count');
+  if(asicSubCount) asicSubCount.textContent = asicN+'/'+ASICS.length;
+  else document.getElementById('asic-sub').textContent=asicN+'/'+ASICS.length+' '+t('asics_label');
+
+  const gs=document.getElementById('grid-sub');
+  const gridNode=document.querySelector('.n-grid');
+  if(inject>5){
+    gs.textContent='← injection';gs.style.color='#10b981';
+    if(gridNode) gridNode.classList.add('inject');
+  } else if(consGrid>5){
+    gs.textContent='→ import';gs.style.color='#ef4444';
+    if(gridNode) gridNode.classList.remove('inject');
+  } else {
+    gs.textContent='— équilibre';gs.style.color='#94a3b8';
+    if(gridNode) gridNode.classList.remove('inject');
+  }
+
+  if(prod>20) document.getElementById('circle-solar').classList.add('active');
+  else document.getElementById('circle-solar').classList.remove('active');
+  if(asicW>0) document.getElementById('circle-asic').classList.add('active');
+  else document.getElementById('circle-asic').classList.remove('active');
+
+  setPill('sh',prod>20,prod);
+  setPill('ha',asicW>0,asicW);
+  setPill('hg',inject>10,inject);
+  setPill('gh',consGrid>10,consGrid);
+
+  const nextAsic=ASICS.find(a=>!a.on);
+  const thr=nextAsic?nextAsic.w+50:0;
+  document.getElementById('surplus-fill').style.width=(thr>0?Math.min(100,Math.max(0,(surplus/thr)*100)):0)+'%';
+  document.getElementById('surplus-val').textContent=Math.round(surplus)+' W';
+  document.getElementById('next-threshold').textContent=thr||'—';
+  document.getElementById('next-name').textContent=prochain;
+  renderAsics();
+  updateChrono();
+  document.getElementById('last-up').textContent=t('updated')+': '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+
+function renderAsics(){
+  const g=document.getElementById('asic-grid');g.innerHTML='';
+  let on=0;
+  ASICS.forEach(a=>{
+    if(a.on) on++;
+    const d=document.createElement('div');
+    d.className='asic-item '+(a.on?'on':'off');
+    d.innerHTML=`<div class="asic-led ${a.on?'on':'off'}"></div><div class="asic-info"><div class="asic-name">${a.name}</div><div class="asic-ent">${a.entity.replace('switch.','')}</div></div><div class="asic-ww">${a.on?a.w+'W':'—'}</div>`;
+    g.appendChild(d);
+  });
+  document.getElementById('asic-sum').textContent=`${on} ON · ${ASICS.length-on} OFF`;
+  const totalEl = document.getElementById('total-asic-count');
+  if(totalEl) totalEl.textContent = '/ ' + ASICS.length;
+  document.getElementById('st-asic-n').textContent = on;
+}
+
+function downsample(arr, maxPts){
+  if(arr.length <= maxPts) return arr;
+  const step = arr.length / maxPts;
+  const out = [];
+  for(let i=0;i<maxPts;i++){
+    const idx = Math.min(arr.length-1, Math.round(i*step));
+    out.push(arr[idx]);
+  }
+  return out;
+}
+function drawChart(arrP,arrI,arrA,arrEDF,arrASIC){
+  const ph = document.getElementById('chart-placeholder');
+  if(ph) ph.style.display='none';
+  arrEDF = arrEDF || new Array((arrP||[]).length).fill(0);
+  arrASIC = arrASIC || new Array((arrP||[]).length).fill(0);
+  // Downsampling si trop de points (perf SVG)
+  const MAX_PTS = 200;
+  arrP = downsample(arrP, MAX_PTS); arrI = downsample(arrI, MAX_PTS);
+  arrA = downsample(arrA, MAX_PTS); arrEDF = downsample(arrEDF, MAX_PTS);
+  arrASIC = downsample(arrASIC, MAX_PTS);
+  // Aligner sur la même longueur
+  const minLen = Math.min(arrP.length, arrI.length, arrA.length);
+  if(minLen < 2) return;
+  const ap = arrP.slice(0, minLen);
+  const ai = arrI.slice(0, minLen);
+  const aa = arrA.slice(0, minLen);
+  chartData = {p:ap, i:ai, a:aa};
+
+  // Auto-scale: MAX = valeur max des données + 10% de marge, arrondi au kW supérieur
+  const dataMax = Math.max(...ap, ...ai, ...aa, 100);
+  const rawMax = dataMax * 1.1;
+  // Arrondir au prochain multiple "propre" (500, 1000, 2000, 5000, 10000...)
+  const steps = [500, 1000, 2000, 3000, 5000, 7500, 10000, 15000, 20000];
+  const MAX = steps.find(s => s >= rawMax) || Math.ceil(rawMax / 1000) * 1000;
+
+  // Mettre à jour les labels Y dynamiquement
+  const y1 = MAX, y2 = MAX * 0.5, y3 = MAX * 0.167;
+  function fmtY(w){ return w >= 1000 ? (w/1000).toFixed(w%1000===0?0:1)+'kW' : Math.round(w)+'W'; }
+  const ytop = document.getElementById('chart-ytop');
+  const ymid = document.getElementById('chart-ymid');
+  const ybot = document.getElementById('chart-ybot');
+  if(ytop) ytop.textContent = fmtY(y1);
+  if(ymid) ymid.textContent = fmtY(y2);
+  if(ybot) ybot.textContent = fmtY(y3);
+
+  const W=560, H=100, len=minLen;
+  function area(a){return `M0,${H} L`+a.map((v,j)=>`${(j/(len-1))*W},${H-(v/MAX)*H}`).join(' L')+` L${W},${H} Z`;}
+  function line(a){return `M`+a.map((v,j)=>`${(j/(len-1))*W},${H-(v/MAX)*H}`).join(' L');}
+  document.getElementById('ca-p').setAttribute('d',area(ap));document.getElementById('cl-p').setAttribute('d',line(ap));
+  document.getElementById('ca-i').setAttribute('d',area(ai));document.getElementById('cl-i').setAttribute('d',line(ai));
+  document.getElementById('ca-a').setAttribute('d',area(aa));document.getElementById('cl-a').setAttribute('d',line(aa));
+
+  // ── Courbe EDF import (rouge pointillé) ──────────────────────
+  const edfEl = document.getElementById('cl-edf');
+  if(edfEl && arrEDF && arrEDF.length >= 2){
+    const ae2 = arrEDF.slice(0, minLen);
+    edfEl.setAttribute('d', line(ae2));
+  }
+
+  // ── Barres ASIC count (violet, axe secondaire) ───────────────
+  const asicG = document.getElementById('asic-bars');
+  if(asicG && arrASIC && arrASIC.length >= 2){
+    asicG.innerHTML = '';
+    const an2 = arrASIC.slice(0, minLen);
+    const BAR_MAX_H = H * 0.20;
+    const bw = Math.max(1, W / an2.length - 0.3);
+    // Trouver le dernier bucket non-zéro (évite les barres dans le futur)
+    let lastNonZero = 0;
+    for(let i=an2.length-1;i>=0;i--){ if(an2[i]>0){lastNonZero=i;break;} }
+    an2.forEach((v,i)=>{
+      if(!v || i > lastNonZero) return; // pas de barre après dernière valeur connue
+      const bh = Math.max(1, (v/18) * BAR_MAX_H);
+      const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      rect.setAttribute('x',  (i/an2.length)*W);
+      rect.setAttribute('y',  H - bh);
+      rect.setAttribute('width',  bw);
+      rect.setAttribute('height', bh);
+      rect.setAttribute('fill','rgba(139,92,246,0.55)');
+      asicG.appendChild(rect);
+    });
+  }
+
+  // Mettre à jour chartData avec toutes les séries
+  chartData = {p:ap, i:ai, a:aa, e:arrEDF||[], n:arrASIC||[]};
+}
+
+// Fallback history fetch
+async function fetchHistBest(ids, hours){
+  for(const id of ids){
+    try{
+      const data = await fetchHist(id, hours);
+      const valid = data.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+      if(valid.length >= 1) return data; // 1 point suffit
+    }catch(e){}
+  }
+  return [];
+}
+
+async function loadDayHistory(){
+  // Empêcher les appels parallèles
+  if(historyRefreshing){ console.log('loadDayHistory: déjà en cours, ignoré'); return; }
+  historyRefreshing = true;
+  try{
+  const now = Date.now();
+  const dayStart = new Date(); dayStart.setHours(0,0,0,0);
+  const t0 = dayStart.getTime();
+  const BUCKETS = 96; // un point toutes les 15min sur 24h
+
+  // fetchHours: si cache existe → récupérer seulement les dernières minutes
+  //             si pas de cache → récupérer toute la journée (24h)
+  let cache = null;
+  try{
+    const raw = localStorage.getItem(HIST_CACHE_KEY);
+    if(raw){ const c = JSON.parse(raw); if(c.t0 === t0) cache = c; }
+  }catch(e){}
+  const fetchHours = cache ? Math.max(1, Math.ceil((now - Math.max(t0, cache.updatedAt - 5*60*1000)) / 3600000) + 1) : 24;
+
+  // Fetch séquentiel avec no_attributes=true (réduit 80kB → 25kB)
+  // Limiter à 12h max pour les sensors lourds (prod/ferme ~6000pts/24h → ~3000pts/12h)
+  const lightHours = Math.min(fetchHours, 12);
+  const hp    = await fetchHistBest(['sensor.production_solaire'],  lightHours);
+  const hi    = await fetchHistBest(['sensor.injection_reseau'],    fetchHours); // léger
+  const ha    = await fetchHistBest(['sensor.consommation_ferme'],  lightHours);
+  // Affichage immédiat avec les 3 courbes principales
+  if(hp.length > 0 || hi.length > 0){
+    drawChart(resampleDay(hp), resampleDay(hi), resampleDay(ha), new Array(96).fill(0), new Array(96).fill(0));
+    ['00h','06h','12h','18h','24h'].forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
+  }
+  const hedf  = await fetchHistBest(['sensor.consommation_reseau'], lightHours);
+  const hasic = await fetchHistBest(['sensor.asic_allumes_count'],  fetchHours);
+
+  // Rééchantillonner sur 96 buckets de minuit à maintenant
+  function resampleDay(raw){
+    const valid = raw.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+    const out = new Array(BUCKETS).fill(0);
+    valid.forEach(s=>{
+      const t = new Date(s.lu||s.last_changed).getTime();
+      const idx = Math.floor(((t - t0) / (24*3600*1000)) * BUCKETS);
+      if(idx >= 0 && idx < BUCKETS) out[idx] = +s.state;
+    });
+    let last = 0;
+    for(let i=0;i<BUCKETS;i++){
+      if(out[i]>0) last=out[i];
+      else if(i>0) out[i]=last;
+    }
+    const nowBucket = Math.floor(((now - t0) / (24*3600*1000)) * BUCKETS);
+    for(let i=nowBucket+1;i<BUCKETS;i++) out[i]=0;
+    return out;
+  }
+
+  function resampleCount(raw, BUCKETS){
+    const valid = raw.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+    const out = new Array(BUCKETS).fill(null);
+    valid.forEach(s=>{
+      const t = new Date(s.lu||s.last_changed).getTime();
+      const idx = Math.min(BUCKETS-1, Math.max(0, Math.floor(((t - tStart)/(hours*3600*1000))*BUCKETS)));
+      out[idx] = Math.round(+s.state);
+    });
+    let last = null;
+    for(let i=0;i<BUCKETS;i++){
+      if(out[i]!==null) last=out[i];
+      else if(last!==null) out[i]=last;
+    }
+    return out.map(v=>v===null?0:v);
+  }
+
+  chartMeta = { dataStart: t0, dataEnd: t0 + 24*3600*1000, period: 'day', buckets: BUCKETS };
+  // Resampler EDF et ASIC count aussi
+  function resampleDaySimple(raw){
+    if(!raw || !raw.length) return new Array(96).fill(0);
+    const t0b = new Date(); t0b.setHours(0,0,0,0);
+    const t0v = t0b.getTime();
+    const nowBkt = Math.min(95, Math.floor(((Date.now()-t0v)/(86400000))*96));
+    const out = new Array(96).fill(0);
+    raw.forEach(s=>{
+      const t = new Date(s.lu||s.last_changed).getTime();
+      const idx = Math.min(nowBkt, Math.max(0, Math.floor(((t-t0v)/(86400000))*96)));
+      const v = parseFloat(s.state);
+      if(!isNaN(v) && v >= 0) out[idx] = v;
+    });
+    let last=0;
+    for(let i=0;i<=nowBkt;i++){if(out[i]>0)last=out[i];else if(i>0&&last>0)out[i]=last;}
+    // Zéro les buckets futurs
+    for(let i=nowBkt+1;i<96;i++) out[i]=0;
+    return out;
+  }
+  // Valeurs live depuis hd pour corriger le dernier bucket
+  const liveEdf  = Math.max(0, parseFloat(hd['sensor.consommation_reseau'])||0);
+  const liveAsic = parseInt(hd['sensor.asic_allumes_count'])||0; // sensor HA temps réel
+  const aeDay = resampleDaySimple(hedf, liveEdf);
+  const anDay = resampleDaySimple(hasic, liveAsic).map(v=>Math.round(v));
+  drawChart(resampleDay(hp), resampleDay(hi), resampleDay(ha), aeDay, anDay);
+  ['00h','06h','12h','18h','24h'].forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
+  }finally{ historyRefreshing = false; }
+}
+
+
+
+async function drawHistPeriod(hours){
+  const now = Date.now();
+
+  // Trouver les données réellement disponibles (fallback progressif)
+  const fallbacks = [hours, 720, 360, 168, 72, 48, 24].filter((v,i,a)=>a.indexOf(v)===i&&v<=hours||v<hours);
+  let actualHours = 24;
+
+  async function fetchWithFallback(ids, h){
+    // Essayer uniquement plages utiles (évite le spam de requêtes)
+    const toTry = [h, 72, 48, 24].filter((v,i,a)=>a.indexOf(v)===i&&v<=h);
+    for(const fb of toTry){
+      const data = await fetchHistBest(ids, fb);
+      if(data.length >= 2){
+        actualHours = Math.max(actualHours, fb);
+        return data;
+      }
+    }
+    return [];
+  }
+
+  // Fetch séquentiel pour Pi 3B — essentiels d'abord
+  const hp   = await fetchWithFallback(['sensor.production_solaire'], hours);
+  const hi   = await fetchWithFallback(['sensor.injection_reseau'], hours);
+  const ha   = await fetchWithFallback(['sensor.consommation_ferme'], hours);
+  let hedf = [], hasic = [];
+  try{ hedf  = await fetchWithFallback(['sensor.consommation_reseau'], hours); }catch(e){}
+  try{ hasic = await fetchWithFallback(['sensor.asic_allumes_count'], hours); }catch(e){}
+
+  const tStart = now - actualHours * 3600 * 1000; // ajusté selon données réelles
+  const BUCKETS = actualHours <= 24 ? 96 : actualHours <= 168 ? 168 : 360;
+  console.log('History: actualHours='+actualHours+'h pts='+hp.length+'/'+hi.length+'/'+ha.length);
+  if(hp.length === 0 && hi.length === 0 && ha.length === 0){
+    console.error('=== DIAGNOSTIC HISTORIQUE ===');
+    console.error('Test direct API - copie cette URL dans ton navigateur:');
+    const testStart = new Date(Date.now() - 24*3600000).toISOString();
+    console.error(HA_URL + '/api/history/period/' + testStart + '?filter_entity_id=sensor.production_solaire&significant_changes_only=false');
+    console.error('Si vide → sensor non enregistré dans recorder HA');
+    console.error('Fix: ajouter dans configuration.yaml:');
+    console.error('recorder:\n  include:\n    entities:\n      - sensor.production_solaire\n      - sensor.injection_reseau\n      - sensor.surplus_solaire');
+  }
+  if(hp.length === 0 && hi.length === 0 && ha.length === 0){
+    console.warn('AUCUNE DONNEE - vérifier: purge_keep_days dans configuration.yaml (mettre >= 30)');
+  }
+
+  function resample(raw){
+    const valid = raw.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+    if(valid.length < 1) return new Array(BUCKETS).fill(0);
+    const dataStart = new Date(valid[0].lu||valid[0].last_changed).getTime();
+    const dataEnd   = now;
+    const span      = Math.max(dataEnd - dataStart, 1);
+    // Bucket correspondant à "maintenant" dans ce graphique
+    const nowBkt = BUCKETS - 1; // dataEnd = now → dernier bucket = maintenant
+    const out = new Array(BUCKETS).fill(0);
+    valid.forEach(s=>{
+      const t = new Date(s.lu||s.last_changed).getTime();
+      if(t > now) return; // ignorer les points futurs
+      const idx = Math.min(BUCKETS-1, Math.max(0, Math.floor(((t-dataStart)/span)*BUCKETS)));
+      out[idx] = Math.max(out[idx], +s.state);
+    });
+    // Forward-fill uniquement jusqu'au dernier point connu
+    let last = 0, lastKnown = 0;
+    for(let i=0;i<BUCKETS;i++) if(out[i]>0) lastKnown=i;
+    for(let i=0;i<=lastKnown;i++){
+      if(out[i]>0) last=out[i];
+      else if(i>0&&last>0) out[i]=last;
+    }
+    return out;
+  }
+
+  const ap = resample(hp);
+  const ai = resample(hi);
+  const aa = resample(ha);
+  const ae = resample(hedf);
+  const s19OnHist = hd['switch.antminer_s19_switch'] === 'on';
+  const an = resampleCount(hasic, BUCKETS, tStart, Date.now()).map(v=>v>0?(s19OnHist?v+1:v):0);
+  // Calculer la vraie plage temporelle des données
+  const bestRawForMeta = hp.length > 0 ? hp : (hi.length > 0 ? hi : ha);
+  const validMeta = bestRawForMeta.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+  const metaStart = validMeta.length > 0 ? new Date(validMeta[0].lu||validMeta[0].last_changed).getTime() : tStart;
+  chartMeta = { dataStart: metaStart, dataEnd: now, period: hours<=24?'day':hours<=168?'week':'month', buckets: BUCKETS };
+
+  // Labels X selon les données réellement disponibles
+  function getActualLabels(raw, requestedHours){
+    const valid = raw.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+    if(valid.length < 1) return null;
+    const dataStart = new Date(valid[0].lu||valid[0].last_changed).getTime();
+    const actualHours = Math.round((now - dataStart) / 3600000);
+    if(actualHours <= 24) return ['00h','06h','12h','18h','24h'];
+    if(actualHours <= 48) return ['J-2','J-2 12h','Hier','Hier 12h','Auj'];
+    if(actualHours <= 96) return ['J-4','J-3','J-2','J-1','Auj'];
+    return requestedHours<=168
+      ? ['J-7','J-5','J-3','J-1','Auj']
+      : ['J-30','J-22','J-15','J-7','Auj'];
+  }
+  const bestRaw = hp.length > 0 ? hp : (hi.length > 0 ? hi : ha);
+  const lx = getActualLabels(bestRaw, hours)
+    || (hours<=168 ? ['J-7','J-5','J-3','J-1','Auj'] : ['J-30','J-22','J-15','J-7','Auj']);
+  lx.forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
+
+  drawChart(ap, ai, aa, ae, an);
+  drawMeteoOverlay(actualHours, tStart, 560, 130).catch(e=>{});
+}
+
+
+// Cache pour semaine et mois (rarement changé)
+function clearHistCache(){
+  ['solar_asic_hist_day','solar_asic_hist_168','solar_asic_hist_720'].forEach(k=>localStorage.removeItem(k));
+  if(period==='day') loadDayHistory().catch(e=>{});
+  else loadPeriodCached(period==='week'?168:720).catch(e=>{});
+}
+function refreshHistBtn(el){
+  // Feedback visuel temporaire
+  el.textContent = '⟳';
+  el.style.background = 'var(--solar-bg)';
+  el.style.color = 'var(--solar)';
+  const ph = document.getElementById('chart-placeholder');
+  if(ph){ ph.style.display='block'; ph.textContent='Chargement en cours...'; }
+  clearHistCache();
+  // Retour au style normal après 2s
+  setTimeout(()=>{
+    el.textContent = '↻';
+    el.style.background = '';
+    el.style.color = '';
+  }, 2000);
+}
+
+// ═══ MÉTÉO Open-Meteo ════════════════════════════════════════
+// Pas de clé API requise — données météo pour Lyon
+const METEO_LAT = 45.75, METEO_LON = 4.85;
+let meteoCache = null, meteoCacheTs = 0;
+
+async function fetchMeteo(hours){
+  // Cache 30 min
+  if(meteoCache && Date.now()-meteoCacheTs < 30*60*1000) return meteoCache;
+  try{
+    const days = Math.ceil(hours/24) + 1;
+    // past_days pour historique + forecast_days pour aujourd'hui
+    const pastDays = Math.min(days, 7);
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${METEO_LAT}&longitude=${METEO_LON}`
+      + `&hourly=cloudcover,precipitation,weathercode`
+      + `&past_days=${pastDays}&forecast_days=1`
+      + `&timezone=Europe%2FParis`;
+    const r = await fetch(url);
+    const d = await r.json();
+    meteoCache = d;
+    meteoCacheTs = Date.now();
+    return d;
+  }catch(e){ console.warn('Météo indisponible:', e.message); return null; }
+}
+
+function weatherIcon(code){
+  // WMO weather codes → emoji
+  if(code===0) return '☀️';
+  if(code<=2) return '🌤️';
+  if(code<=3) return '☁️';
+  if(code<=49) return '🌫️';
+  if(code<=69) return '🌧️';
+  if(code<=79) return '🌨️';
+  if(code<=84) return '🌦️';
+  if(code<=99) return '⛈️';
+  return '🌡️';
+}
+
+async function drawMeteoOverlay(hours, tStart, W, H){
+  const d = await fetchMeteo(hours);
+  if(!d || !d.hourly) return;
+  const times = d.hourly.time; // ["2024-01-01T00:00", ...]
+  const clouds = d.hourly.cloudcover; // 0-100%
+  const codes = d.hourly.weathercode;
+  const now = Date.now();
+  const tEnd = now;
+  const tRange = tEnd - tStart;
+
+  const meteoG = document.getElementById('meteo-overlay');
+  if(!meteoG) return;
+  meteoG.innerHTML = '';
+
+  // Bande nuages en haut du graphique (hauteur 15% du SVG)
+  const CLOUD_H = H * 0.12;
+  times.forEach((t, i)=>{
+    const ts = new Date(t).getTime();
+    if(ts < tStart || ts > tEnd) return;
+    const x = ((ts - tStart) / tRange) * W;
+    const nextTs = i+1 < times.length ? new Date(times[i+1]).getTime() : ts + 3600000;
+    const w = Math.max(1, ((Math.min(nextTs, tEnd) - ts) / tRange) * W);
+    const opacity = (clouds[i] || 0) / 100 * 0.35; // max 35% opacité
+    const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', 0);
+    rect.setAttribute('width', w); rect.setAttribute('height', CLOUD_H);
+    rect.setAttribute('fill', `rgba(148,163,184,${opacity})`);
+    meteoG.appendChild(rect);
+  });
+
+  // Icônes météo toutes les 6h (pas trop dense)
+  let lastIconX = -50;
+  times.forEach((t, i)=>{
+    if(i % 12 !== 0) return; // toutes les 12h (moins dense)
+    const ts = new Date(t).getTime();
+    if(ts < tStart || ts > tEnd) return;
+    const x = ((ts - tStart) / tRange) * W;
+    if(x - lastIconX < 30) return; // éviter chevauchement
+    lastIconX = x;
+    const icon = weatherIcon(codes[i] || 0);
+    const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+    txt.setAttribute('x', x); txt.setAttribute('y', CLOUD_H - 1);
+    txt.setAttribute('font-size', '10'); txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('style', 'font-family:sans-serif;');
+    txt.textContent = icon;
+    meteoG.appendChild(txt);
+  });
+}
+
+async function loadPeriodCached(hours){
+  // Récupère les données depuis l'API historique HA sur 7j ou 30j
+  // (rééchantillonnage à 1 bucket par jour pour limiter le volume)
+  if(historyRefreshing){ console.log('loadPeriodCached: déjà en cours, ignoré'); return; }
+  historyRefreshing = true;
+
+  try{
+    const days = hours <= 168 ? 7 : 30;
+    const BUCKETS = days; // 1 point par jour
+    const now = Date.now();
+    const t0  = new Date(now - days * 24 * 3600 * 1000);
+    t0.setHours(0,0,0,0);
+    const startTs = t0.getTime();
+
+    // Helper : rééchantillonne sur N buckets de 24h
+    function resamplePeriod(raw){
+      const valid = raw.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+      // Pour les sensors de puissance instantanée, on calcule la MOYENNE par bucket
+      const sums = new Array(BUCKETS).fill(0);
+      const cnts = new Array(BUCKETS).fill(0);
+      valid.forEach(s=>{
+        const t = new Date(s.lu||s.last_changed).getTime();
+        const idx = Math.floor((t - startTs) / (24*3600*1000));
+        if(idx >= 0 && idx < BUCKETS){
+          sums[idx] += +s.state;
+          cnts[idx] += 1;
+        }
+      });
+      const out = sums.map((s,i)=> cnts[i] > 0 ? s/cnts[i] : 0);
+      return out;
+    }
+
+    // Fetch parallèle (mais limité, sur 7-30 jours on prend ce qu'on peut)
+    const hp    = await fetchHistBest(['sensor.production_solaire'],  days * 24);
+    const hi    = await fetchHistBest(['sensor.injection_reseau'],    days * 24);
+    const ha    = await fetchHistBest(['sensor.consommation_ferme'],  days * 24);
+    const hedf  = await fetchHistBest(['sensor.consommation_reseau'], days * 24);
+    const hasic = await fetchHistBest(['sensor.asic_allumes_count'],  days * 24);
+
+    const ap = resamplePeriod(hp);
+    const ai = resamplePeriod(hi);
+    const aa = resamplePeriod(ha);
+    const ae = resamplePeriod(hedf);
+    // Pour les ASIC: on prend le max par bucket (count)
+    const an = (function(){
+      const valid = hasic.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
+      const maxes = new Array(BUCKETS).fill(0);
+      valid.forEach(s=>{
+        const t = new Date(s.lu||s.last_changed).getTime();
+        const idx = Math.floor((t - startTs) / (24*3600*1000));
+        if(idx >= 0 && idx < BUCKETS){
+          maxes[idx] = Math.max(maxes[idx], +s.state);
+        }
+      });
+      return maxes;
+    })();
+
+    // Vérifier qu'on a au moins quelques points non-nuls
+    const totalDataPoints = ap.filter(v=>v>0).length + ai.filter(v=>v>0).length + aa.filter(v=>v>0).length;
+    if(totalDataPoints < 2){
+      const ph = document.getElementById('chart-placeholder');
+      if(ph){
+        ph.style.display='block';
+        ph.textContent = days === 7
+          ? 'Pas encore assez de données — revenez dans quelques jours'
+          : 'Pas encore assez de données — revenez dans quelques semaines';
+      }
+      console.warn('Pas assez de points HA sur '+days+'j');
+      return;
+    }
+
+    // Labels X = dates réelles (4 points équirépartis + Auj)
+    function dayLabel(ts){ const d=new Date(ts); return d.getDate()+'/'+(d.getMonth()+1); }
+    const dayMs = 24*3600*1000;
+    const lx = [
+      dayLabel(startTs),
+      dayLabel(startTs + Math.floor(days*0.25)*dayMs),
+      dayLabel(startTs + Math.floor(days*0.5)*dayMs),
+      dayLabel(startTs + Math.floor(days*0.75)*dayMs),
+      'Auj'
+    ];
+    lx.forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
+
+    chartMeta = {dataStart:startTs, dataEnd:now, period:days<=7?'week':'month', buckets:BUCKETS};
+    drawChart(ap, ai, aa, ae, an);
+    console.log('Graphique '+days+'j depuis HA history ('+BUCKETS+' buckets)');
+
+  }catch(e){
+    console.warn('loadPeriodCached erreur:', e.message);
+    const ph = document.getElementById('chart-placeholder');
+    if(ph){ ph.style.display='block'; ph.textContent='Erreur de chargement'; }
+  }finally{
+    historyRefreshing = false;
+  }
+}
+
+function setPeriod(p,el){
+  period=p;
+  document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const lx={day:['00h','06h','12h','18h','24h'],week:['J-7','J-5','J-3','J-1','Auj'],month:['J-30','J-22','J-15','J-7','Auj']};
+  lx[p].forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
+  // Jour: immédiat. Semaine/Mois: petit délai pour ne pas bloquer le Pi 3B
+  if(!historyRefreshing){
+    if(p==='day'){
+      historyRefreshing = false; // reset au cas où bloqué par un appel précédent
+      loadDayHistory().catch(e=>console.warn(e));
+    } else {
+      // Afficher "Chargement..." pendant le délai
+      const ph = document.getElementById('chart-placeholder');
+      if(ph){ ph.style.display='block'; ph.textContent='Chargement en cours...'; }
+      setTimeout(()=>{
+        if(!historyRefreshing) loadPeriodCached(p==='week'?168:720).catch(e=>console.warn(e));
+      }, 500); // 500ms de délai pour laisser l'UI se mettre à jour
+    }
+  }
+}
+
+const svgEl=document.getElementById('chart-svg');
+const tip=document.getElementById('chart-tooltip');
+const cross=document.getElementById('chart-crosshair');
+let _lastMoveTs=0;
+document.getElementById('chart-hover-area').addEventListener('mousemove',function(e){
+  const now2=Date.now(); if(now2-_lastMoveTs<50) return; _lastMoveTs=now2;
+  const rect=svgEl.getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width,x=pct*560;
+  cross.setAttribute('x1',x);cross.setAttribute('x2',x);cross.setAttribute('opacity',1);
+  const len=chartData.p.length;
+  if(len>1){
+    const idx=Math.min(Math.floor(pct*len),len-1);
+    document.getElementById('tt-solar').textContent=t('tt_prod')+': '+fmt(chartData.p[idx]||0);
+    document.getElementById('tt-inject').textContent=t('tt_inject')+': '+fmt(chartData.i[idx]||0);
+    document.getElementById('tt-asic').textContent=t('tt_ferme')+': '+fmt(chartData.a[idx]||0);
+    const edfEl2=document.getElementById('tt-edf');
+    if(edfEl2&&chartData.e&&chartData.e.length) edfEl2.textContent=t('tt_import')+': '+fmt(chartData.e[idx]||0);
+    const asicNEl=document.getElementById('tt-asic-n');
+    if(asicNEl&&chartData.n) asicNEl.textContent=t('tt_asic_n')+': '+(chartData.n[idx]||0);
+    // Afficher l'heure ou la date+heure selon la période
+    if(chartMeta.dataStart && chartMeta.dataEnd){
+      const span = chartMeta.dataEnd - chartMeta.dataStart;
+      const t = new Date(chartMeta.dataStart + (idx / (len-1)) * span);
+      let timeStr;
+      if(chartMeta.period === 'day'){
+        // Journée → heure uniquement
+        timeStr = t.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      } else {
+        // Semaine/mois → date + heure
+        timeStr = t.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})
+                + ' ' + t.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      }
+      const ttTime = document.getElementById('tt-time');
+      if(ttTime) ttTime.textContent = timeStr;
+    }
+    tip.style.display='block';
+    tip.style.left=Math.min(e.clientX-rect.left+12,rect.width-150)+'px';
+    tip.style.top=Math.max(e.clientY-rect.top-70,4)+'px';
+  }
+});
+document.getElementById('chart-hover-area').addEventListener('mouseleave',function(){cross.setAttribute('opacity',0);tip.style.display='none';});
+
+// Mois traduits via tMonth(i) — voir dictionnaire MONTHS_I18N
+// Stats mensuelles avec sensors RÉELS d'énergie cumulée Refoss
+
+// ─── Backfill : récupère les mois passés depuis l'historique HA ───
+// Les compteurs Refoss `_this_month_energy` se réinitialisent au 1er de chaque
+// mois. La MAX value pendant le dernier jour du mois = total du mois.
+// On interroge HA pour les jours 28-31 de chaque mois précédent et on prend
+// le max. Stocké dans localStorage, ne s'exécute qu'une fois par mois.
+async function backfillHistoricalMonths(){
+  const now = new Date();
+  const year = now.getFullYear();
+  const currentMo = now.getMonth();
+  // Vérifie si on a déjà fait le backfill ce mois-ci
+  const backfillKey = 'monthly_backfill_'+year+'_'+currentMo;
+  if(localStorage.getItem(backfillKey) === '1') return false;
+
+  const channels   = [1,2,3,4,5,6];
+  const sensorsEnergy = channels.map(c=>`sensor.refoss_smart_energy_monitor_em_channel_${c}_this_month_energy`);
+  const sensorsReturn = [1,2,3].map(c=>`sensor.refoss_smart_energy_monitor_em_channel_${c}_this_month_return_energy`);
+  const allSensors = [...sensorsEnergy, ...sensorsReturn];
+  const filterIds = allSensors.join(',');
+
+  let monthly = {};
+  try{ monthly = JSON.parse(localStorage.getItem('mining_monthly_stats')||'{}'); }catch(e){}
+
+  let anyAdded = false;
+  // Boucle sur tous les mois passés de l'année courante (jusqu'au mois précédent)
+  for(let mo = 0; mo < currentMo; mo++){
+    const monthKey = year + '-' + mo;
+    // Skip si on a déjà des données significatives pour ce mois
+    const existing = monthly[monthKey];
+    if(existing && (existing.ferme > 0.5 || existing.importEdf > 0.5 || existing.inject > 0.5)) continue;
+
+    // Période de query: derniers 3 jours du mois (large fenêtre pour capter
+    // la valeur juste avant le reset au 1er du mois suivant)
+    const lastDayOfMonth = new Date(year, mo + 1, 0); // dernier jour du mois mo
+    const start = new Date(year, mo, Math.max(1, lastDayOfMonth.getDate() - 3), 0, 0, 0);
+    const end   = new Date(year, mo, lastDayOfMonth.getDate(), 23, 59, 59);
+
+    try{
+      const url = `${HA_URL}/api/history/period/${start.toISOString()}`+
+                  `?end_time=${end.toISOString()}`+
+                  `&filter_entity_id=${encodeURIComponent(filterIds)}`+
+                  `&minimal_response&significant_changes_only`;
+      const r = await fetch(url, { headers:{'Authorization':'Bearer '+HA_TOKEN} });
+      if(!r.ok){ console.log('Backfill HA history non-OK pour mois', mo, r.status); continue; }
+      const data = await r.json(); // tableau de séries (une par sensor)
+
+      // Pour chaque série, prendre la valeur max (= total mensuel juste avant reset)
+      const maxes = {};
+      data.forEach(series=>{
+        if(!series || !series.length) return;
+        const eid = series[0].entity_id;
+        let max = 0;
+        for(const pt of series){
+          const v = parseFloat(pt.state);
+          if(!isNaN(v) && v > max) max = v;
+        }
+        maxes[eid] = max;
+      });
+
+      const ferme  = [4,5,6].reduce((s,c)=>s+(maxes[`sensor.refoss_smart_energy_monitor_em_channel_${c}_this_month_energy`]||0),0);
+      const imp    = [1,2,3].reduce((s,c)=>s+(maxes[`sensor.refoss_smart_energy_monitor_em_channel_${c}_this_month_energy`]||0),0);
+      const inj    = [1,2,3].reduce((s,c)=>s+(maxes[`sensor.refoss_smart_energy_monitor_em_channel_${c}_this_month_return_energy`]||0),0);
+      const solar  = Math.max(inj + ferme - imp, 0);
+
+      // Seulement enregistrer si on a des données réelles
+      if(ferme > 0.1 || imp > 0.1 || inj > 0.1){
+        if(!monthly[monthKey]) monthly[monthKey] = {dailySnap:{}, asicKwh:0, asicHours:0, lastDay:''};
+        monthly[monthKey].ferme      = ferme;
+        monthly[monthKey].importEdf  = imp;
+        monthly[monthKey].inject     = inj;
+        monthly[monthKey].solar      = solar;
+        monthly[monthKey].asicKwh    = ferme; // ferme ≈ ASIC kWh
+        monthly[monthKey]._backfilled = true;
+        anyAdded = true;
+        console.log(`Backfill ${tMonth(mo)} ${year}: solar=${solar.toFixed(1)} ferme=${ferme.toFixed(1)} imp=${imp.toFixed(1)} inj=${inj.toFixed(1)}`);
+      }
+    }catch(e){
+      console.log('Erreur backfill mois', mo, e.message);
+    }
+  }
+
+  if(anyAdded){
+    try{ localStorage.setItem('mining_monthly_stats', JSON.stringify(monthly)); }catch(e){}
+  }
+  // Marquer comme fait pour ce mois (évite re-query inutile)
+  localStorage.setItem(backfillKey, '1');
+  return anyAdded;
+}
+
+async function loadYearStats(){
+  // Backfill historique en arrière-plan (1 fois par mois)
+  try{ await backfillHistoricalMonths(); }catch(e){}
+
+  const now = new Date();
+  document.getElementById('stats-year').textContent = now.getFullYear();
+  const tbody = document.getElementById('stats-tbody');
+  const monthKey = now.getFullYear()+'-'+now.getMonth();
+  const dayKey = now.toISOString().slice(0,10);
+
+  // Lire l'historique mensuel
+  let monthly = {};
+  try{
+    monthly = JSON.parse(localStorage.getItem('mining_monthly_stats')||'{}');
+    // Migration: imp_edf → importEdf (ancienne clé → nouvelle)
+    Object.values(monthly).forEach(m=>{
+      if(!m.dailySnap) return;
+      Object.values(m.dailySnap).forEach(d=>{
+        if(d.imp_edf !== undefined && d.importEdf === undefined){
+          d.importEdf = d.imp_edf; delete d.imp_edf;
+        }
+      });
+      if(m.imp_edf !== undefined && m.importEdf === undefined){
+        m.importEdf = m.imp_edf; delete m.imp_edf;
+      }
+    });
+  }catch(e){ monthly = {}; }
+
+  // Valeurs cumulées du jour (Refoss)
+  const todayFerme = todayFermeKwh; // CT4+5+6 ferme conso
+  const todayInj = todayInject;     // CT1+2+3 injection
+  // Production solaire = ce qu'on a consommé en ferme + ce qu'on a injecté
+  const todaySolarKwh = todayFerme + todayInj;
+  const asicsOn = Math.round(parseFloat(hd['sensor.asic_allumes_count'])||0);
+
+  // Initialiser le mois si nouveau
+  if(!monthly[monthKey]){
+    monthly[monthKey] = {solar:0, inject:0, asicKwh:0, asicHours:0,
+                         dailySnap:{}, lastDay:''};
+  }
+  const m = monthly[monthKey];
+  if(!m.dailySnap) m.dailySnap = {};
+
+  if(!m.dailySnap[dayKey]){
+    m.dailySnap[dayKey] = {solar:0, ferme:0, importEdf:0, inject:0, asicKwh:0, asicHours:0};
+  }
+  // MAX du jour (Refoss compteurs cumulatifs)
+  m.dailySnap[dayKey].solar    = Math.max(m.dailySnap[dayKey].solar||0,     todaySolarKwh);
+  m.dailySnap[dayKey].ferme    = Math.max(m.dailySnap[dayKey].ferme||0,     todayFermeKwh);
+  m.dailySnap[dayKey].importEdf= Math.max(m.dailySnap[dayKey].importEdf||0, todayImport);
+  m.dailySnap[dayKey].inject   = Math.max(m.dailySnap[dayKey].inject||0,    todayInj);
+  m.dailySnap[dayKey].asicKwh  = Math.max(m.dailySnap[dayKey].asicKwh||0,   todayFerme);
+  if(asicsOn > 0){
+    m.dailySnap[dayKey].asicHours = (m.dailySnap[dayKey].asicHours||0) + (REFRESH_MS/3600000);
+  }
+
+  // Totaux mensuels (recalcul uniquement si nouveau jour ou nouveau mois)
+  const needsRecalc = !m._cachedDay || m._cachedDay !== dayKey;
+  let monthSolar=0, monthFerme=0, monthImport=0, monthInj=0, monthAsicKwh=0, monthAsicH=0;
+  for(const d of Object.keys(m.dailySnap)){
+    monthSolar    += m.dailySnap[d].solar||0;
+    monthFerme    += m.dailySnap[d].ferme||0;
+    monthImport   += m.dailySnap[d].importEdf||0;
+    monthInj      += m.dailySnap[d].inject||0;
+    monthAsicKwh  += m.dailySnap[d].asicKwh||0;
+    monthAsicH    += m.dailySnap[d].asicHours||0;
+  }
+  m._cachedDay = dayKey;
+  m.solar     = monthSolar;
+  m.ferme     = monthFerme;
+  m.importEdf = monthImport;
+  m.inject    = monthInj;
+  m.asicKwh   = monthAsicKwh;
+  m.asicHours = monthAsicH;
+  m.lastDay = dayKey;
+
+  // Pruning: garder seulement les 12 derniers mois
+  const cutoffYear = now.getFullYear() - 1;
+  Object.keys(monthly).forEach(k=>{
+    const [y] = k.split('-');
+    if(parseInt(y) < cutoffYear) delete monthly[k];
+  });
+  // Pruning des snapshots > 60 jours dans chaque mois
+  const cutoffDay = new Date(Date.now()-60*86400000).toISOString().slice(0,10);
+  Object.values(monthly).forEach(m=>{
+    if(!m.dailySnap) return;
+    Object.keys(m.dailySnap).forEach(d=>{ if(d<cutoffDay) delete m.dailySnap[d]; });
+  });
+  try{ localStorage.setItem('mining_monthly_stats', JSON.stringify(monthly)); }catch(e){}
+
+  // Affichage tableau
+  tbody.innerHTML = '';
+
+  // ── Mois courant : récupérer les vraies valeurs Refoss this_month AVANT le rendu ──
+  // (sinon le mois courant affiche les snapshots locaux, souvent à 0)
+  const curMoFermePre  = (+hd['sensor.refoss_smart_energy_monitor_em_channel_4_this_month_energy']||0)
+                       + (+hd['sensor.refoss_smart_energy_monitor_em_channel_5_this_month_energy']||0)
+                       + (+hd['sensor.refoss_smart_energy_monitor_em_channel_6_this_month_energy']||0);
+  const curMoImportPre = (+hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_month_energy']||0)
+                       + (+hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_month_energy']||0)
+                       + (+hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_month_energy']||0);
+  const curMoInjectPre = (+hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_month_return_energy']||0)
+                       + (+hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_month_return_energy']||0)
+                       + (+hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_month_return_energy']||0);
+  const curMoSolarPre  = Math.max(curMoInjectPre + curMoFermePre - curMoImportPre, 0);
+  const curMoKeyPre = now.getFullYear()+'-'+now.getMonth();
+  if(monthly[curMoKeyPre]){
+    // Garder le max entre snapshot accumulé et capteur Refoss (anti-régression)
+    monthly[curMoKeyPre].ferme     = Math.max(monthly[curMoKeyPre].ferme     || 0, curMoFermePre);
+    monthly[curMoKeyPre].importEdf = Math.max(monthly[curMoKeyPre].importEdf || 0, curMoImportPre);
+    monthly[curMoKeyPre].inject    = Math.max(monthly[curMoKeyPre].inject    || 0, curMoInjectPre);
+    monthly[curMoKeyPre].solar     = Math.max(monthly[curMoKeyPre].solar     || 0, curMoSolarPre);
+    // asicKwh ≈ ferme (consommation ASIC mesurée)
+    monthly[curMoKeyPre].asicKwh   = Math.max(monthly[curMoKeyPre].asicKwh   || 0, curMoFermePre);
+  }
+
+  let totals = {solar:0, ferme:0, importEdf:0, inject:0, asicKwh:0, asicHours:0};
+  for(let mo=0; mo<=now.getMonth(); mo++){
+    const k = now.getFullYear()+'-'+mo;
+    const d = monthly[k] || {solar:0, ferme:0, importEdf:0, inject:0, asicKwh:0, asicHours:0};
+    totals.solar     += d.solar     || 0;
+    totals.ferme     += d.ferme     || 0;
+    totals.importEdf += d.importEdf || 0;
+    totals.inject    += d.inject    || 0;
+    totals.asicKwh   += d.asicKwh   || 0;
+    totals.asicHours += d.asicHours || 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td class="td-month">'+tMonth(mo)+'</td>'+
+      '<td class="td-solar">'+(d.solar||0).toFixed(1)+' kWh</td>'+
+      '<td class="td-solar">'+(d.ferme||0).toFixed(1)+' kWh</td>'+
+      '<td class="td-inject">'+(d.importEdf||0).toFixed(1)+' kWh</td>'+
+      '<td class="td-inject">'+(d.inject||0).toFixed(1)+' kWh</td>'+
+      '<td class="td-asic">'+(d.asicKwh||0).toFixed(1)+' kWh</td>';
+    tbody.appendChild(tr);
+  }
+  const trTot = document.createElement('tr');
+  trTot.style.fontWeight = '700';
+  trTot.style.background = 'var(--bg3)';
+  trTot.innerHTML = '<td class="td-month" style="background:var(--bg3);font-weight:700;">'+t('total')+'</td>'+
+    '<td class="td-solar" style="font-weight:700;">'+totals.solar.toFixed(1)+' kWh</td>'+
+    '<td class="td-solar" style="font-weight:700;">'+totals.ferme.toFixed(1)+' kWh</td>'+
+    '<td class="td-inject" style="font-weight:700;">'+totals.importEdf.toFixed(1)+' kWh</td>'+
+    '<td class="td-inject" style="font-weight:700;">'+totals.inject.toFixed(1)+' kWh</td>'+
+    '<td class="td-asic" style="font-weight:700;">'+totals.asicKwh.toFixed(1)+' kWh</td>';
+  tbody.appendChild(trTot);
+
+  // Sauvegarder les valeurs mises à jour
+  try{ localStorage.setItem('mining_monthly_stats', JSON.stringify(monthly)); }catch(e){}
+}
+
+
+// ── BANNIERE CAROUSEL PILOTEE A DISTANCE ──
+let bannerData=[], bannerIdx=0, bannerTimer=null;
+
+function getLangVal(val, fallback=''){
+  // Supporte les strings simples ET les objets {fr:'...', en:'...', de:'...', es:'...'}
+  if(!val) return fallback;
+  if(typeof val === 'string') return val;
+  if(typeof val === 'object'){
+    return val[_lang] || val['fr'] || val['en'] || fallback;
+  }
+  return fallback;
+}
+function buildSlide(b){
+  const slide = document.createElement('div');
+  slide.className = 'banner-slide';
+  slide.style.borderColor = b.couleur || '#f59e0b';
+  slide.style.background = b.fond || '#fffbeb';
+  const titre  = getLangVal(b.titre,  '');
+  const texte  = getLangVal(b.texte,  '');
+  const bouton = getLangVal(b.bouton, t('banner_btn') || 'En savoir plus');
+  const image  = getLangVal(b.image,  ''); // supporte string ET objet {fr, en, de, es}
+  let html = '';
+  if(image && image !== ''){
+    html += `<a href="${b.url||'#'}" target="_blank" class="banner-img-wrap">
+      <img src="${image}" alt="banniere" loading="lazy"/>
+    </a>`;
+  }
+  html += `<div class="banner-inner">
+    <div class="banner-text">
+      <div class="banner-title">${titre}</div>
+      <div class="banner-sub">${texte}</div>
+    </div>
+    <a class="banner-btn" href="${b.url||'#'}" target="_blank"
+       style="background:${b.couleur||'#f59e0b'};color:#fff;">
+      ${bouton}
+    </a>
+  </div>`;
+  slide.innerHTML = html;
+  return slide;
+}
+
+function showSlide(idx){
+  const slides = document.querySelectorAll('.banner-slide');
+  const dots = document.querySelectorAll('.banner-dot');
+  slides.forEach(s=>s.classList.remove('active'));
+  dots.forEach(d=>d.classList.remove('active'));
+  if(slides[idx]) slides[idx].classList.add('active');
+  if(dots[idx]) dots[idx].classList.add('active');
+  bannerIdx = idx;
+}
+
+function nextSlide(){ showSlide((bannerIdx+1) % bannerData.length); }
+function prevSlide(){ showSlide((bannerIdx-1+bannerData.length) % bannerData.length); }
+
+async function loadBanner(){
+  try{
+    let BANNER_URL = (typeof BANNER_JSON_URL !== 'undefined' && BANNER_JSON_URL)
+      ? BANNER_JSON_URL
+      : window.location.origin + '/local/banner_local.json';
+    const r = await fetch(BANNER_URL + '?t=' + Date.now());
+    if(!r.ok) return;
+    const b = await r.json();
+    const el = document.getElementById('site-banner');
+    if(!b.visible){ el.style.display='none'; return; }
+
+    bannerData = b.bannieres || [];
+    if(bannerData.length === 0){ el.style.display='none'; return; }
+
+    el.style.display = 'block';
+    const slidesDiv = document.getElementById('banner-slides');
+    const dotsDiv = document.getElementById('banner-dots');
+    const arrowsDiv = document.getElementById('banner-arrows');
+    slidesDiv.innerHTML = '';
+    dotsDiv.innerHTML = '';
+
+    // Build slides
+    bannerData.forEach((ban, i) => {
+      const slide = buildSlide(ban);
+      slidesDiv.appendChild(slide);
+      // Dot
+      const dot = document.createElement('button');
+      dot.className = 'banner-dot';
+      dot.onclick = () => { showSlide(i); resetTimer(); };
+      dotsDiv.appendChild(dot);
+    });
+
+    // Show nav only if multiple banners
+    if(bannerData.length > 1){
+      dotsDiv.style.display = 'flex';
+      arrowsDiv.style.display = 'flex';
+      document.getElementById('banner-prev').onclick = () => { prevSlide(); resetTimer(); };
+      document.getElementById('banner-next').onclick = () => { nextSlide(); resetTimer(); };
+      // Auto-rotate every 5 seconds
+      function resetTimer(){
+        if(bannerTimer) clearInterval(bannerTimer);
+        bannerTimer = setInterval(nextSlide, 5000);
+      }
+      resetTimer();
+    }
+
+    showSlide(0);
+  }catch(e){ console.log('Banner non disponible'); }
+}
+
+// ═══ MODE CLAIR / SOMBRE ════════════════════════════════════
+// Initialisé dans DOMContentLoaded (head script) pour fonctionner
+// même si la config HA n'est pas renseignée.
+function toggleTheme(){
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  document.getElementById('theme-toggle').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('solar_theme', isDark ? 'light' : 'dark');
+}
+
+// ═══ REVENUS MINAGE F2POOL ════════════════════════════════════
+let miningPrices = {}, miningCache = {}, miningCacheTs = 0;
+let dailyRevEur = 0; // revenus jour en € (pour calcul rentabilité)
+
+async function fetchCoinPrices(){
+  if(Date.now() - miningCacheTs < 5*60*1000 && Object.keys(miningPrices).length) return miningPrices;
+  try{
+    if(typeof MINING_COINS === 'undefined') return {};
+    const ids = MINING_COINS.map(c=>c.coingecko).join(',');
+    const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=eur`);
+    if(!r.ok) return miningPrices;
+    const d = await r.json();
+    MINING_COINS.forEach(c=>{ if(d[c.coingecko]) miningPrices[c.id] = d[c.coingecko].eur; });
+    miningCacheTs = Date.now();
+    return miningPrices;
+  }catch(e){ return miningPrices; }
+}
+
+// F2Pool: lecture via sensors HA (proxy côté serveur, pas de CORS)
+// Les sensors rest: dans configuration.yaml fetchtent F2Pool côté Pi
+async function fetchF2PoolCoin(coin){
+  try{
+    // sensorMap: dynamique depuis MINING_COINS
+    // NOTE: F2Pool hashrate API ne supporte que BTC (pas ALPH ni KAS)
+    // Avec Legacy V1, ALPH et KAS ont aussi hashrate + workers
+    // BTC utilise maintenant Legacy V1 — hashrate dans f2pool_btc_raw
+    const f2poolHrCoins = []; // plus de sensor HR séparé
+    const sensorMap = {};
+    if(typeof MINING_COINS !== 'undefined'){
+      MINING_COINS.forEach(c=>{
+        const short = c.symbol.toLowerCase();
+        const entry = {
+          day:       `sensor.f2pool_${short}_day`,
+          unpaid:    `sensor.f2pool_${short}_unpaid`,
+          yesterday: `sensor.f2pool_${short}_yesterday`,
+          raw:       `sensor.f2pool_${short}_raw`,
+          workers:   `sensor.f2pool_${short}_workers`,
+          hr:        `sensor.f2pool_${short}_raw`,
+        };
+        sensorMap[c.id]  = entry;
+        sensorMap[short] = entry;
+      });
+    }
+    if(!sensorMap['bitcoin']) sensorMap['bitcoin'] = {
+      day:'sensor.f2pool_btc_day', unpaid:'sensor.f2pool_btc_unpaid', raw:'sensor.f2pool_btc_raw'
+    };
+    // Override pour K1Pool RXD — tous les champs requis
+    const poolOverrides = {
+      'rxd':     { day:'sensor.f2pool_rxd_day',     unpaid:'sensor.f2pool_rxd_unpaid',
+                   yesterday:'sensor.f2pool_rxd_yesterday',
+                   raw:'sensor.k1pool_rxd_raw',      workers:'sensor.f2pool_rxd_workers', hr:'sensor.k1pool_rxd_raw' },
+      'radiant': { day:'sensor.f2pool_rxd_day',     unpaid:'sensor.f2pool_rxd_unpaid',
+                   yesterday:'sensor.f2pool_rxd_yesterday',
+                   raw:'sensor.k1pool_rxd_raw',      workers:'sensor.f2pool_rxd_workers', hr:'sensor.k1pool_rxd_raw' },
+      'kda':     { day:'sensor.antpool_kda_day',    unpaid:'sensor.antpool_kda_unpaid',
+                   yesterday:'sensor.antpool_kda_yesterday',
+                   raw:'sensor.antpool_kda_raw',     workers:'sensor.antpool_kda_workers',
+                   hr:'sensor.antpool_kda_overview_raw' },
+      'kadena':  { day:'sensor.antpool_kda_day',    unpaid:'sensor.antpool_kda_unpaid',
+                   yesterday:'sensor.antpool_kda_yesterday',
+                   raw:'sensor.antpool_kda_raw',     workers:'sensor.antpool_kda_workers',
+                   hr:'sensor.antpool_kda_overview_raw' },
+    };
+    Object.assign(sensorMap, poolOverrides);
+    const sensors = sensorMap[coin.id];
+    if(!sensors) return null;
+    // Lire depuis hd (déjà chargé par fetchAll)
+    const day      = parseFloat(hd[sensors.day]      || '0') || 0;
+    let unpaid   = parseFloat(hd[sensors.unpaid]   || '0') || 0;
+    const yesterday = parseFloat(hd[sensors.yesterday] || '0') || 0;
+    // Attributs étendus depuis le sensor raw (workers, hashrate, balance KDA)
+    let workers = 0, hashrate = 0;
+    // Workers depuis sensor dédié dans hd (prioritaire)
+    if(sensors.workers && hd[sensors.workers]){
+      workers = parseInt(hd[sensors.workers]) || 0;
+    }
+    try{
+      // Lire hashrate + workers (fallback) + balance KDA depuis sensor raw via API HA
+      const ctrl = new AbortController();
+      const tmr = setTimeout(()=>ctrl.abort(), 5000);
+      const rawSensor = (sensors.hr && sensors.hr !== null) ? sensors.hr : sensors.raw;
+      const r = await fetch(`${HA_URL}/api/states/${rawSensor}`, {
+        headers:{'Authorization':'Bearer '+HA_TOKEN}, signal:ctrl.signal
+      });
+      clearTimeout(tmr);
+      if(r.ok){
+        const s = await r.json();
+        const attr = s.attributes || {};
+        // DEBUG: log KDA attributes pour diagnostiquer le HR manquant
+        if(coin.id === 'kda' || coin.id === 'kadena'){
+          if(!window._kdaDebugged){
+            window._kdaDebugged = true;
+            console.log('[KDA debug] sensor', rawSensor, 'attributes:', attr);
+          }
+        }
+        // F2Pool V2 (BTC) : hash_rate_info.hash_rate
+        // F2Pool V1 (ALPH/KAS/LTC) : attr.hashrate, attr.worker_count
+        // Antpool (KDA) : attr.data.balance / attr.data.totalWorkerNum (le HR n'est PAS dedans)
+        // K1Pool (RXD) : attr.miner.curHashrate, attr.miner.workersOnline
+        const minerObj   = attr.miner       || {};
+        const hashRateInfo = attr.hash_rate_info || {};
+        const workerObj  = attr.worker      || attr.workers_info || {};
+        const dataObj    = attr.data        || {};   // Antpool API V2
+        // Helper pour parser un hashrate qui peut être "123.45 GH/s" ou "123450000000"
+        function parseHR(v){
+          if(v === null || v === undefined) return 0;
+          if(typeof v === 'number') return v;
+          if(typeof v === 'string'){
+            const m = v.match(/[\d.]+/);
+            if(!m) return 0;
+            let n = parseFloat(m[0]);
+            const lower = v.toLowerCase();
+            // Si l'unité est dans la chaîne, normalise vers H/s
+            if(lower.includes('th/s') || lower.includes('th '))      n *= 1e12;
+            else if(lower.includes('gh/s') || lower.includes('gh ')) n *= 1e9;
+            else if(lower.includes('mh/s') || lower.includes('mh ')) n *= 1e6;
+            else if(lower.includes('kh/s') || lower.includes('kh ')) n *= 1e3;
+            return n;
+          }
+          return 0;
+        }
+        hashrate = parseHR(
+          hashRateInfo.hash_rate          ??
+          attr.hashrate10m                ??
+          attr.hashrate                   ??
+          attr.hash_rate                  ??
+          attr.hashRate                   ??
+          attr.hashrate_10min             ??
+          attr.hashrate_24h               ??
+          attr.last_10m                   ??
+          attr.hashes_10m                 ??
+          attr.hsLast10m                  ??   // Antpool API
+          attr.hsLast1h                   ??   // Antpool API
+          attr.hsLast1d                   ??   // Antpool API
+          minerObj.curHashrate            ??
+          minerObj.hashrate               ??
+          minerObj.hashRate               ??
+          workerObj.hashrate              ??
+          workerObj.hashrate10m           ??
+          dataObj.hashrate                ??
+          dataObj.last10mHashrate         ??
+          dataObj.last10MHashrate         ??
+          dataObj.last1HHashrate          ??
+          dataObj.hashrate10m             ??
+          dataObj.hsLast10m               ??   // Antpool nested
+          dataObj.hsLast1h                ??   // Antpool nested
+          dataObj.hsLast1d                ??   // Antpool nested
+          0
+        );
+        if(!workers) workers = parseInt(
+          attr.worker_count          ||
+          attr.workers_online        ||
+          attr.workersOnline         ||
+          attr.online_workers        ||
+          attr.totalWorkerNum        ||   // Antpool API
+          attr.activeWorkerNum       ||   // Antpool API
+          minerObj.workersOnline     ||
+          minerObj.worker_count      ||
+          workerObj.online           ||
+          dataObj.activeWorkerNum    ||   // Antpool nested
+          dataObj.totalWorkerNum     ||   // Antpool nested
+          (Array.isArray(attr.workers) ? attr.workers.length : 0) || 0
+        );
+        // KDA/Antpool : balance dans attr.data.balance ou attr.unpaidAmount (Antpool API)
+        if(!unpaid){
+          const raw = attr.unpaid_amount  ?? attr.balance      ?? attr.total_unpaid ??
+                      attr.unpaidAmount   ?? attr.totalAmount  ??   // Antpool API
+                      minerObj.balance    ?? minerObj.unpaid   ??
+                      dataObj.balance     ?? dataObj.unpaid    ??
+                      dataObj.unpaidAmount?? dataObj.totalAmount ?? null;
+          if(raw !== null && raw !== undefined) unpaid = parseFloat(raw) || 0;
+        }
+      }
+
+      // ── Fallback HR pour Antpool (KDA) : essayer des sensors séparés ──
+      // Antpool n'expose pas le hashrate dans sensor.antpool_kda_raw,
+      // il faut un sensor dédié (à créer dans configuration.yaml HA)
+      if((coin.id === 'kda' || coin.id === 'kadena') && hashrate === 0){
+        // 1) Lire d'abord l'attribut data.hsLast10m du sensor antpool_kda_overview_raw
+        //    (ce sensor contient les données accountOverview.htm avec le hashrate)
+        try{
+          const ctrl3 = new AbortController();
+          const tmr3 = setTimeout(()=>ctrl3.abort(), 3000);
+          const r3 = await fetch(`${HA_URL}/api/states/sensor.antpool_kda_overview_raw`, {
+            headers:{'Authorization':'Bearer '+HA_TOKEN}, signal:ctrl3.signal
+          });
+          clearTimeout(tmr3);
+          if(r3.ok){
+            const s3 = await r3.json();
+            const dataO = (s3.attributes && s3.attributes.data) || {};
+            const errO  = s3.attributes && s3.attributes._error;
+            if(!window._kdaOverviewDebugged){
+              window._kdaOverviewDebugged = true;
+              console.log('[KDA overview] state:', s3.state, 'attributes:', s3.attributes);
+              if(errO) console.warn('[KDA overview] _error from script:', errO);
+              if(!dataO || Object.keys(dataO).length === 0){
+                console.warn('[KDA overview] data attribute is EMPTY. Check /config/scripts/antpool_kda_overview.py works:');
+                console.warn('  ssh into HA: python3 /config/scripts/antpool_kda_overview.py');
+              }
+            }
+            const hsRaw = dataO.hsLast10m ?? dataO.hsLast1h ?? dataO.hsLast1d ?? 0;
+            if(hsRaw){
+              hashrate = parseFloat(hsRaw) || 0;
+              // Mise à jour workers depuis ce même sensor s'il y en a
+              if(!workers){
+                workers = parseInt(dataO.activeWorkerNum || dataO.totalWorkerNum || 0);
+              }
+              if(hashrate > 0){
+                console.log(`[KDA HR] Trouvé via sensor.antpool_kda_overview_raw: ${hashrate} H/s`);
+              }
+            }
+          }
+        }catch(e){
+          console.warn('[KDA overview] fetch error:', e.message);
+        }
+
+        // 2) Si toujours rien, essayer les sensors dérivés (antpool_kda_hashrate, etc.)
+        if(hashrate === 0){
+          const kdaHrCandidates = [
+            'sensor.antpool_kda_hashrate',
+            'sensor.antpool_kda_hr',
+            'sensor.antpool_kda_hashrate_10m',
+            'sensor.antpool_kda_hashrate10m',
+          ];
+          for(const candidate of kdaHrCandidates){
+            try{
+              const ctrl2 = new AbortController();
+              const tmr2 = setTimeout(()=>ctrl2.abort(), 3000);
+              const r2 = await fetch(`${HA_URL}/api/states/${candidate}`, {
+                headers:{'Authorization':'Bearer '+HA_TOKEN}, signal:ctrl2.signal
+              });
+              clearTimeout(tmr2);
+              if(r2.ok){
+                const s2 = await r2.json();
+                const val = s2.state;
+                if(val && val !== 'unavailable' && val !== 'unknown' && val !== '0' && val !== '0.0'){
+                  const unit = (s2.attributes && s2.attributes.unit_of_measurement) || '';
+                  hashrate = parseHR(val + ' ' + unit);
+                  if(hashrate > 0){
+                    console.log(`[KDA HR] Trouvé via ${candidate}: ${val} ${unit} = ${hashrate} H/s`);
+                    break;
+                  }
+                }
+              }
+            }catch(e){}
+          }
+        }
+
+        // 3) Lire aussi sensor.antpool_kda_workers (Template HA) si workers = 0
+        if(!workers){
+          try{
+            const ctrl4 = new AbortController();
+            const tmr4 = setTimeout(()=>ctrl4.abort(), 3000);
+            const r4 = await fetch(`${HA_URL}/api/states/sensor.antpool_kda_workers`, {
+              headers:{'Authorization':'Bearer '+HA_TOKEN}, signal:ctrl4.signal
+            });
+            clearTimeout(tmr4);
+            if(r4.ok){
+              const s4 = await r4.json();
+              const val = parseInt(s4.state);
+              if(!isNaN(val) && val > 0){
+                workers = val;
+                console.log(`[KDA workers] Trouvé via sensor.antpool_kda_workers: ${workers}`);
+              }
+            }
+          }catch(e){}
+        }
+      }
+    }catch(e){}
+    // Ne pas retourner null si le sensor existe mais a des valeurs à 0
+    // (cas normal après paiement quotidien F2Pool)
+    return { earned_today_amount: day, unpaid_amount: unpaid, yesterday_amount: yesterday, worker_count: workers, hashes_last_day: hashrate, _sensor_found: true };
+  }catch(e){ return null; }
+}
+
+function fmtCoin(val, decimals){
+  if(val === null || val === undefined || isNaN(val)) return '—';
+  return parseFloat(val).toFixed(decimals);
+}
+
+async function loadMiningRevenue(){
+  if(typeof MINING_COINS === 'undefined' || !MINING_COINS.length) return;
+  if(typeof F2POOL_USER === 'undefined' || !F2POOL_USER || F2POOL_USER === 'ton_username_f2pool'){
+    console.log('F2Pool: configurer F2POOL_USER dans la section CONFIGURATION du fichier');
+    return;
+  }
+
+  const card = document.getElementById('mining-revenue-card');
+  if(card) card.style.display = 'block';
+
+  const prices = await fetchCoinPrices();
+  const grid = document.getElementById('mining-coins-grid');
+  if(!grid) return;
+
+  let totalDayEur = 0, totalWeekEur = 0;
+  const results = [];
+
+  for(const coin of MINING_COINS){
+    const d = await fetchF2PoolCoin(coin);
+    const price = prices[coin.id] || 0;
+    let dayAmount = 0, weekAmount = 0, unpaid = 0, hashrate = 0, workers = 0;
+
+    if(d){
+      // F2Pool: earned_today_amount ou value_24h selon la crypto
+      dayAmount  = parseFloat(d.earned_today_amount || d.value_24h || 0);
+      weekAmount = parseFloat(d.earned_week_amount  || d.value_7d  || 0);
+      unpaid     = parseFloat(d.unpaid_amount || d.balance || 0);
+      hashrate   = parseFloat(d.hashes_last_day || d.hashrate || 0);
+      workers    = parseInt(d.worker_count || d.workers?.length || 0);
+    }
+
+    const dayEur  = dayAmount  * price;
+    const weekEur = weekAmount * price;
+    totalDayEur  += dayEur;
+    totalWeekEur += weekEur;
+    results.push({coin, d, price, dayAmount, weekAmount, unpaid, hashrate, workers, dayEur, weekEur});
+  }
+
+  dailyRevEur = totalDayEur;
+
+  // Rendu HTML
+  grid.innerHTML = '';
+  results.forEach(({coin, d, price, dayAmount, weekAmount, unpaid, hashrate, workers, dayEur, weekEur})=>{
+    const el = document.createElement('div');
+    // Couleur de la carte basée sur la couleur définie dans MINING_COINS
+    const cardColor = coin.color || '#0ea5e9';
+    el.className = 'mining-card';
+    el.style.setProperty('--mc-color', cardColor);
+    el.style.borderTop = `3px solid ${cardColor}`;
+    // Calcul affichage avant rendu
+    const hasYest = d && d._sensor_found;
+    const dispAmt = (hasYest && d.yesterday_amount >= 0) ? d.yesterday_amount : dayAmount;
+    const dispLbl = hasYest ? t('hier') : (dayAmount > 0 ? 'auj.' : '—');
+    const yestEur = hasYest ? (d.yesterday_amount || 0) * price : dayEur;
+    const eurLine = d && d._sensor_found
+      ? (yestEur > 0.0001 ? '≈ '+yestEur.toFixed(2)+' €/'+t('hier') : '0.00 €/'+t('hier'))
+      : '<span style="color:var(--gridc)">⚙️ Sensor HA manquant</span>';
+    const hrParts = [];
+    if(workers > 0) hrParts.push(workers+' worker'+(workers>1?'s':''));
+    if(hashrate > 0) hrParts.push('HR: '+fmtHashrate(hashrate, coin.id));
+    const hrLine = hrParts.length ? hrParts.join(' · ')
+      : (d ? '<span style="color:var(--text3)">HR: —</span>'
+           : '<span style="color:var(--gridc)">⚙️ Vérifier sensor HA</span>');
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div class="mining-symbol" style="color:${coin.color}">${coin.symbol}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);">${price > 0 ? price.toFixed(price>1000?0:4)+' €' : '— €'}</div>
+      </div>
+      <div class="mining-amount" style="color:${coin.color}">${fmtCoin(dispAmt, coin.decimals)}</div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:1px;">${dispLbl}</div>
+      <div class="mining-eur">${eurLine}</div>
+      <div class="mining-sub">
+        ${d && d._sensor_found ? '💰 '+t('unpaid')+': '+fmtCoin(unpaid, coin.decimals)+' '+coin.symbol : ''}
+      </div>
+      <div class="mining-hr">${hrLine}</div>`;
+    grid.appendChild(el);
+  });
+
+  // ── Calcul total revenus hier (toutes cryptos) ─────────────
+  let totalYestEur = 0;
+  results.forEach(({d, price}) => {
+    const yest = d ? (d.yesterday_amount || 0) : 0;
+    totalYestEur += yest * price;
+  });
+
+  // ── Badge Pool LIVE ─────────────────────────────────────────
+  const badge = document.getElementById('mining-total-eur');
+  if(badge) badge.textContent = totalYestEur > 0.001 ? totalYestEur.toFixed(2)+' €/'+t('hier') : '— €/hier';
+
+  // ── Bilan net ──────────────────────────────────────────────
+  // todayImport = kWh importés depuis Refoss (valeur journalière)
+  const costEdf    = todayImport * 0.20;  // 0.20€/kWh
+  const net        = totalYestEur - costEdf;
+  const netEl      = document.getElementById('mining-net-profit');
+  if(netEl){
+    if(totalYestEur > 0){
+      netEl.textContent = t('bilan')+' : '+t('revenues')+' '+totalYestEur.toFixed(2)+' € − '+t('edf_cost')+' '+costEdf.toFixed(2)+' € = '+(net>=0?'+':'')+net.toFixed(2)+' €';
+    } else {
+      netEl.textContent = '<span data-i18n="bilan_waiting">Bilan hier : en attente…</span>';
+    }
+  }
+}
+
+function fmtHashrate(h, coinId){
+  if(coinId === 'bitcoin'){
+    if(h >= 1e12) return (h/1e12).toFixed(1)+' TH/s';
+    if(h >= 1e9)  return (h/1e9).toFixed(1)+' GH/s';
+    return (h/1e6).toFixed(1)+' MH/s';
+  }
+  if(h >= 1e9)  return (h/1e9).toFixed(1)+' GH/s';
+  if(h >= 1e6)  return (h/1e6).toFixed(1)+' MH/s';
+  if(h >= 1e3)  return (h/1e3).toFixed(1)+' KH/s';
+  return h+' H/s';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NOTIFICATIONS — Telegram + ntfy + HA Companion
+// ═══════════════════════════════════════════════════════════════
+
+async function sendTelegram(msg){
+  if(typeof TELEGRAM_BOT_TOKEN === 'undefined' || !TELEGRAM_BOT_TOKEN) return false;
+  try{
+    const r = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML' })
+    });
+    return r.ok;
+  }catch(e){ return false; }
+}
+
+async function sendNtfy(msg, title, priority='default', tags=[]){
+  if(typeof NTFY_TOPIC === 'undefined' || !NTFY_TOPIC || NTFY_TOPIC.includes('CHANGE_MOI')) return false;
+  // Passer par HA rest_command pour éviter les problèmes CORS du navigateur
+  try{
+    const r = await fetch(`${HA_URL}/api/services/rest_command/ntfy_notify`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+HA_TOKEN,'Content-Type':'application/json'},
+      body: JSON.stringify({
+        topic: NTFY_TOPIC,
+        title: title,
+        message: msg,
+        priority: priority,
+        tags: tags.join(',') || 'solar_energy'
+      })
+    });
+    return r.ok;
+  }catch(e){
+    // Fallback: fetch direct ntfy
+    try{
+      const r2 = await fetch(`${NTFY_SERVER||'https://ntfy.sh'}/${NTFY_TOPIC}`,{
+        method:'POST', headers:{'Title':title,'Priority':priority,'Tags':tags.join(',')},
+        body: msg
+      });
+      return r2.ok;
+    }catch(e2){ return false; }
+  }
+}
+
+async function sendHANotify(msg, title){
+  if(typeof HA_NOTIFY_SERVICE === 'undefined' || !HA_NOTIFY_SERVICE) return false;
+  try{
+    const service = HA_NOTIFY_SERVICE.replace('notify.','');
+    const r = await fetch(`${HA_URL}/api/services/notify/${service}`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+HA_TOKEN,'Content-Type':'application/json'},
+      body: JSON.stringify({ message: msg, title: title })
+    });
+    return r.ok;
+  }catch(e){ return false; }
+}
+
+async function sendNotif(msg, title='☀️ Solar ASIC', priority='default', tags=['solar_energy']){
+  // N'envoyer que sur les canaux activés par l'utilisateur
+  const state = getNotifState();
+  const promises = [];
+  if(state.telegram) promises.push(sendTelegram(`<b>${title}</b>\n${msg}`));
+  if(state.ntfy)     promises.push(sendNtfy(msg, title, priority, tags));
+  if(state.ha)       promises.push(sendHANotify(msg, title));
+  if(!promises.length) return 0; // aucun canal activé
+  const results = await Promise.allSettled(promises);
+  const sent = results.filter(r=>r.value===true).length;
+  if(sent > 0) console.log(`Notif envoyée (${sent} canal): ${title}`);
+  return sent;
+}
+
+// Activer/désactiver un canal de notification avec persistance
+const NOTIF_KEY = 'solar_notif_channels'; // localStorage
+
+function getNotifState(){
+  try{ return JSON.parse(localStorage.getItem(NOTIF_KEY)||'{}'); }catch(e){ return {}; }
+}
+function saveNotifState(state){
+  localStorage.setItem(NOTIF_KEY, JSON.stringify(state));
+}
+function applyNotifButtons(){
+  const state = getNotifState();
+  ['telegram','ntfy','ha'].forEach(ch=>{
+    const btn = document.getElementById('notif-btn-'+ch);
+    if(!btn) return;
+    const labels = {telegram:'✈ Telegram', ntfy:'📱 ntfy', ha:'🏠 HA'}; // i18n TODO
+    if(state[ch]){
+      btn.className = 'notif-btn active';
+      btn.textContent = '✅ '+labels[ch];
+    } else {
+      btn.className = 'notif-btn';
+      btn.textContent = labels[ch];
+    }
+  });
+}
+
+async function toggleNotif(channel, btn){
+  const state = getNotifState();
+  const labels = {telegram:'✈ Telegram', ntfy:'📱 ntfy', ha:'🏠 HA'}; // i18n TODO
+
+  if(state[channel]){
+    // Désactiver
+    state[channel] = false;
+    saveNotifState(state);
+    btn.className = 'notif-btn';
+    btn.textContent = labels[channel];
+    return;
+  }
+
+  // Activer → envoyer un test d'abord
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  const msg = '✅ Notifications Solar ASIC activées !\n☀️ Tu recevras les alertes importantes.';
+  let ok = false;
+  if(channel === 'telegram') ok = await sendTelegram('<b>☀️ Solar ASIC activé</b>\n'+msg);
+  if(channel === 'ntfy')     ok = await sendNtfy(msg, '☀️ Solar ASIC activé', 'default', ['solar_energy','white_check_mark']);
+  if(channel === 'ha')       ok = await sendHANotify(msg, '☀️ Solar ASIC activé');
+
+  btn.disabled = false;
+  if(ok){
+    state[channel] = true;
+    saveNotifState(state);
+    btn.className = 'notif-btn active';
+    btn.textContent = '✅ '+labels[channel];
+  } else {
+    btn.className = 'notif-btn';
+    btn.textContent = '❌ '+labels[channel];
+    setTimeout(()=>{ btn.textContent = labels[channel]; }, 3000);
+  }
+}
+
+// Appliquer l'état des boutons au chargement de la page
+setTimeout(applyNotifButtons, 500);
+
+// ─── Notifications automatiques sur événements ────────────────
+let _lastNotifState = '';
+
+// Stats journalières accumulées (reset auto à minuit)
+function getDailyStats(){
+  const today = new Date().toISOString().slice(0,10);
+  let s = {};
+  try{ s = JSON.parse(localStorage.getItem('daily_stats_notif') || '{}'); }catch(e){}
+  if(s.day !== today){
+    // Nouveau jour → reset complet
+    s = { day: today,
+          maxAsicsOn: 0,           // pic ASICs simultanés
+          asicMinutesCumul: 0,     // total ASIC-minutes (ex: 3 ASIC × 60min = 180)
+          totalRunMinutes: 0,      // minutes pendant lesquelles ≥1 ASIC tournait
+          maxS19On: false,         // S19 a tourné aujourd'hui ?
+          s19Minutes: 0,           // minutes où S19 a tourné
+          lastTick: Date.now() };
+  }
+  return s;
+}
+
+function updateDailyStats(){
+  if(!ASICS || !ASICS.length) return null;
+  const s = getDailyStats();
+  const now = Date.now();
+  // Delta en minutes, cap à 5 min (évite gros saut si onglet inactif)
+  const elapsedMin = Math.max(0, Math.min(5, (now - (s.lastTick||now)) / 60000));
+
+  const asicsOnNow = ASICS.filter(a=>a.on).length;
+  const s19On = ASICS.some(a => a.name === 'Antminer S19' && a.on);
+
+  if(asicsOnNow > s.maxAsicsOn) s.maxAsicsOn = asicsOnNow;
+  if(asicsOnNow > 0) s.totalRunMinutes = (s.totalRunMinutes||0) + elapsedMin;
+  s.asicMinutesCumul = (s.asicMinutesCumul||0) + (asicsOnNow * elapsedMin);
+  if(s19On){
+    s.maxS19On = true;
+    s.s19Minutes = (s.s19Minutes||0) + elapsedMin;
+  }
+  s.lastTick = now;
+  try{ localStorage.setItem('daily_stats_notif', JSON.stringify(s)); }catch(e){}
+  return s;
+}
+
+async function checkNotifEvents(){
+  if(!ASICS.length) return;
+  // Accumule les stats du jour à chaque appel
+  const dailyStats = updateDailyStats() || getDailyStats();
+  const asicsOn = ASICS.filter(a=>a.on).length;
+  const solar = Math.round(parseFloat(hd['_prodCalc']||0));
+  const surplus = Math.round(parseFloat(hd['sensor.surplus_solaire']||0));
+  const importEdf = Math.round(parseFloat(hd['sensor.consommation_reseau']||0));
+
+  // Clé d'état: évite de renvoyer la même notif en boucle
+  const stateKey = `${asicsOn}-${solar > 100 ? 'solar' : 'nosolar'}`;
+  if(stateKey === _lastNotifState) return;
+
+  const now = new Date();
+  const hour = now.getHours();
+
+  // Notif bilan de fin de journée (20h-21h) — utilise les vraies stats du jour
+  if(hour === 20 && !_lastNotifState.includes('bilan20h')){
+    const asicHours    = (dailyStats.asicMinutesCumul / 60).toFixed(1); // équivalent 1-ASIC-h
+    const runHours     = (dailyStats.totalRunMinutes / 60).toFixed(1);  // durée totale avec ≥1 ASIC
+    const s19Hours     = (dailyStats.s19Minutes / 60).toFixed(1);
+    const revEur       = dailyRevEur.toFixed(2);
+    const costEdf      = (todayImport * 0.20).toFixed(2);
+    const gainEdf      = (todayInject * 0.04).toFixed(2);
+    const net          = (parseFloat(revEur) - parseFloat(costEdf) + parseFloat(gainEdf)).toFixed(2);
+
+    let msg = `📊 Bilan du jour:\n`
+      + `\n`
+      + `☀️ Solaire produit: ${todayProd.toFixed(1)} kWh\n`
+      + `⛏️ Conso ASIC: ${todayFermeKwh.toFixed(1)} kWh\n`
+      + `📥 Import EDF: ${todayImport.toFixed(1)} kWh (${costEdf} €)\n`
+      + `📤 Injection EDF: ${todayInject.toFixed(1)} kWh (${gainEdf} €)\n`
+      + `\n`
+      + `⚡ Pic ASICs: ${dailyStats.maxAsicsOn}/${ASICS.length} simultanés\n`
+      + `🕐 Durée totale minage: ${runHours} h\n`
+      + `📊 ASIC·heures cumulées: ${asicHours} h\n`;
+    if(dailyStats.maxS19On){
+      msg += `🚀 Antminer S19: ${s19Hours} h\n`;
+    } else {
+      msg += `🚀 Antminer S19: non activé\n`;
+    }
+    msg += `\n`
+      + `💰 Revenus minage: ${revEur} €\n`
+      + `📈 Net (revenus - coût + injection): ${parseFloat(net) >= 0 ? '+' : ''}${net} €`;
+
+    await sendNotif(msg, '☀️ Bilan Solar ASIC', 'default', ['chart_increasing','solar_energy']);
+    _lastNotifState = stateKey + '-bilan20h';
+    return;
+  }
+
+  // Notif import EDF anormal (> 500W depuis plus de 20 cycles = ~7 min)
+  if(importEdf > 500 && !_lastNotifState.includes('importHigh')){
+    await sendNotif(
+      `⚠️ Import EDF élevé: ${importEdf}W\nVérifier la ferme (${asicsOn} ASIC actifs, ${solar}W solaire)`,
+      '⚠️ Import EDF anormal', 'high', ['warning','electric_plug']
+    );
+    _lastNotifState = stateKey + '-importHigh';
+    return;
+  }
+
+  _lastNotifState = stateKey;
+}
+
+// revenus lancés ci-dessous
+
+// ── Stubs de compatibilité ──
+window.updateF2PoolUI    = window.updateF2PoolUI    || function(){};
+window.updateNotifBadges = window.updateNotifBadges || function(){};
+window.updateMiningUI    = window.updateMiningUI    || function(){};
+
+fetchAll();
+setInterval(fetchAll, DATA_REFRESH_MS); // états HA toutes les 15s (rapide)
+// Historique toutes les 5 min (requêtes longues → Pi 3B a le temps de répondre)
+let historyRefreshing = false; // garde anti-double-appel
+async function refreshHistory(){
+  if(historyRefreshing) return;
+  historyRefreshing = true;
+  try{
+    if(period==='day') await loadDayHistory();
+    else await loadPeriodCached(period==='week'?168:720);
+  }catch(e){ console.warn('History refresh:', e.message); }
+  finally{ historyRefreshing = false; }
+}
+// Historique Jour : chargement rapide (1s après démarrage)
+setTimeout(()=>{ if(!historyRefreshing) loadDayHistory().catch(e=>{}); }, 1000);
+// Semaine et Mois : différés 5s pour ne pas surcharger le Pi 3B au démarrage
+// Stats annuelles : chargement initial différé + toutes les heures
+// Stats aujourd'hui: chargement initial + toutes les heures
+setTimeout(()=>loadDayWeekStats().catch(e=>{}), 1500);
+setInterval(()=>loadDayWeekStats().catch(e=>{}), 60*60*1000); // 1h
+
+// Stats semaine/mois: 1x au démarrage + 1x à minuit
+setTimeout(()=>{ try{ const p=loadYearStats(); if(p&&p.catch) p.catch(e=>{}); }catch(e){} }, 2000);
+(function scheduleDaily(){
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(0,1,0,0); // 00:01
+  midnight.setDate(midnight.getDate() + 1);
+  const msToMidnight = midnight - now;
+  setTimeout(()=>{
+    if(typeof loadYearStats==="function") loadYearStats().catch(e=>{});
+    if(typeof loadDayWeekStats==="function") loadDayWeekStats().catch(e=>{}); // remise à zéro des stats jour
+    scheduleDaily(); // replanifier pour le lendemain
+  }, msToMidnight);
+  console.log('Stats quotidiennes planifiées dans', Math.round(msToMidnight/3600000) + 'h');
+})();
+setInterval(loadYearStats, 60*60*1000); // toutes les heures
+// Refresh historique 15min: utilise le cache, ne refetch que si > 15min
+setInterval(()=>{
+  if(historyRefreshing) return;
+  try{
+    const raw = localStorage.getItem(HIST_CACHE_KEY);
+    if(raw){
+      const c = JSON.parse(raw);
+      const dayStart = new Date(); dayStart.setHours(0,0,0,0);
+      if(c.t0 === dayStart.getTime() && (Date.now()-c.updatedAt) < 15*60*1000) return; // cache récent
+    }
+  }catch(e){}
+  loadDayHistory().catch(e=>{});
+}, 15*60*1000);
+loadBanner();
+// Revenus minage: chargement initial différé + toutes les 10min
+setTimeout(()=>{ loadMiningRevenue().catch(e=>{}); }, 3000);
+setInterval(loadMiningRevenue, 10*60*1000);
+setTimeout(updateLines,300);
+
+// Données mois depuis Refoss this_month_energy
+function getMonthStatsFromRefoss(){
+  const ferme = (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_4_this_month_energy'])||0)
+              + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_5_this_month_energy'])||0)
+              + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_6_this_month_energy'])||0);
+  const imp   = (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_month_energy'])||0)
+              + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_month_energy'])||0)
+              + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_month_energy'])||0);
+  const inj   = (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_month_return_energy'])||0)
+              + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_month_return_energy'])||0)
+              + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_month_return_energy'])||0);
+  const prod  = Math.max(ferme + inj - imp, 0);
+  return {ferme, imp, inj, prod};
+}
+
+// ═══ Stats jour / semaine ════════════════════════════════════
+function loadTodayStats(){
+  const b = document.getElementById('stats-body-day');
+  if(!b) return;
+  b.innerHTML = `<tr>
+    <td><b>${t('today')}</b></td>
+    <td>${todayProd.toFixed(2)} kWh</td>
+    <td>${todayFermeKwh.toFixed(2)} kWh</td>
+    <td>${todayImport.toFixed(2)} kWh</td>
+    <td>${todayInject.toFixed(2)} kWh</td>
+    <td>${asicKwhToday.toFixed(2)} kWh</td>
+  </tr>`;
+}
+
+async function loadWeekStats(){
+  // Refoss this_week_energy = instantané, 0 requête HA longue
+  const b = document.getElementById('stats-body-week');
+  if(!b) return;
+  try{
+    // Essayer les noms courts d'abord, puis noms complets Refoss Dell
+    const fermeW = (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_4_this_week_energy'])||0)
+                 + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_5_this_week_energy'])||0)
+                 + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_6_this_week_energy'])||0)
+                 || (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_4_this_week_energy'])||0)
+                  + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_5_this_week_energy'])||0)
+                  + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_6_this_week_energy'])||0);
+    const importW = (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_week_energy'])||0)
+                  + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_week_energy'])||0)
+                  + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_week_energy'])||0)
+                  || (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_week_energy'])||0)
+                   + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_week_energy'])||0)
+                   + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_week_energy'])||0);
+    const injectW = (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_week_return_energy'])||0)
+                  + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_week_return_energy'])||0)
+                  + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_week_return_energy'])||0)
+                  || (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_1_this_week_return_energy'])||0)
+                   + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_2_this_week_return_energy'])||0)
+                   + (parseFloat(hd['sensor.refoss_smart_energy_monitor_em_channel_3_this_week_return_energy'])||0);
+    const prodW = Math.max(fermeW + injectW - importW, 0);
+    b.innerHTML=`<tr style="border-top:1px solid var(--border);">
+      <td><b>${t('this_week')}</b></td>
+      <td class="td-solar">${prodW.toFixed(1)} kWh</td>
+      <td class="td-solar">${fermeW.toFixed(1)} kWh</td>
+      <td class="td-inject">${importW.toFixed(1)} kWh</td>
+      <td class="td-inject">${injectW.toFixed(1)} kWh</td>
+      <td class="td-asic">${fermeW.toFixed(1)} kWh</td>
+    </tr>`;
+  }catch(e){ console.warn('Stats semaine:',e.message); }
+}
+
+
+async function loadDayWeekStats(){
+  loadTodayStats();
+  await loadWeekStats();
+}
+</script>
+</body>
+</html>
