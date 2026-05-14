@@ -1,12 +1,5 @@
 # ☀️ Solar ASIC — Dashboard de minage solaire pour Home Assistant
 
-<p align="center">
-  <a href="README.md">Français</a> | 
-  <a href="README.en.md">English</a> | 
-  <a href="README.es.md">Español</a> | 
-  <a href="README.de.md">Deutsch</a>
-</p>
-
 **Un dashboard HTML standalone** qui connecte votre installation solaire à votre ferme de minage ASIC via Home Assistant. Conçu pour maximiser l'utilisation du surplus solaire et **miner des cryptomonnaies gratuitement** — sans toucher au réseau national d'électricité.
 
 ![Solar ASIC Dashboard](docs/screenshot.png)
@@ -92,11 +85,11 @@ solar-asic/
 ├── configuration.example.yaml   # Template HA → adapter dans configuration.yaml
 ├── automation_asic.example.yaml # Automation HA → adapter dans automations.yaml
 ├── scripts/
-│   ├── antpool_kda.py           # Script API Antpool (balance, marche avec toutes les crypto Antpool)
-│   └── antpool_kda_overview.py  # Script API Antpool (hashrate + workers, marche avec toutes les crypto Antpool)
+│   ├── antpool_kda.py           # Script API Antpool (balance KDA, marche avec toutes les crypto de Antpool)
+│   └── antpool_kda_overview.py  # Script API Antpool (hashrate + workers KDA, marche avec toutes les crypto de Antpool)
 ├── docs/
 │   └── MANUEL.pdf               # Manuel d'installation complet (PDF)
-├── .gitignore                   # Exclut secrets.js, banner.json...
+├── .gitignore                   # Exclut secrets.js, ...
 └── README.md                    # Ce fichier
 ```
 
@@ -109,28 +102,32 @@ solar-asic/
 Via SSH ou l'Add-on Terminal de HA :
 
 ```bash
+# Crée le dossier www si nécessaire
 mkdir -p /config/www
 mkdir -p /config/scripts
 
+# Copie le dashboard
 cp dashboard_mining.html /config/www/
 
-# Scripts Antpool (si tu mines sur Antpool)
+# Copie les scripts Antpool (si tu mines sur Antpool)
 cp scripts/antpool_kda.py /config/scripts/
 cp scripts/antpool_kda_overview.py /config/scripts/
 chmod +x /config/scripts/antpool_kda*.py
 
+# Crée ton fichier de configuration
 cp secrets.example.js /config/www/secrets.js
-nano /config/www/secrets.js
+nano /config/www/secrets.js   # Edite avec tes valeurs
 ```
 
 ### Étape 2 — Configurer `secrets.js`
 
 ```javascript
-const HA_URL_LOCAL = 'http://192.168.1.X:8123';
-const HA_TOKEN     = 'TON_TOKEN_HA';
-const F2POOL_USER  = 'ton_user_f2pool';
+const HA_URL_LOCAL = 'http://192.168.1.X:8123';  // Ton IP locale
+const HA_TOKEN     = 'TON_TOKEN_HA';              // Profil → Tokens longue durée
+const F2POOL_USER  = 'ton_user_f2pool';           // Optionnel
 const MINING_COINS = [
   { id: 'alph', symbol: 'ALPH', color: '#fa792b', decimals: 3, coingecko: 'alephium' },
+  // ...
 ];
 ```
 
@@ -173,7 +170,7 @@ http://IP_DE_TON_HA:8123/local/dashboard_mining.html
 2. Dans `configuration.yaml`, décommente et adapte le sensor `f2pool_*_raw`
 3. Dans `secrets.js`, remplis `F2POOL_USER` et décommente les `MINING_COINS`
 
-### Antpool (KDA et autres)
+### Antpool (KDA)
 
 1. Récupère tes clés sur [antpool.com](https://antpool.com/userCenter/apiAccess.htm)
 2. Installe les scripts Python : `cp scripts/antpool_kda*.py /config/scripts/`
@@ -181,7 +178,7 @@ http://IP_DE_TON_HA:8123/local/dashboard_mining.html
 4. Dans `secrets.js`, remplis `ANTPOOL_USER_ID`, `ANTPOOL_API_KEY`, `ANTPOOL_API_SECRET`
 5. Dans `configuration.yaml`, décommente les sensors Antpool
 
-### K1Pool (RXD et autres)
+### K1Pool (RXD)
 
 1. Dans `configuration.yaml`, décommente le sensor `k1pool_rxd_raw`
 2. Remplace l'adresse wallet par la tienne
@@ -190,6 +187,8 @@ http://IP_DE_TON_HA:8123/local/dashboard_mining.html
 ---
 
 ## 📊 Sensors HA requis
+
+Le dashboard attend ces sensors (créés par `configuration.example.yaml`) :
 
 | Sensor HA | Description |
 |---|---|
@@ -202,25 +201,37 @@ http://IP_DE_TON_HA:8123/local/dashboard_mining.html
 | `sensor.asic_puissance_estimee` | Puissance estimée des ASIC allumés (W) |
 | `sensor.prochain_asic` | Nom du prochain ASIC à démarrer |
 
+Et les sensors d'énergie mensuelle Refoss (ou équivalent pour les stats) :
+- `sensor.refoss_smart_energy_monitor_em_channel_[1-6]_this_month_energy`
+- `sensor.refoss_smart_energy_monitor_em_channel_[1-3]_this_month_return_energy`
+
 ---
 
 ## 🔔 Notifications
 
+Configure dans `secrets.js` :
+
 ```javascript
+// Telegram
 const TELEGRAM_BOT_TOKEN = '123456789:AAF...';
 const TELEGRAM_CHAT_ID   = '987654321';
-const NTFY_TOPIC         = 'mon-topic-unique-123';
-const NTFY_SERVER        = 'https://ntfy.sh';
-const HA_NOTIFY_SERVICE  = 'notify.mobile_app_mon_telephone';
+
+// ntfy.sh (self-hosted ou public)
+const NTFY_TOPIC  = 'mon-topic-unique-123';
+const NTFY_SERVER = 'https://ntfy.sh';
+
+// HA Companion App
+const HA_NOTIFY_SERVICE = 'notify.mobile_app_mon_pixel';
 ```
 
 ### Événements notifiés
 - ✅ Import EDF résolu (les ASIC ont démarré)
 - ⬇️ ASIC prioritaire (S19, S21, S23) éteint
 - 🔨 Ferme ASIC éteinte (soir)
-- 📊 **Bilan quotidien à 20h** : pic ASICs, heures de minage, revenus, coût EDF net
+- 📊 **Bilan quotidien à 20h** : production solaire, heures de minage, revenus, coût EDF net
 
 ---
+
 
 ## 🤝 Contribution
 
