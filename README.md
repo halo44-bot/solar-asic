@@ -10,7 +10,7 @@
 
 En **bear market**, le cours des cryptomonnaies chute. Miner devient déficitaire : les revenus de minage ne couvrent plus le coût de l'électricité. La solution : **utiliser une installation solaire** pour alimenter les ASIC.
 
-> **Logique simple** : si le soleil produit de l'énergie excédentaire, autant la transformer en cryptomonnaies plutôt que de l'injecter dans le réseau à 4 centimes le kWh.
+> **Logique simple** : si le soleil produit de l'énergie excédentaire, autant la transformer en cryptomonnaies plutôt que de l'injecter dans le réseau à 4 centimes d'euro le kWh.
 
 Avec ce projet :
 - ⛏️ Tes ASIC tournent **quand il y a du soleil** — coût électricité = 0€
@@ -29,15 +29,15 @@ Avec ce projet :
 
 ### Automatisation intelligente
 - 🌅 **Matin** : Allume tous les petits ASIC disponibles dès 120W de surplus
-- ☀️ **Plein soleil** : Bascule sur l'Antminer S19 (3400W) quand surplus ≥ 3550W
-- ☁️ **Nuage** : Éteint le S19 si surplus < 3200W pendant 5 min, relance les petits
+- ☀️ **Plein soleil** : Bascule sur l'asic prioritaire (3400W) quand surplus ≥ 3550W
+- ☁️ **Nuage** : Éteint l'asic prioritaire si surplus < 3200W pendant 5 min, relance les petits
 - 🌇 **Soir** : Extinction progressive par lots jusqu'au dernier ASIC (≥ 120W)
 - ⏱️ **Tempo anti-rebond** : 5 min de stabilité avant chaque action
 
 ### Revenus de minage
 - Support **F2Pool** (BTC, ALPH, KAS, LTC et autres)
-- Support **Antpool** (KDA via HMAC-SHA256)
-- Support **K1Pool** (RXD)
+- Support **Antpool** (KDA, BTC, ALPH, KAS, LTC et autres via HMAC-SHA256)
+- Support **K1Pool** (RXD, BTC, ALPH, KAS, ETC et autres)
 - Prix en EUR via **CoinGecko**
 - Hashrate, workers actifs, solde non payé
 
@@ -56,7 +56,6 @@ Avec ce projet :
 - 🌍 **4 langues** : Français, English, Deutsch, Español
 - 🌙 **Mode sombre/clair** (mémorisé)
 - 📱 **Responsive** : PC, tablette, Android/iOS
-- 🎨 **Bannière dynamique** depuis un JSON externe (GitHub)
 
 ---
 
@@ -70,7 +69,7 @@ Avec ce projet :
 | **Switches Tuya/WiFi** (Tasmota, ESPHome…) | Contrôle ON/OFF des ASIC |
 | **ASIC IceRiver** (AL0, KS0, RX0 — 100W) | Petits mineurs |
 | **Goldshell AL Box / KD Box** (360-480W) | Mineurs intermédiaires |
-| **Antminer S19** (3400W) | Gros mineur prioritaire soleil fort |
+| **Antminer S19 / S21 / S23** (3400W) | Gros mineur prioritaire soleil fort |
 
 > ⚠️ Le matériel exact n'est pas obligatoire. Tout ASIC contrôlable par un switch HA fonctionne. Le dashboard s'adapte via `secrets.js` et `configuration.yaml`.
 
@@ -86,11 +85,11 @@ solar-asic/
 ├── configuration.example.yaml   # Template HA → adapter dans configuration.yaml
 ├── automation_asic.example.yaml # Automation HA → adapter dans automations.yaml
 ├── scripts/
-│   ├── antpool_kda.py           # Script API Antpool (balance KDA)
-│   └── antpool_kda_overview.py  # Script API Antpool (hashrate + workers KDA)
+│   ├── antpool_kda.py           # Script API Antpool (balance KDA, marche avec toutes les crypto de Antpool)
+│   └── antpool_kda_overview.py  # Script API Antpool (hashrate + workers KDA, marche avec toutes les crypto de Antpool)
 ├── docs/
 │   └── MANUEL.pdf               # Manuel d'installation complet (PDF)
-├── .gitignore                   # Exclut secrets.js, banner.json...
+├── .gitignore                   # Exclut secrets.js, ...
 └── README.md                    # Ce fichier
 ```
 
@@ -110,7 +109,7 @@ mkdir -p /config/scripts
 # Copie le dashboard
 cp dashboard_mining.html /config/www/
 
-# Copie les scripts Antpool (si tu mines KDA)
+# Copie les scripts Antpool (si tu mines sur Antpool)
 cp scripts/antpool_kda.py /config/scripts/
 cp scripts/antpool_kda_overview.py /config/scripts/
 chmod +x /config/scripts/antpool_kda*.py
@@ -142,8 +141,8 @@ Copie le contenu de `configuration.example.yaml` dans `/config/configuration.yam
 ### Étape 4 — Créer les helpers input_datetime
 
 Dans HA : **Paramètres → Appareils et services → Helpers → + Créer → Date et heure** :
-- `s19_surplus_depuis`
-- `s19_deficit_depuis`
+- `asic_prioritaire_surplus_depuis`
+- `asic_prioritaire_deficit_depuis`
 - `petits_deficit_depuis`
 
 ### Étape 5 — Ajouter l'automation
@@ -227,23 +226,12 @@ const HA_NOTIFY_SERVICE = 'notify.mobile_app_mon_pixel';
 
 ### Événements notifiés
 - ✅ Import EDF résolu (les ASIC ont démarré)
-- ⬇️ ASIC prioritaire (S19) éteint
+- ⬇️ ASIC prioritaire (S19, S21, S23) éteint
 - 🔨 Ferme ASIC éteinte (soir)
 - 📊 **Bilan quotidien à 20h** : production solaire, heures de minage, revenus, coût EDF net
 
 ---
 
-## 🎨 Bannière personnalisée
-
-Pour afficher une bannière promotionnelle rotative :
-
-1. Crée un fichier `banner.json` (basé sur `banner.example.json`)
-2. Héberge-le sur GitHub Raw ou dans `/config/www/`
-3. Dans `secrets.js` : `const BANNER_JSON_URL = 'https://raw.githubusercontent.com/TON_USER/TON_REPO/main/banner.json';`
-
-La bannière supporte les 4 langues, images par langue, et lien cliquable.
-
----
 
 ## 🤝 Contribution
 
