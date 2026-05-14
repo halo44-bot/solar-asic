@@ -14,7 +14,8 @@ const HA_TOKEN     = 'COLLE_TON_TOKEN_HA_ICI';        // Profil HA → Tokens lo
 
 // ── Pools de minage ───────────────────────────────────────────
 // Nom d'utilisateur F2Pool (laisser '' si non utilisé)
-const F2POOL_USER = '';
+const F2POOL_API_TOKEN = 'COLLE_TON_TOKEN_F2POOL_ICI';
+const F2POOL_USER      = 'USER_ID';
 
 // Cryptos minées — décommenter celles que tu mines
 const MINING_COINS = [
@@ -40,7 +41,7 @@ const NTFY_TOPIC         = '';   // ex: 'mon-topic-unique-solar-asic'
 const NTFY_SERVER        = 'https://ntfy.sh';
 const HA_NOTIFY_SERVICE  = '';   // ex: 'notify.mobile_app_mon_telephone'
 
-// ── Bannière distante (optionnel) ─────────────────────────────
-// URL vers un banner.json sur ton propre GitHub/serveur
-// Laisser '' pour désactiver
-const BANNER_JSON_URL = '';
+// ── K1Pool (RXD) ─────────────────────────────────────────────
+// Pas de token — l'adresse wallet suffit
+// Remplacer par ton adresse Radiant dans configuration.yaml → TON_WALLET_RXD
+const K1POOL_RXD_WALLET = 'WALLET';

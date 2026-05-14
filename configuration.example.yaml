@@ -435,7 +435,7 @@ template:
           {% set d = state_attr('sensor.antpool_kda_raw','data') %}
           {{ d.earn24Hours | float(0) if d else 0 }}
 
-      # Extraction des workers actifs de la nouvelle API de Claude
+      # Extraction des workers actifs
       - name: "antpool_kda_workers"
         unique_id: "antpool_kda_workers"
         state: >

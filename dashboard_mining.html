@@ -2509,12 +2509,9 @@ async function loadYearStats(){
   try{ localStorage.setItem('mining_monthly_stats', JSON.stringify(monthly)); }catch(e){}
 }
 
-
-// ── BANNIERE CAROUSEL PILOTEE A DISTANCE ──
 let bannerData=[], bannerIdx=0, bannerTimer=null;
 
 function getLangVal(val, fallback=''){
-  // Supporte les strings simples ET les objets {fr:'...', en:'...', de:'...', es:'...'}
   if(!val) return fallback;
   if(typeof val === 'string') return val;
   if(typeof val === 'object'){
@@ -2530,7 +2527,7 @@ function buildSlide(b){
   const titre  = getLangVal(b.titre,  '');
   const texte  = getLangVal(b.texte,  '');
   const bouton = getLangVal(b.bouton, t('banner_btn') || 'En savoir plus');
-  const image  = getLangVal(b.image,  ''); // supporte string ET objet {fr, en, de, es}
+  const image  = getLangVal(b.image,  ''); 
   let html = '';
   if(image && image !== ''){
     html += `<a href="${b.url||'#'}" target="_blank" class="banner-img-wrap">
@@ -2585,7 +2582,6 @@ async function loadBanner(){
     slidesDiv.innerHTML = '';
     dotsDiv.innerHTML = '';
 
-    // Build slides
     bannerData.forEach((ban, i) => {
       const slide = buildSlide(ban);
       slidesDiv.appendChild(slide);
@@ -2596,13 +2592,11 @@ async function loadBanner(){
       dotsDiv.appendChild(dot);
     });
 
-    // Show nav only if multiple banners
     if(bannerData.length > 1){
       dotsDiv.style.display = 'flex';
       arrowsDiv.style.display = 'flex';
       document.getElementById('banner-prev').onclick = () => { prevSlide(); resetTimer(); };
       document.getElementById('banner-next').onclick = () => { nextSlide(); resetTimer(); };
-      // Auto-rotate every 5 seconds
       function resetTimer(){
         if(bannerTimer) clearInterval(bannerTimer);
         bannerTimer = setInterval(nextSlide, 5000);
