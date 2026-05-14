@@ -9,7 +9,7 @@
 
 **Un panel HTML independiente** que conecta tu instalación solar a tu granja de minería ASIC a través de Home Assistant. Diseñado para maximizar el uso del excedente solar y **minar criptomonedas gratis** — sin tocar la red eléctrica nacional.
 
-![Solar ASIC Dashboard](docs/screenshot.png)
+![Solar ASIC Dashboard](docs/dashboard_ES.png)
 
 ---
 
@@ -63,6 +63,15 @@ Con este proyecto:
 - 🌍 **4 idiomas**: Français, English, Deutsch, Español
 - 🌙 **Modo oscuro/claro** (recordado)
 - 📱 **Responsive**: PC, tableta, Android/iOS
+
+
+### 🌙 Modo oscuro / Modo claro
+
+![Theme sombre et clair](docs/theme_sombre_clair.png)
+
+### 📱 Notificaciones Telegram
+
+![Notifications Telegram](docs/notification.png)
 
 ---
 

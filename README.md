@@ -9,7 +9,7 @@
 
 **Un dashboard HTML standalone** qui connecte votre installation solaire à votre ferme de minage ASIC via Home Assistant. Conçu pour maximiser l'utilisation du surplus solaire et **miner des cryptomonnaies gratuitement** — sans toucher au réseau national d'électricité.
 
-![Solar ASIC Dashboard](docs/screenshot.png)
+![Solar ASIC Dashboard](docs/dashboard_FR.png)
 
 ---
 
@@ -63,6 +63,15 @@ Avec ce projet :
 - 🌍 **4 langues** : Français, English, Deutsch, Español
 - 🌙 **Mode sombre/clair** (mémorisé)
 - 📱 **Responsive** : PC, tablette, Android/iOS
+
+
+### 🌙 Mode sombre / Mode clair
+
+![Theme sombre et clair](docs/theme_sombre_clair.png)
+
+### 📱 Notifications Telegram
+
+![Notifications Telegram](docs/notification.png)
 
 ---
 
