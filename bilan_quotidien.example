@@ -1,0 +1,87 @@
+alias: Bilan Solar ASIC - Quotidien 20h
+description: >-
+  Envoie le bilan quotidien à 20h via Telegram + ntfy + HA Companion.
+  Utilise les sensors history_stats (24/7) → durées ASIC fiables.
+  Adaptez les entity_id et les credentials à votre installation.
+
+triggers:
+  - trigger: time
+    at: "20:00:00"
+
+conditions: []
+
+actions:
+  - variables:
+      # ── Énergie (depuis vos sensors CT) ──────────────────────
+      # Adaptez les noms de sensors à votre compteur (Refoss EM06, Shelly 3EM, etc.)
+      import_kwh: >-
+        {{ states('sensor.em06_channel_1_today_energy') | float(0)
+         + states('sensor.em06_channel_2_today_energy') | float(0)
+         + states('sensor.em06_channel_3_today_energy') | float(0) }}
+      inject_kwh: >-
+        {{ states('sensor.em06_channel_1_today_return_energy') | float(0)
+         + states('sensor.em06_channel_2_today_return_energy') | float(0)
+         + states('sensor.em06_channel_3_today_return_energy') | float(0) }}
+      conso_asic_kwh: >-
+        {{ states('sensor.em06_channel_4_today_energy') | float(0)
+         + states('sensor.em06_channel_5_today_energy') | float(0)
+         + states('sensor.em06_channel_6_today_energy') | float(0) }}
+      solaire_kwh: >-
+        {{ conso_asic_kwh + inject_kwh - import_kwh }}
+      # ── Durées ASIC (history_stats) ──────────────────────────
+      minage_heures: "{{ states('sensor.asic_minage_actif_heures_jour') | float(0) }}"
+      big_1_heures: "{{ states('sensor.asic_big_1_heures_jour') | float(0) }}"
+      # ── Revenus ──────────────────────────────────────────────
+      rev_hier: "{{ states('sensor.mining_revenue_yesterday_eur') | float(0) }}"
+      cout_edf: "{{ (import_kwh * 0.20) | round(2) }}"
+      net: "{{ (rev_hier - (import_kwh * 0.20)) | round(2) }}"
+
+  - variables:
+      message: >-
+        📊 Bilan du jour:
+
+
+        ☀️ Solaire produit: {{ solaire_kwh | round(1) }} kWh
+
+        ⛏️ Conso ASIC: {{ conso_asic_kwh | round(1) }} kWh
+
+        📥 Import EDF: {{ import_kwh | round(1) }} kWh ({{ cout_edf }} €)
+
+        📤 Injection EDF: {{ inject_kwh | round(1) }} kWh
+
+
+        🕐 Durée minage: {{ minage_heures | round(1) }} h
+
+        🚀 Big ASIC: {{ big_1_heures | round(1) }} h
+
+
+        💰 Revenus minage (hier J-1): {{ rev_hier | round(2) }} €
+
+        📈 Net (revenus − coût EDF): {{ '+' if net >= 0 else '' }}{{ net }} €
+
+  # ── 1. Telegram ──────────────────────────────────────────────
+  # Remplacez par votre bot token et chat_id
+  - action: rest_command.telegram_notify
+    data:
+      token: "VOTRE_BOT_TOKEN"
+      chat_id: "VOTRE_CHAT_ID"
+      message: "☀️ Bilan Solar ASIC\n\n{{ message }}"
+
+  # ── 2. ntfy ──────────────────────────────────────────────────
+  - action: rest_command.ntfy_notify
+    data:
+      title: "☀️ Bilan Solar ASIC"
+      message: "{{ message }}"
+      priority: "default"
+      tags: "chart_increasing,solar_energy"
+
+  # ── 3. HA Companion ─────────────────────────────────────────
+  # Remplacez par votre service de notification mobile
+  - action: notify.mobile_app_votre_telephone
+    data:
+      title: "☀️ Bilan Solar ASIC"
+      message: "{{ message }}"
+      data:
+        notification_icon: mdi:solar-power
+
+mode: single
