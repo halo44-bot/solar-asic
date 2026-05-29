@@ -1,3 +1,11 @@
+# ═══════════════════════════════════════════════════════════════
+# CONFIGURATION.YAML — Solar ASIC Dashboard
+# Home Assistant configuration for solar-powered ASIC mining
+#
+# ⚠️ ADAPTEZ LES ENTITY_IDs À VOS PROPRES APPAREILS
+#    Les noms ci-dessous sont des EXEMPLES.
+# ═══════════════════════════════════════════════════════════════
+
 # Loads default set of integrations. Do not remove.
 default_config:
 
@@ -9,16 +17,16 @@ script: !include scripts.yaml
 scene: !include scenes.yaml
 
 # ── HTTP (CORS pour le dashboard) ─────────────────────────────
+# Ajoutez les URLs depuis lesquelles vous accédez au dashboard
 http:
   cors_allowed_origins:
-    - http://192.168.1.X
+    - http://192.168.1.XX         # ← Votre IP locale HA
     - http://homeassistant.local
     - http://localhost
-    - http://100.X.X.X
 
 # ── OPTIMISATIONS ─────────────────────────────────────────────
 recorder:
-  purge_keep_days: 31
+  purge_keep_days: 31             # Historique 1 mois (nécessaire pour les graphiques)
   commit_interval: 60
   exclude:
     domains:
@@ -39,7 +47,7 @@ recorder:
 logger:
   default: warning
 
-# ── REST COMMANDS ─────────────────────────────────────────────
+# ── REST COMMANDS (ntfy + Telegram depuis HA) ─────────────────
 rest_command:
   ntfy_notify:
     url: "https://ntfy.sh/{{ states('input_text.ntfy_topic') }}"
@@ -63,44 +71,57 @@ rest_command:
 input_text:
   ntfy_topic:
     name: "Topic ntfy"
-    initial: "solarasic-halo44"
+    initial: "mon-topic-solar-asic"  # ← Changez ce topic (doit être unique)
     max: 100
 
-# ── COMMAND LINE SENSORS — F2Pool Legacy V1 (UN seul appel par crypto) ──
+# ═══════════════════════════════════════════════════════════════
+# COMMAND LINE SENSORS — Données des pools de minage
+# ═══════════════════════════════════════════════════════════════
+# Adaptez les URLs, tokens et wallets à vos propres comptes.
+# Chaque sensor fait 1 appel API toutes les 5 min (scan_interval: 300).
+#
+# POOLS SUPPORTÉS :
+#   - F2Pool  (BTC, ALPH, KAS, LTC, RXD, etc.)
+#   - Antpool (KDA)
+#   - K1Pool  (RXD)
+# ═══════════════════════════════════════════════════════════════
 command_line:
+  # ── F2Pool — Bitcoin ─────────────────────────────────────────
+  # API Legacy V1 : https://api.f2pool.com/{coin}/{username}
+  # Token API dans le header F2P-API-SECRET
   - sensor:
       name: "f2pool_btc_raw"
       scan_interval: 300
       unit_of_measurement: "BTC"
-      command: "curl -s -H 'F2P-API-SECRET: 58b08xjbrrjqrkerlahddvgkz23xpudverok2tymsoe2exib5xawslicwvwbddg5' https://api.f2pool.com/bitcoin/halo44"
+      command: "curl -s -H 'F2P-API-SECRET: VOTRE_TOKEN_F2POOL' https://api.f2pool.com/bitcoin/VOTRE_USERNAME"
       value_template: "{{ value_json.balance | default(0) }}"
       json_attributes:
         - hashrate
         - worker_length_online
         - value_last_day
         - value_today
-        - today_est_base
       command_timeout: 15
 
+  # ── F2Pool — Alephium ────────────────────────────────────────
   - sensor:
       name: "f2pool_alph_raw"
       scan_interval: 300
       unit_of_measurement: "ALPH"
-      command: "curl -s -H 'F2P-API-SECRET: 58b08xjbrrjqrkerlahddvgkz23xpudverok2tymsoe2exib5xawslicwvwbddg5' https://api.f2pool.com/alephium/halo44"
+      command: "curl -s -H 'F2P-API-SECRET: VOTRE_TOKEN_F2POOL' https://api.f2pool.com/alephium/VOTRE_USERNAME"
       value_template: "{{ value_json.balance | default(0) }}"
       json_attributes:
         - hashrate
         - worker_length_online
         - value_last_day
         - value_today
-        - today_est_base
       command_timeout: 15
 
+  # ── F2Pool — Kaspa ───────────────────────────────────────────
   - sensor:
       name: "f2pool_kas_raw"
       scan_interval: 300
       unit_of_measurement: "KAS"
-      command: "curl -s -H 'F2P-API-SECRET: 58b08xjbrrjqrkerlahddvgkz23xpudverok2tymsoe2exib5xawslicwvwbddg5' https://api.f2pool.com/kaspa/halo44"
+      command: "curl -s -H 'F2P-API-SECRET: VOTRE_TOKEN_F2POOL' https://api.f2pool.com/kaspa/VOTRE_USERNAME"
       value_template: "{{ value_json.balance | default(0) }}"
       json_attributes:
         - hashrate
@@ -109,11 +130,12 @@ command_line:
         - value_today
       command_timeout: 15
 
+  # ── F2Pool — Litecoin ────────────────────────────────────────
   - sensor:
       name: "f2pool_ltc_raw"
       scan_interval: 300
       unit_of_measurement: "LTC"
-      command: "curl -s -H 'F2P-API-SECRET: 58b08xjbrrjqrkerlahddvgkz23xpudverok2tymsoe2exib5xawslicwvwbddg5' https://api.f2pool.com/litecoin/halo44"
+      command: "curl -s -H 'F2P-API-SECRET: VOTRE_TOKEN_F2POOL' https://api.f2pool.com/litecoin/VOTRE_USERNAME"
       value_template: "{{ value_json.balance | default(0) }}"
       json_attributes:
         - hashrate
@@ -122,7 +144,9 @@ command_line:
         - value_today
       command_timeout: 15
 
-  # Antpool KDA — Données Financières (Ton sensor existant)
+  # ── Antpool — Kadena (optionnel) ─────────────────────────────
+  # Nécessite un script Python pour signer les requêtes HMAC
+  # Voir antpool_kda_overview.py dans le dossier scripts/
   - sensor:
       name: "antpool_kda_raw"
       scan_interval: 300
@@ -132,7 +156,7 @@ command_line:
         import hmac, hashlib, time, json;
         from urllib.request import urlopen, Request;
         from urllib.parse import urlencode;
-        u='TON_USER_ID'; k='TA_CLE_API_32_CHARS_HEX'; s='TON_API_SECRET_32_CHARS_HEX';
+        u='VOTRE_USER_ID'; k='VOTRE_API_KEY'; s='VOTRE_SECRET';
         n=str(int(time.time()*1000));
         sig=hmac.new(s.encode(),(u+k+n).encode(),hashlib.sha256).hexdigest().upper();
         body=urlencode({'userId':u,'key':k,'coin':'KDA','nonce':n,'signature':sig}).encode();
@@ -144,24 +168,12 @@ command_line:
         - data
       command_timeout: 20
 
-  # Antpool KDA Overview — Hashrate & Workers via accountOverview.htm
-  # Le script Python est dans /config/scripts/antpool_kda_overview.py
-  # (à copier depuis le fichier antpool_kda_overview.py fourni)
-  - sensor:
-      name: "antpool_kda_overview_raw"
-      scan_interval: 300
-      command: "python3 /config/scripts/antpool_kda_overview.py"
-      value_template: "{{ value_json.data.userId | default('TON_USER_ID') }}"
-      json_attributes:
-        - data
-        - _error
-      command_timeout: 25
-
+  # ── K1Pool — Radiant (optionnel) ─────────────────────────────
   - sensor:
       name: "k1pool_rxd_raw"
       scan_interval: 300
       unit_of_measurement: "RXD"
-      command: "curl -s https://k1pool.com/api/miner/rxd/TON_ADRESSE_WALLET_RXD"
+      command: "curl -s https://k1pool.com/api/miner/rxd/VOTRE_WALLET_RXD"
       value_template: >
         {% set m = value_json.miner %}
         {{ m.pendingBalance | float(0) if m else 0 }}
@@ -170,20 +182,33 @@ command_line:
       command_timeout: 15
 
 
-# ── SOLAR ASIC TEMPLATES ──────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════
+# TEMPLATE SENSORS — Calculs solaire, réseau, ASIC
+# ═══════════════════════════════════════════════════════════════
+# ⚠️ ADAPTEZ les entity_id des CT sensors et des switches ASIC
+#    à votre propre installation.
+#
+# Architecture des CT (pinces ampèremétriques) :
+#   CT 1,2,3 = Réseau EDF (avant onduleur, signé: + = import, - = injection)
+#   CT 4,5,6 = Ferme de minage (sortie onduleur, toujours positif)
+#
+# Exemple avec un Refoss EM06P (6 canaux) :
+#   sensor.em06_channel_X_power → puissance instantanée canal X
+# ═══════════════════════════════════════════════════════════════
 template:
   - sensor:
 
-      # ── RÉSEAU EDF (CT 1,2,3 — avant onduleur) ──────────────
+      # ── RÉSEAU EDF (CT 1,2,3) ───────────────────────────────
+      # Somme des 3 phases. Positif = import, négatif = injection.
       - name: "reseau_total"
         unique_id: "reseau_total"
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         state: >
-          {% set p1 = states('sensor.refoss_smart_energy_monitor_em_channel_1_power') | float(0) %}
-          {% set p2 = states('sensor.refoss_smart_energy_monitor_em_channel_2_power') | float(0) %}
-          {% set p3 = states('sensor.refoss_smart_energy_monitor_em_channel_3_power') | float(0) %}
+          {% set p1 = states('sensor.em06_channel_1_power') | float(0) %}
+          {% set p2 = states('sensor.em06_channel_2_power') | float(0) %}
+          {% set p3 = states('sensor.em06_channel_3_power') | float(0) %}
           {{ (p1 + p2 + p3) | round(1) }}
 
       - name: "consommation_reseau"
@@ -212,16 +237,16 @@ template:
         state: >
           {{ states('sensor.injection_reseau') | float(0) }}
 
-      # ── FERME DE MINAGE (CT 4,5,6 — sortie onduleur) ────────
+      # ── FERME DE MINAGE (CT 4,5,6) ──────────────────────────
       - name: "consommation_ferme"
         unique_id: "consommation_ferme"
         unit_of_measurement: "W"
         device_class: power
         state_class: measurement
         state: >
-          {% set p4 = states('sensor.refoss_smart_energy_monitor_em_channel_4_power') | float(0) %}
-          {% set p5 = states('sensor.refoss_smart_energy_monitor_em_channel_5_power') | float(0) %}
-          {% set p6 = states('sensor.refoss_smart_energy_monitor_em_channel_6_power') | float(0) %}
+          {% set p4 = states('sensor.em06_channel_4_power') | float(0) %}
+          {% set p5 = states('sensor.em06_channel_5_power') | float(0) %}
+          {% set p6 = states('sensor.em06_channel_6_power') | float(0) %}
           {{ [p4 + p5 + p6, 0] | max | round(1) }}
 
       - name: "production_solaire"
@@ -245,30 +270,21 @@ template:
           {% set asic   = states('sensor.asic_puissance_estimee') | float(0) %}
           {{ [grid + inject - asic, 0] | max | round(0) }}
 
-      # ── COMPTAGE ASIC ────────────────────────────────────────
+      # ═══════════════════════════════════════════════════════════
+      # COMPTAGE ASIC — Adaptez cette liste à VOS switches
+      # ═══════════════════════════════════════════════════════════
+      # Exemple avec 5 ASIC : 3× petits (100W), 1× moyen (360W), 1× gros (3400W)
+      # Remplacez les entity_id par ceux de votre installation.
       - name: "asic_allumes_count"
         unique_id: "asic_allumes_count"
         unit_of_measurement: "ASIC"
         state: >
           {{ expand(
-            'switch.iceriver_al0_1_socket_1',
-            'switch.iceriver_al0_2_switch_1',
-            'switch.iceriver_al0_3_switch_1',
-            'switch.iceriver_al0_4_switch_1',
-            'switch.iceriver_al0_5_switch_1',
-            'switch.iceriver_al0_6_switch_1',
-            'switch.iceriver_al0_7_switch_1',
-            'switch.iceriver_al0_8_switch_1',
-            'switch.iceriver_al0_9_switch_1',
-            'switch.iceriver_al0_11_switch_1',
-            'switch.iceriver_al0_12_switch_1',
-            'switch.iceriver_al0_13_switch_1',
-            'switch.iceriver_ks0_switch_1',
-            'switch.iceriver_rx0_1_switch_1',
-            'switch.iceriver_rx0_2_switch_1',
-            'switch.goldshell_al_box_ii_switch_1',
-            'switch.goldshell_kd_box_ii_switch_1',
-            'switch.antminer_s19_switch'
+            'switch.asic_small_1',
+            'switch.asic_small_2',
+            'switch.asic_small_3',
+            'switch.asic_medium_1',
+            'switch.asic_big_1'
           ) | selectattr('state','eq','on') | list | count }}
 
       - name: "asic_puissance_estimee"
@@ -279,24 +295,11 @@ template:
         state: >
           {% set on = namespace(total=0) %}
           {% set asics = [
-            ('switch.iceriver_al0_1_socket_1',           100),
-            ('switch.iceriver_al0_2_switch_1',           100),
-            ('switch.iceriver_al0_3_switch_1',           100),
-            ('switch.iceriver_al0_4_switch_1',           100),
-            ('switch.iceriver_al0_5_switch_1',           100),
-            ('switch.iceriver_al0_6_switch_1',           100),
-            ('switch.iceriver_al0_7_switch_1',           100),
-            ('switch.iceriver_al0_8_switch_1',           100),
-            ('switch.iceriver_al0_9_switch_1',           100),
-            ('switch.iceriver_al0_11_switch_1',          100),
-            ('switch.iceriver_al0_12_switch_1',          100),
-            ('switch.iceriver_al0_13_switch_1',          100),
-            ('switch.iceriver_ks0_switch_1',             100),
-            ('switch.iceriver_rx0_1_switch_1',           100),
-            ('switch.iceriver_rx0_2_switch_1',           100),
-            ('switch.goldshell_al_box_ii_switch_1',      480),
-            ('switch.goldshell_kd_box_ii_switch_1',      360),
-            ('switch.antminer_s19_switch',              3400)
+            ('switch.asic_small_1',  100),
+            ('switch.asic_small_2',  100),
+            ('switch.asic_small_3',  100),
+            ('switch.asic_medium_1', 360),
+            ('switch.asic_big_1',   3400)
           ] %}
           {% for sw, w in asics %}
             {% if is_state(sw, 'on') %}
@@ -310,24 +313,11 @@ template:
         state: >
           {% set ns = namespace(found='Aucun') %}
           {% set order = [
-            ['AL0 1',        'switch.iceriver_al0_1_socket_1'],
-            ['AL0 2',        'switch.iceriver_al0_2_switch_1'],
-            ['AL0 3',        'switch.iceriver_al0_3_switch_1'],
-            ['AL0 4',        'switch.iceriver_al0_4_switch_1'],
-            ['AL0 5',        'switch.iceriver_al0_5_switch_1'],
-            ['AL0 6',        'switch.iceriver_al0_6_switch_1'],
-            ['AL0 7',        'switch.iceriver_al0_7_switch_1'],
-            ['AL0 8',        'switch.iceriver_al0_8_switch_1'],
-            ['AL0 9',        'switch.iceriver_al0_9_switch_1'],
-            ['AL0 11',       'switch.iceriver_al0_11_switch_1'],
-            ['AL0 12',       'switch.iceriver_al0_12_switch_1'],
-            ['AL0 13',       'switch.iceriver_al0_13_switch_1'],
-            ['KS0',          'switch.iceriver_ks0_switch_1'],
-            ['RX0 1',        'switch.iceriver_rx0_1_switch_1'],
-            ['RX0 2',        'switch.iceriver_rx0_2_switch_1'],
-            ['Goldshell AL', 'switch.goldshell_al_box_ii_switch_1'],
-            ['Goldshell KD', 'switch.goldshell_kd_box_ii_switch_1'],
-            ['S19',          'switch.antminer_s19_switch']
+            ['Small 1',  'switch.asic_small_1'],
+            ['Small 2',  'switch.asic_small_2'],
+            ['Small 3',  'switch.asic_small_3'],
+            ['Medium 1', 'switch.asic_medium_1'],
+            ['Big 1',    'switch.asic_big_1']
           ] %}
           {% for name, sw in order %}
             {% if ns.found == 'Aucun' and is_state(sw, 'off') %}
@@ -336,7 +326,9 @@ template:
           {% endfor %}
           {{ ns.found }}
 
-      # ── F2POOL REVENUS ───────────────────────────────────────
+      # ═══════════════════════════════════════════════════════════
+      # REVENUS F2POOL — Sensors dérivés des command_line raw
+      # ═══════════════════════════════════════════════════════════
       - name: "f2pool_btc_day"
         unique_id: "f2pool_btc_day"
         unit_of_measurement: "BTC"
@@ -413,7 +405,7 @@ template:
         unique_id: "f2pool_ltc_workers"
         state: "{{ state_attr('sensor.f2pool_ltc_raw','worker_length_online') | int(0) }}"
 
-      # ── ANTPOOL KDA ──────────────────────────────────────────
+      # ── Antpool KDA (optionnel) ──────────────────────────────
       - name: "antpool_kda_unpaid"
         unique_id: "antpool_kda_unpaid"
         unit_of_measurement: "KDA"
@@ -435,48 +427,7 @@ template:
           {% set d = state_attr('sensor.antpool_kda_raw','data') %}
           {{ d.earn24Hours | float(0) if d else 0 }}
 
-      # Extraction des workers actifs
-      - name: "antpool_kda_workers"
-        unique_id: "antpool_kda_workers"
-        state: >
-          {% set d = state_attr('sensor.antpool_kda_overview_raw','data') %}
-          {{ d.activeWorkerNum | int(0) if d else 0 }}
-
-      # Hashrate 10 min (Converti en TH/s pour le S19)
-      - name: "antpool_kda_hashrate"
-        unique_id: "antpool_kda_hashrate"
-        unit_of_measurement: "TH/s"
-        state: >
-          {% set d = state_attr('sensor.antpool_kda_overview_raw','data') %}
-          {% set hr = d.hsLast10m | float(0) if d else 0 %}
-          {{ (hr / 1e12) | round(2) }}
-
-      # Hashrate 24h (Moyenne journalière)
-      - name: "antpool_kda_hashrate_24h"
-        unique_id: "antpool_kda_hashrate_24h"
-        unit_of_measurement: "TH/s"
-        state: >
-          {% set d = state_attr('sensor.antpool_kda_overview_raw','data') %}
-          {% set hr = d.hsLast1d | float(0) if d else 0 %}
-          {{ (hr / 1e12) | round(2) }}
-
-      # 🟢 ALIAS POUR TON DASHBOARD (Élimine définitivement les erreurs 404)
-      - name: "antpool_kda_hashrate_10m"
-        unique_id: "antpool_kda_hashrate_10m_alias"
-        unit_of_measurement: "TH/s"
-        state: "{{ states('sensor.antpool_kda_hashrate') }}"
-
-      - name: "antpool_kda_hashrate10m"
-        unique_id: "antpool_kda_hashrate10m_alias"
-        unit_of_measurement: "TH/s"
-        state: "{{ states('sensor.antpool_kda_hashrate') }}"
-
-      - name: "antpool_kda_hr"
-        unique_id: "antpool_kda_hr_alias"
-        unit_of_measurement: "TH/s"
-        state: "{{ states('sensor.antpool_kda_hashrate') }}"
-
-      # ── K1POOL RXD ───────────────────────────────────────────
+      # ── K1Pool RXD (optionnel) ───────────────────────────────
       - name: "f2pool_rxd_day"
         unique_id: "f2pool_rxd_day"
         unit_of_measurement: "RXD"
@@ -489,12 +440,6 @@ template:
         unit_of_measurement: "RXD"
         state: "{{ states('sensor.k1pool_rxd_raw') | float(0) }}"
 
-      - name: "f2pool_rxd_workers"
-        unique_id: "f2pool_rxd_workers"
-        state: >
-          {% set m = state_attr('sensor.k1pool_rxd_raw','miner') %}
-          {{ m.workersOnline | int(0) if m else 0 }}
-
       - name: "f2pool_rxd_yesterday"
         unique_id: "f2pool_rxd_yesterday"
         unit_of_measurement: "RXD"
@@ -505,3 +450,204 @@ template:
           {% else %}
             0
           {% endif %}
+
+      # ═══════════════════════════════════════════════════════════
+      # ASIC PRIORITAIRES — Source of truth
+      # ═══════════════════════════════════════════════════════════
+      # Modifiez cette liste pour définir vos ASIC prioritaires.
+      # Ordre = ordre de démarrage (FIFO). Arrêt = inverse (LIFO).
+      #
+      # Exemple avec 1 gros ASIC prioritaire (Antminer S19) :
+      - name: "asic_prio_config"
+        unique_id: "asic_prio_config"
+        state: "ok"
+        attributes:
+          asics: >-
+            {{ [
+              {'entity': 'switch.asic_big_1', 'power': 3400, 'name': 'Big ASIC #1'}
+            ] }}
+            {# Exemples avec plusieurs prioritaires :
+            {{ [
+              {'entity': 'switch.antminer_s19',   'power': 3450, 'name': 'S19'},
+              {'entity': 'switch.antminer_s21_1',  'power': 3500, 'name': 'S21 #1'},
+              {'entity': 'switch.antminer_s21_2',  'power': 3500, 'name': 'S21 #2'}
+            ] }}
+            #}
+
+      # ── Sensors dérivés (ne pas modifier) ────────────────────
+      - name: "asic_prio_power_needed"
+        unique_id: "asic_prio_power_needed"
+        unit_of_measurement: "W"
+        device_class: power
+        state: >-
+          {% set priorities = state_attr('sensor.asic_prio_config', 'asics') or [] %}
+          {% set ns = namespace(on_pow=0, next_pow=0) %}
+          {% for p in priorities %}
+            {% set st = states(p.entity) %}
+            {% if st == 'on' %}
+              {% set ns.on_pow = ns.on_pow + p.power %}
+            {% elif ns.next_pow == 0 and st not in ['unavailable', 'unknown'] %}
+              {% set ns.next_pow = p.power %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.on_pow + ns.next_pow }}
+
+      - name: "asic_prio_power_on"
+        unique_id: "asic_prio_power_on"
+        unit_of_measurement: "W"
+        device_class: power
+        state: >-
+          {% set priorities = state_attr('sensor.asic_prio_config', 'asics') or [] %}
+          {% set ns = namespace(t=0) %}
+          {% for p in priorities %}
+            {% if is_state(p.entity, 'on') %}
+              {% set ns.t = ns.t + p.power %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.t }}
+
+      - name: "asic_prio_next_entity"
+        unique_id: "asic_prio_next_entity"
+        state: >-
+          {% set priorities = state_attr('sensor.asic_prio_config', 'asics') or [] %}
+          {% set ns = namespace(result='none') %}
+          {% for p in priorities %}
+            {% set st = states(p.entity) %}
+            {% if ns.result == 'none' and st == 'off' %}
+              {% set ns.result = p.entity %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.result }}
+
+      - name: "asic_prio_last_entity"
+        unique_id: "asic_prio_last_entity"
+        state: >-
+          {% set priorities = state_attr('sensor.asic_prio_config', 'asics') or [] %}
+          {% set ns = namespace(result='none') %}
+          {% for p in priorities %}
+            {% if is_state(p.entity, 'on') %}
+              {% set ns.result = p.entity %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.result }}
+
+      - name: "asic_prio_count_on"
+        unique_id: "asic_prio_count_on"
+        state: >-
+          {% set priorities = state_attr('sensor.asic_prio_config', 'asics') or [] %}
+          {% set ns = namespace(c=0) %}
+          {% for p in priorities %}
+            {% if is_state(p.entity, 'on') %}{% set ns.c = ns.c + 1 %}{% endif %}
+          {% endfor %}
+          {{ ns.c }}
+
+      # ── Revenus minage en € (CoinGecko) ─────────────────────
+      - name: "mining_revenue_yesterday_eur"
+        unique_id: "mining_revenue_yesterday_eur"
+        unit_of_measurement: "EUR"
+        state: >-
+          {% set ns = namespace(total=0) %}
+          {% set prices = {
+            'btc':  (state_attr('sensor.crypto_prices_eur','bitcoin')  or {}).get('eur', 0),
+            'alph': (state_attr('sensor.crypto_prices_eur','alephium') or {}).get('eur', 0),
+            'kas':  (state_attr('sensor.crypto_prices_eur','kaspa')    or {}).get('eur', 0),
+            'rxd':  (state_attr('sensor.crypto_prices_eur','radiant')  or {}).get('eur', 0),
+            'ltc':  (state_attr('sensor.crypto_prices_eur','litecoin') or {}).get('eur', 0),
+            'kda':  (state_attr('sensor.crypto_prices_eur','kadena')   or {}).get('eur', 0)
+          } %}
+          {% set coins = [
+            ('sensor.f2pool_btc_yesterday',  prices.btc),
+            ('sensor.f2pool_alph_yesterday', prices.alph),
+            ('sensor.f2pool_kas_yesterday',  prices.kas),
+            ('sensor.f2pool_rxd_yesterday',  prices.rxd),
+            ('sensor.f2pool_ltc_yesterday',  prices.ltc),
+            ('sensor.antpool_kda_yesterday', prices.kda)
+          ] %}
+          {% for sensor_id, price in coins %}
+            {% set amount = states(sensor_id) | float(0) %}
+            {% set ns.total = ns.total + (amount * (price | float(0))) %}
+          {% endfor %}
+          {{ ns.total | round(2) }}
+
+      - name: "mining_revenue_today_eur"
+        unique_id: "mining_revenue_today_eur"
+        unit_of_measurement: "EUR"
+        state: >-
+          {% set ns = namespace(total=0) %}
+          {% set prices = {
+            'btc':  (state_attr('sensor.crypto_prices_eur','bitcoin')  or {}).get('eur', 0),
+            'alph': (state_attr('sensor.crypto_prices_eur','alephium') or {}).get('eur', 0),
+            'kas':  (state_attr('sensor.crypto_prices_eur','kaspa')    or {}).get('eur', 0),
+            'rxd':  (state_attr('sensor.crypto_prices_eur','radiant')  or {}).get('eur', 0),
+            'ltc':  (state_attr('sensor.crypto_prices_eur','litecoin') or {}).get('eur', 0),
+            'kda':  (state_attr('sensor.crypto_prices_eur','kadena')   or {}).get('eur', 0)
+          } %}
+          {% set coins = [
+            ('sensor.f2pool_btc_day',  prices.btc),
+            ('sensor.f2pool_alph_day', prices.alph),
+            ('sensor.f2pool_kas_day',  prices.kas),
+            ('sensor.f2pool_rxd_day',  prices.rxd),
+            ('sensor.f2pool_ltc_day',  prices.ltc),
+            ('sensor.antpool_kda_day', prices.kda)
+          ] %}
+          {% for sensor_id, price in coins %}
+            {% set amount = states(sensor_id) | float(0) %}
+            {% set ns.total = ns.total + (amount * (price | float(0))) %}
+          {% endfor %}
+          {{ ns.total | round(2) }}
+
+  # ═════════════════════════════════════════════════════════════
+  # BINARY SENSORS
+  # ═════════════════════════════════════════════════════════════
+  - binary_sensor:
+      - name: "asic_prio_add_ready"
+        unique_id: "asic_prio_add_ready"
+        state: >-
+          {% set needed   = states('sensor.asic_prio_power_needed') | int(0) %}
+          {% set on       = states('sensor.asic_prio_power_on')     | int(0) %}
+          {% set prod     = states('sensor.production_solaire')    | float(0) %}
+          {% set next_ent = states('sensor.asic_prio_next_entity') %}
+          {{ needed > on and prod >= needed and next_ent != 'none' }}
+
+      - name: "asic_au_moins_un_actif"
+        unique_id: "asic_au_moins_un_actif"
+        state: >-
+          {{ states('sensor.asic_allumes_count') | int(0) > 0 }}
+
+# ═══════════════════════════════════════════════════════════════
+# HISTORY_STATS + REST — Pour le bilan quotidien (24/7)
+# ═══════════════════════════════════════════════════════════════
+# ⚠️ Adaptez les entity_id des switches à vos ASIC prioritaires
+sensor:
+  # Durées ON par ASIC (reset auto à minuit)
+  - platform: history_stats
+    name: "asic_big_1_heures_jour"
+    entity_id: switch.asic_big_1       # ← Votre ASIC prioritaire
+    state: "on"
+    type: time
+    start: "{{ today_at('00:00') }}"
+    end: "{{ now() }}"
+
+  # Durée totale minage (≥1 ASIC actif)
+  - platform: history_stats
+    name: "asic_minage_actif_heures_jour"
+    entity_id: binary_sensor.asic_au_moins_un_actif
+    state: "on"
+    type: time
+    start: "{{ today_at('00:00') }}"
+    end: "{{ now() }}"
+
+  # Prix crypto via CoinGecko (gratuit, 1 appel / 10 min)
+  - platform: rest
+    name: "crypto_prices_eur"
+    resource: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,alephium,kaspa,radiant,litecoin,kadena&vs_currencies=eur"
+    scan_interval: 600
+    value_template: "ok"
+    json_attributes:
+      - bitcoin
+      - alephium
+      - kaspa
+      - radiant
+      - litecoin
+      - kadena
+    timeout: 15
