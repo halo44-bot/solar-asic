@@ -1,0 +1,329 @@
+alias: ASIC V1.0.37 - solar asic
+description: >-
+  Automation générique pour ASIC solaires : petits ASIC en cascade le matin,
+  puis bascule sur les ASIC prioritaires (gros mineurs) quand la production
+  solaire le permet. 100% configurable via sensor.asic_prio_config.
+
+  ⚠️ ADAPTEZ les entity_id dans la section "variables:" ci-dessous
+  à vos propres switches ASIC (Tuya, Shelly, etc.)
+
+triggers:
+  - seconds: /5
+    id: cycle_normal
+    trigger: time_pattern
+  - entity_id: binary_sensor.asic_prio_add_ready
+    to: "on"
+    for:
+      minutes: 1
+    id: maybe_prio_add
+    trigger: state
+  - entity_id: sensor.reseau_total
+    above: 250
+    for:
+      minutes: 5
+    id: sustained_import
+    trigger: numeric_state
+  - entity_id: sensor.production_solaire
+    below: 2800
+    for:
+      minutes: 5
+    id: production_drop
+    trigger: numeric_state
+  - entity_id: sensor.reseau_total
+    above: 50
+    for:
+      minutes: 10
+    id: endofday_cleanup
+    trigger: numeric_state
+
+actions:
+  - choose:
+      # ══════════════════════════════════════════
+      # 1. AJOUT PRIO (prod solaire suffisante)
+      # ══════════════════════════════════════════
+      - conditions:
+          - condition: trigger
+            id: maybe_prio_add
+          - condition: template
+            value_template: >-
+              {{ next_prio_entity not in ['none', '', 'unknown', 'unavailable'] }}
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: "{{ small_on }}"
+          - action: system_log.write
+            data:
+              level: info
+              message: >-
+                V37 PRIO ADD: coupe {{ nb_small_on }} petits, démarre
+                {{ next_prio_entity }} | prod {{ prod_solaire }}W
+          - delay:
+              seconds: 25
+          - action: switch.turn_on
+            target:
+              entity_id: "{{ next_prio_entity }}"
+          - action: system_log.write
+            data:
+              level: info
+              message: >-
+                V37 PRIO ON: {{ next_prio_entity }} — ADD bloqué 10 min
+
+      # ══════════════════════════════════════════
+      # 2. PRODUCTION CHUTE (sun fading)
+      # ══════════════════════════════════════════
+      - conditions:
+          - condition: trigger
+            id: production_drop
+          - condition: template
+            value_template: >-
+              {{ prio_count_on > 0
+                 and last_prio_entity not in ['none', '']
+                 and is_state(last_prio_entity, 'on') }}
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: "{{ last_prio_entity }}"
+          - action: system_log.write
+            data:
+              level: info
+              message: >-
+                V37 PRIO OFF: {{ last_prio_entity }} | prod
+                {{ prod_solaire }}W < 2800W
+
+      # ══════════════════════════════════════════
+      # 3. IMPORT SUSTAINED (grid > 250W, 5 min)
+      # ══════════════════════════════════════════
+      - conditions:
+          - condition: trigger
+            id: sustained_import
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ al0_to_remove_count > 0 }}"
+                sequence:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: "{{ al0_to_remove }}"
+                  - action: system_log.write
+                    data:
+                      level: info
+                      message: >-
+                        V37 REDUCE: -{{ al0_to_remove_count }} small |
+                        grid {{ grid_total }}W
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ remove_kd and is_state(kd_box, 'on') }}"
+                sequence:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: "{{ kd_box }}"
+                  - action: system_log.write
+                    data:
+                      level: info
+                      message: "V37 REDUCE: -Medium | grid {{ grid_total }}W"
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ remove_al and is_state(al_box, 'on') }}"
+                sequence:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: "{{ al_box }}"
+                  - action: system_log.write
+                    data:
+                      level: info
+                      message: "V37 REDUCE: -Large | grid {{ grid_total }}W"
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: >-
+                      {{ small_on | length == 0
+                         and prio_count_on > 0
+                         and grid_total > 250
+                         and is_state(last_prio_entity, 'on') }}
+                sequence:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: "{{ last_prio_entity }}"
+                  - action: system_log.write
+                    data:
+                      level: warning
+                      message: >-
+                        V37 REDUCE PRIO: {{ last_prio_entity }} OFF
+                        (0 small, import {{ grid_total }}W)
+
+      # ══════════════════════════════════════════
+      # 4. FIN DE JOURNÉE
+      # ══════════════════════════════════════════
+      - conditions:
+          - condition: trigger
+            id: endofday_cleanup
+          - condition: template
+            value_template: >-
+              {{ prio_count_on == 0 and small_on | length > 0 }}
+        sequence:
+          - action: switch.turn_off
+            target:
+              entity_id: "{{ small_on }}"
+          - action: system_log.write
+            data:
+              level: info
+              message: >-
+                V37 NIGHT OFF: coupe {{ small_on | length }} petits |
+                grid {{ grid_total }}W
+
+      # ══════════════════════════════════════════
+      # 5. CYCLE NORMAL (5s)
+      # ══════════════════════════════════════════
+      - conditions:
+          - condition: trigger
+            id: cycle_normal
+        sequence:
+          # URGENCE
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: >-
+                      {{ prio_count_on > 0
+                         and grid_total > 500
+                         and small_on | length == 0
+                         and is_state(last_prio_entity, 'on') }}
+                sequence:
+                  - action: switch.turn_off
+                    target:
+                      entity_id: "{{ last_prio_entity }}"
+                  - action: system_log.write
+                    data:
+                      level: warning
+                      message: >-
+                        V37 URGENCE: {{ last_prio_entity }} OFF
+                        (grid {{ grid_total }}W, 0 petit)
+          # SHED : import > 50W → couper 1 petit
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: >-
+                      {{ grid_total > 50 and nb_small_on > 0
+                         and switch_cooldown_ok }}
+                sequence:
+                  - variables:
+                      last_small: "{{ small_on[-1] }}"
+                  - action: switch.turn_off
+                    target:
+                      entity_id: "{{ last_small }}"
+                  - action: system_log.write
+                    data:
+                      level: info
+                      message: >-
+                        V37 SHED: -1 petit ({{ last_small }}) |
+                        grid {{ grid_total }}W
+          # ADD smalls (bloqué 10 min après boot prio)
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: >-
+                      {{ add_count > 0
+                         and switch_cooldown_ok
+                         and prio_boot_ok }}
+                sequence:
+                  - action: switch.turn_on
+                    target:
+                      entity_id: "{{ add_list }}"
+                  - action: system_log.write
+                    data:
+                      level: info
+                      message: >-
+                        V37 ADD: {{ '+Large ' if add_al_box else '' -}}
+                        {{ '+Medium ' if add_kd_box else '' -}}
+                        +{{ al0_to_add_count }} small | surplus
+                        {{ surplus_actuel }}W
+
+mode: single
+
+# ═══════════════════════════════════════════════════════════════
+# VARIABLES — ⚠️ ADAPTEZ LES ENTITY_IDs CI-DESSOUS
+# ═══════════════════════════════════════════════════════════════
+variables:
+  grid_total: "{{ states('sensor.reseau_total') | float(0) }}"
+  prod_solaire: "{{ states('sensor.production_solaire') | float(0) }}"
+  next_prio_entity: "{{ states('sensor.asic_prio_next_entity') }}"
+  last_prio_entity: "{{ states('sensor.asic_prio_last_entity') }}"
+  prio_count_on: "{{ states('sensor.asic_prio_count_on') | int(0) }}"
+  power_needed: "{{ states('sensor.asic_prio_power_needed') | int(0) }}"
+  small_power: 100
+
+  # ── MEDIUM / LARGE ASIC (optionnel) ──────────────────────────
+  # Si vous n'avez pas de Goldshell ou équivalent, mettez un
+  # entity_id inexistant (ex: switch.none) — ils seront ignorés.
+  kd_box: switch.asic_medium_1         # ← ex: Goldshell KD Box (360W)
+  al_box: switch.asic_large_1          # ← ex: Goldshell AL Box (480W)
+  kd_on: "{{ is_state(kd_box, 'on') }}"
+  al_on: "{{ is_state(al_box, 'on') }}"
+
+  # ── PETITS ASIC (100W chacun) ────────────────────────────────
+  # Listez tous vos petits ASIC ici (IceRiver AL0, KS0, RX0, etc.)
+  al0_asics:
+    - switch.asic_small_1
+    - switch.asic_small_2
+    - switch.asic_small_3
+    # Ajoutez autant de lignes que vous avez de petits ASIC :
+    # - switch.asic_small_4
+    # - switch.asic_small_5
+    # ...
+
+  small_asics: "{{ al0_asics + [kd_box, al_box] }}"
+  small_on: "{{ small_asics | select('is_state', 'on') | list }}"
+  small_off: "{{ small_asics | select('is_state', 'off') | list }}"
+  nb_small_on: "{{ small_on | length }}"
+  pwr_small_on: "{{ nb_small_on * small_power }}"
+  al0_on: "{{ al0_asics | select('is_state', 'on') | list }}"
+  al0_off: "{{ al0_asics | select('is_state', 'off') | list }}"
+  nb_al0_on: "{{ al0_on | length }}"
+  surplus_actuel: "{{ ([(-grid_total) - 50, 0] | max) | int }}"
+
+  # ── ADD greedy (Large → Medium → Small) ──────────────────────
+  add_al_box: "{{ (not al_on) and (surplus_actuel >= 480) }}"
+  surplus_after_al_box: "{{ (surplus_actuel - (480 if add_al_box else 0)) | int }}"
+  add_kd_box: "{{ (not kd_on) and (surplus_after_al_box >= 360) }}"
+  surplus_after_kd_box: "{{ (surplus_after_al_box - (360 if add_kd_box else 0)) | int }}"
+  al0_to_add_count: >-
+    {{ ([al0_off | length, (surplus_after_kd_box / small_power) | int(0)] | min) | int }}
+  al0_to_add: "{{ al0_off[:al0_to_add_count] }}"
+  add_list: >-
+    {{ (([al_box] if add_al_box else []) + ([kd_box] if add_kd_box else []) + al0_to_add) | list }}
+  add_count: "{{ add_list | length }}"
+
+  # ── REMOVE (Small → Medium → Large) ─────────────────────────
+  needed_reduction: "{{ ([grid_total, 0] | max) | int }}"
+  al0_to_remove_count: >-
+    {{ ([nb_al0_on, (needed_reduction / small_power) | round(0, 'ceil') | int(0)] | min) | int }}
+  al0_to_remove: >-
+    {{ al0_on[-al0_to_remove_count:] if al0_to_remove_count > 0 else [] }}
+  reduction_after_al0: "{{ (needed_reduction - al0_to_remove_count * small_power) | int }}"
+  remove_kd: "{{ kd_on and reduction_after_al0 >= 180 }}"
+  reduction_after_kd: "{{ (reduction_after_al0 - (360 if remove_kd else 0)) | int }}"
+  remove_al: "{{ al_on and reduction_after_kd >= 240 }}"
+
+  # ── Cooldowns ────────────────────────────────────────────────
+  switch_cooldown_ok: >-
+    {% set switches = al0_asics + [kd_box, al_box] %}
+    {% set ns = namespace(any_recent=false) %}
+    {% for s in switches %}
+      {% if states[s] is not none and (now() - states[s].last_changed).total_seconds() < 30 %}
+        {% set ns.any_recent = true %}
+      {% endif %}
+    {% endfor %}
+    {{ not ns.any_recent }}
+  prio_boot_ok: >-
+    {% set priorities = state_attr('sensor.asic_prio_config', 'asics') or [] %}
+    {% set ns = namespace(booting=false) %}
+    {% for p in priorities %}
+      {% if states[p.entity] is not none
+            and is_state(p.entity, 'on')
+            and (now() - states[p.entity].last_changed).total_seconds() < 600 %}
+        {% set ns.booting = true %}
+      {% endif %}
+    {% endfor %}
+    {{ not ns.booting }}
