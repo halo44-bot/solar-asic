@@ -279,8 +279,8 @@ html,body{overflow-x:hidden;}
 .banner-slide{display:none;border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;}
 .banner-slide.active{display:block;animation:fadeSlide .35s ease;}
 @keyframes fadeSlide{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
-.banner-img-wrap{width:100%;max-height:180px;overflow:hidden;cursor:pointer;}
-.banner-img-wrap img{width:100%;height:180px;object-fit:cover;display:block;transition:transform .3s;}
+.banner-img-wrap{width:100%;overflow:hidden;cursor:pointer;}
+.banner-img-wrap img{width:100%;height:auto;max-height:25vh;object-fit:cover;display:block;transition:transform .3s;}
 .banner-img-wrap img:hover{transform:scale(1.02);}
 .banner-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 20px;background:var(--bg2);}
 .banner-text{display:flex;flex-direction:column;gap:3px;flex:1;}
@@ -387,6 +387,18 @@ const I18N = {
     asic_stops_in:'ASIC ARRETE DANS', asics_start_in:'ASIC DEMARRENT DANS', asics_stop_in:'ASIC ARRETENT DANS',
     surplus_surveil:'Surveillance du surplus...', surplus_seuil:'Surplus {w}W — seuil: {s}W',
     chrono_offline:'En attente — ASIC hors ligne',
+    chrono_prio_start:'PRIO DÉMARRE DANS', chrono_reduce:'RÉDUCTION DANS',
+    chrono_prio_stop:'PRIO S\'ARRÊTE DANS', chrono_night:'EXTINCTION NUIT DANS',
+    chrono_add_soon:'ASIC DÉMARRENT BIENTÔT', chrono_no_asic:'AUCUN ASIC ACTIF',
+    chrono_sub_inject:'Inject {w}W | surplus pot. {s}W',
+    chrono_sub_import:'Import {w}W | -1 ASIC si maintenu',
+    chrono_sub_prod:'Import {w}W | prio OFF si maintenu',
+    chrono_sub_night:'{n} petits ON | grid {w}W',
+    chrono_sub_add:'Surplus {w}W → +{list}',
+    chrono_sub_all:'{n}/{t} en marche',
+    chrono_sub_none:'Surplus {w}W — en attente du soleil',
+    chrono_sub_idle:'Surplus {w}W | grid {g}W',
+    chrono_thresh_lbl:'Seuil prochain',
     // Flux énergie
     flux_title:'⚡ Flux Énergie — Temps Réel',
     solar_label:'Solaire', solar_sub:'production',
@@ -436,6 +448,18 @@ const I18N = {
     asic_stops_in:'ASIC STOPS IN', asics_start_in:'ASICs START IN', asics_stop_in:'ASICs STOP IN',
     surplus_surveil:'Monitoring surplus...', surplus_seuil:'Surplus {w}W — threshold: {s}W',
     chrono_offline:'Waiting — ASIC offline',
+    chrono_prio_start:'PRIO STARTS IN', chrono_reduce:'REDUCTION IN',
+    chrono_prio_stop:'PRIO STOPS IN', chrono_night:'NIGHT SHUTDOWN IN',
+    chrono_add_soon:'ASICs START SOON', chrono_no_asic:'NO ASIC ACTIVE',
+    chrono_sub_inject:'Inject {w}W | surplus pot. {s}W',
+    chrono_sub_import:'Import {w}W | -1 ASIC if sustained',
+    chrono_sub_prod:'Import {w}W | prio OFF if sustained',
+    chrono_sub_night:'{n} smalls ON | grid {w}W',
+    chrono_sub_add:'Surplus {w}W → +{list}',
+    chrono_sub_all:'{n}/{t} running',
+    chrono_sub_none:'Surplus {w}W — waiting for sun',
+    chrono_sub_idle:'Surplus {w}W | grid {g}W',
+    chrono_thresh_lbl:'Next threshold',
     flux_title:'⚡ Energy Flow — Live',
     solar_label:'Solar', solar_sub:'production',
     grid_label:'Grid EDF', grid_sub_inject:'← export', grid_sub_import:'→ import',
@@ -479,6 +503,18 @@ const I18N = {
     asic_stops_in:'ASIC STOPPT IN', asics_start_in:'ASICs STARTEN IN', asics_stop_in:'ASICs STOPPEN IN',
     surplus_surveil:'Überschuss-Überwachung...', surplus_seuil:'Überschuss {w}W — Schwelle: {s}W',
     chrono_offline:'Warten — ASIC offline',
+    chrono_prio_start:'PRIO STARTET IN', chrono_reduce:'REDUZIERUNG IN',
+    chrono_prio_stop:'PRIO STOPPT IN', chrono_night:'NACHTABSCHALTUNG IN',
+    chrono_add_soon:'ASICs STARTEN BALD', chrono_no_asic:'KEIN ASIC AKTIV',
+    chrono_sub_inject:'Einspeisung {w}W | Überschuss Pot. {s}W',
+    chrono_sub_import:'Netzbezug {w}W | -1 ASIC wenn anhaltend',
+    chrono_sub_prod:'Netzbezug {w}W | Prio AUS wenn anhaltend',
+    chrono_sub_night:'{n} Kleine AN | Netz {w}W',
+    chrono_sub_add:'Überschuss {w}W → +{list}',
+    chrono_sub_all:'{n}/{t} laufend',
+    chrono_sub_none:'Überschuss {w}W — warte auf Sonne',
+    chrono_sub_idle:'Überschuss {w}W | Netz {g}W',
+    chrono_thresh_lbl:'Nächste Schwelle',
     flux_title:'⚡ Energiefluss — Live',
     solar_label:'Solar', solar_sub:'Produktion',
     grid_label:'Stromnetz', grid_sub_inject:'← Einspeisung', grid_sub_import:'→ Bezug',
@@ -522,6 +558,18 @@ const I18N = {
     asic_stops_in:'ASIC SE DETIENE EN', asics_start_in:'ASICs INICIAN EN', asics_stop_in:'ASICs SE DETIENEN EN',
     surplus_surveil:'Monitoreo del excedente...', surplus_seuil:'Excedente {w}W — umbral: {s}W',
     chrono_offline:'En espera — ASIC fuera de línea',
+    chrono_prio_start:'PRIO INICIA EN', chrono_reduce:'REDUCCIÓN EN',
+    chrono_prio_stop:'PRIO SE DETIENE EN', chrono_night:'APAGADO NOCTURNO EN',
+    chrono_add_soon:'ASICs INICIAN PRONTO', chrono_no_asic:'NINGÚN ASIC ACTIVO',
+    chrono_sub_inject:'Inyección {w}W | excedente pot. {s}W',
+    chrono_sub_import:'Import {w}W | -1 ASIC si se mantiene',
+    chrono_sub_prod:'Import {w}W | prio OFF si se mantiene',
+    chrono_sub_night:'{n} pequeños ON | red {w}W',
+    chrono_sub_add:'Excedente {w}W → +{list}',
+    chrono_sub_all:'{n}/{t} en marcha',
+    chrono_sub_none:'Excedente {w}W — esperando sol',
+    chrono_sub_idle:'Excedente {w}W | red {g}W',
+    chrono_thresh_lbl:'Umbral siguiente',
     flux_title:'⚡ Flujo de Energía — En Vivo',
     solar_label:'Solar', solar_sub:'producción',
     grid_label:'Red EDF', grid_sub_inject:'← inyección', grid_sub_import:'→ importación',
@@ -633,6 +681,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
       </div>
       <button id="theme-toggle" class="lang-btn" title="Mode clair/sombre">🌙</button>
       <span class="conn-status conn-err" id="conn-status"><span data-i18n="loading">Chargement…</span></span>
+      <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
+        <span style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1px;white-space:nowrap;">NOTIF:</span>
+        <button class="notif-btn" id="notif-btn-telegram" onclick="toggleNotif('telegram',this)" title="Tester l'envoi Telegram (les bilans auto sont gérés par Home Assistant)">✈ TG</button>
+        <button class="notif-btn" id="notif-btn-ntfy" onclick="toggleNotif('ntfy',this)" title="Tester l'envoi ntfy (les bilans auto sont gérés par Home Assistant)">📳 ntfy</button>
+        <button class="notif-btn" id="notif-btn-ha" onclick="toggleNotif('ha',this)" title="Tester l'envoi HA Companion (les bilans auto sont gérés par Home Assistant)">🏠 HA</button>
+      </div>
       <div class="live-pill"><div class="live-dot"></div>LIVE</div>
     </div>
   </div>
@@ -674,12 +728,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <div class="mining-row" id="mining-coins-grid"></div>
       <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div class="mining-hr" id="mining-net-profit">Bilan net (revenus − coût EDF) : calcul en cours…</div>
-        <div class="notif-bar">
-          <span style="font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;"><span data-i18n="notifs_label">NOTIFS :</span></span>
-          <button class="notif-btn" id="notif-btn-telegram" onclick="toggleNotif('telegram',this)">✈ Telegram</button>
-          <button class="notif-btn" id="notif-btn-ntfy" onclick="toggleNotif('ntfy',this)">📱 ntfy</button>
-          <button class="notif-btn" id="notif-btn-ha" onclick="toggleNotif('ha',this)">🏠 HA</button>
-        </div>
       </div>
     </div>
   </div>
@@ -819,7 +867,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
           <div class="surplus-bar">
             <div class="surplus-head"><span class="surplus-lbl"><span data-i18n="surplus_dispo">Surplus disponible</span></span><span class="surplus-val" id="surplus-val">— W</span></div>
             <div class="surplus-track"><div class="surplus-fill" id="surplus-fill"></div></div>
-            <div style="margin-top:4px;font-family:var(--mono);font-size:9px;color:var(--text3);">Seuil prochain : <span id="next-threshold">—</span> W</div>
+            <div style="margin-top:4px;font-family:var(--mono);font-size:9px;color:var(--text3);"><span data-i18n="chrono_thresh_lbl">Seuil prochain</span> : <span id="next-threshold">—</span> W</div>
           </div>
           <div class="chrono-box chrono-wait" id="chrono-box">
             <div class="chrono-head">
@@ -930,6 +978,7 @@ const ASICS=[
   {name:'AL0 7',       entity:'switch.iceriver_al0_7_switch_1',     w:100},
   {name:'AL0 8',       entity:'switch.iceriver_al0_8_switch_1',     w:100},
   {name:'AL0 9',       entity:'switch.iceriver_al0_9_switch_1',     w:100},
+  {name:'AL0 10',      entity:'switch.iceriver_al0_10_socket_1',    w:100},
   {name:'AL0 11',      entity:'switch.iceriver_al0_11_switch_1',    w:100},
   {name:'AL0 12',      entity:'switch.iceriver_al0_12_switch_1',    w:100},
   {name:'AL0 13',      entity:'switch.iceriver_al0_13_switch_1',    w:100},
@@ -1009,6 +1058,7 @@ const ENTITIES=[
   'sensor.iceriver_al0_7_puissance',
   'sensor.iceriver_al0_8_puissance',
   'sensor.iceriver_al0_9_puissance',
+  'sensor.iceriver_al0_10_puissance',
   'sensor.iceriver_al0_11_puissance',
   'sensor.iceriver_al0_12_puissance',
   'sensor.iceriver_al0_13_puissance',
@@ -1038,13 +1088,73 @@ function getRealAsicPower(){
 }
 
 let hd={}, todayFermeKwh=0, period='day', todayImport=0, todayInject=0, todayProd=0, asicKwhToday=0, countdown=REFRESH_MS/1000, chartData={p:[],i:[],a:[]};
-// Chrono — doit matcher l'automation HA "ASIC V16 - TEMPO 5MIN"
-// DELAY_MS = tempo avant action (5 min comme l'automation)
-// THRESH_UP = surplus mini pour démarrer (correspond au coût d'un petit ASIC + buffer)
-// THRESH_DOWN = surplus en dessous duquel on déclenche l'arrêt
-let chronoState='idle', chronoSince=null;
+// Sauvegarder le SVG original du chart pour le restaurer après le bar chart
+const _chartSvgOriginal = document.getElementById('chart-svg') ? document.getElementById('chart-svg').innerHTML : '';
+// ═══════════════════════════════════════════════════════════════
+// CHRONO V36 — synchronisé avec automation_asic_v36 (Claude)
+// Seuils calés sur les triggers V36 :
+//   - maybe_s19_on       : grid < -3000W pendant 60s
+//   - sustained_import   : grid > +250W  pendant 5 min  (REDUCE)
+//   - maybe_s19_off_long : grid > +50W   pendant 5 min  (S19 OFF)
+//   - endofday_cleanup   : grid > +50W   pendant 10 min (NIGHT OFF)
+//   - cycle ADD          : 5s, dispatch greedy AL Box→KD Box→AL0
+// Pas de cooldown JS (anti-loop) : la V36 a son propre switch_cooldown_ok
+// ═══════════════════════════════════════════════════════════════
 let chartMeta = { dataStart: null, dataEnd: null, period: 'day' }; // pour timestamps tooltip
-const DELAY_MS=5*60*1000, THRESH_UP=100, THRESH_DOWN=-50;
+
+// Seuils V36 (doivent matcher l'automation HA)
+const V36_BUFFER         = 50;       // buffer surplus_actuel
+const V36_SMALL_W        = 100;      // petit ASIC AL0
+const V36_KD_W           = 360;      // Goldshell KD Box
+const V36_AL_W           = 480;      // Goldshell AL Box
+const V36_S19_W          = 3450;     // Antminer S19
+const V36_S19_MIN_KEEP   = 2800;     // surplus mini pour garder S19
+const V36_S19_ON_GRID    = -3000;    // grid mini pour démarrer S19
+const V36_S19_ON_DELAY   = 60;       // 1 min
+const V36_REDUCE_GRID    = 250;
+const V36_REDUCE_DELAY   = 300;      // 5 min
+const V36_S19_OFF_GRID   = 50;
+const V36_S19_OFF_DELAY  = 300;      // 5 min
+const V36_NIGHT_GRID     = 50;
+const V36_NIGHT_DELAY    = 600;      // 10 min
+
+// Trackers de durée des conditions (persistés en localStorage)
+function _getCondSince(key){
+  try{ const v = localStorage.getItem('v36_'+key); return v ? parseInt(v) : null; }
+  catch(e){ return null; }
+}
+function _setCondSince(key, ts){
+  try{
+    if(ts === null) localStorage.removeItem('v36_'+key);
+    else localStorage.setItem('v36_'+key, String(ts));
+  }catch(e){}
+}
+
+// Met à jour les timestamps "depuis quand cette condition est vraie"
+function _trackCondition(key, isTrue, now){
+  const since = _getCondSince(key);
+  if(isTrue){
+    if(since === null) _setCondSince(key, now);
+    return since || now;
+  } else {
+    if(since !== null) _setCondSince(key, null);
+    return null;
+  }
+}
+
+// Calcule combien d'ASIC supplémentaires V36 démarrerait avec ce surplus
+function _v36CalcAdd(surplus, alOn, kdOn, al0OffCount){
+  const list = [];
+  let remaining = surplus;
+  // 1) AL Box si surplus >= 480
+  if(!alOn && remaining >= V36_AL_W){ list.push('AL Box'); remaining -= V36_AL_W; }
+  // 2) KD Box si reste >= 360
+  if(!kdOn && remaining >= V36_KD_W){ list.push('KD Box'); remaining -= V36_KD_W; }
+  // 3) AL0s par tranches de 100W
+  const al0Count = Math.min(al0OffCount, Math.floor(remaining / V36_SMALL_W));
+  for(let i=0; i<al0Count; i++) list.push('AL0');
+  return list;
+}
 
 
 
@@ -1058,337 +1168,131 @@ function updateChrono(){
   const bar    = document.getElementById('chrono-bar');
   const sub    = document.getElementById('chrono-sub');
 
-  // ─── calcMaxCanRun: matche logique automation V17 ──
-  // Si surplus ≥ 3550W → S19 prend le relais + petits qui tiennent dans (surplus - 3400)
-  // Sinon → uniquement des petits ASIC (100W IceRiver → KD 360W → AL 480W)
-  function calcMaxCanRun(surplusW){
-    const SEUIL_S19   = 3550;
-    const MARGE_PETIT = 20;
-    const SEUIL_MIN   = 120;
-    let canRun = 0;
-    const s19 = ASICS.find(a => a.name === 'Antminer S19');
+  // ─── Variables V36 (depuis les sensors HA) ────────────────────
+  // grid_total = sensor.reseau_total (CT1+CT2+CT3, signé)
+  //   - négatif = injection
+  //   - positif = import
+  const grid_total = parseFloat(hd['sensor.reseau_total'] ?? hd['sensor.consommation_reseau'] ?? 0)
+                   - parseFloat(hd['sensor.injection_reseau'] || 0);
+  // Si reseau_total n'existe pas, on reconstruit: import - injection
+  const gridReal = (hd['sensor.reseau_total'] !== undefined)
+                   ? parseFloat(hd['sensor.reseau_total']) || 0
+                   : (parseFloat(hd['sensor.consommation_reseau']||0) - parseFloat(hd['sensor.injection_reseau']||0));
 
-    // Mode S19 actif : surplus suffisant pour le S19
-    const s19Available = s19 && hd[s19.entity] !== 'unavailable' && hd[s19.entity] !== 'unknown';
-    const modeS19 = s19Available && surplusW >= SEUIL_S19;
+  // surplus_actuel = max(-grid - buffer, 0)
+  const surplus_actuel = Math.max((-gridReal) - V36_BUFFER, 0);
 
-    if(modeS19){
-      canRun++; // S19 occupe sa place
-      let budget = Math.max(surplusW - 3400 - 50, 0);
-      // Petits qui tiennent dans le budget restant (ordre petits → KD → AL)
-      const iceriver = ASICS.filter(a => a.w === 100);
-      const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
-      const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
-      for(const a of [...iceriver, ...goldKd, ...goldAl]){
-        const st = hd[a.entity];
-        if(st === 'unavailable' || st === 'unknown') continue;
-        if(budget >= (a.w + MARGE_PETIT)){ canRun++; budget -= a.w; }
-      }
-    } else {
-      // Mode petits seuls
-      let budget = Math.max(surplusW - 50, 0);
-      const iceriver = ASICS.filter(a => a.w === 100);
-      const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
-      const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
-      for(const a of [...iceriver, ...goldKd, ...goldAl]){
-        const st = hd[a.entity];
-        if(st === 'unavailable' || st === 'unknown') continue;
-        if(budget >= (a.w + MARGE_PETIT) && budget >= SEUIL_MIN){ canRun++; budget -= a.w; }
-      }
-    }
-    return canRun;
-  }
+  // États ASIC
+  const s19 = ASICS.find(a => a.name === 'Antminer S19');
+  const s19_on = s19 ? s19.on : false;
+  const s19_available = s19 && hd[s19.entity] !== 'unavailable' && hd[s19.entity] !== 'unknown';
+  const al_box  = ASICS.find(a => a.name === 'Goldsh AL');
+  const kd_box  = ASICS.find(a => a.name === 'Goldsh KD');
+  const al_on   = al_box ? al_box.on : false;
+  const kd_on   = kd_box ? kd_box.on : false;
+  const al0List = ASICS.filter(a => a.w === V36_SMALL_W);
+  const al0_off_count = al0List.filter(a => !a.on && hd[a.entity] !== 'unavailable' && hd[a.entity] !== 'unknown').length;
+  const small_on_count = ASICS.filter(a => a.name !== 'Antminer S19' && a.on).length;
 
-  // ─── Surplus utilisé pour le chrono : MÊME formule que l'automation V18 ──
-  // surplus_reel = prod_solaire - max(conso_ferme - asic_puissance_estimee, 0) - 50
-  // Pourquoi pas le sensor `surplus_solaire` brut ?
-  // → Pendant le démarrage des ASIC (boot 30s à 1 min), la ferme ne consomme pas encore
-  //   alors que `asic_estimee` est déjà à la valeur cible. Si on utilisait surplus_solaire
-  //   brut, on croirait avoir du surplus disponible et l'auto démarrerait encore des ASIC.
-  //   En utilisant la même formule que l'auto, le chrono reste cohérent.
-  const prodNow      = parseFloat(hd['_prodCalc']||0) || parseFloat(hd['sensor.production_solaire']||0);
-  const fermeReal    = parseFloat(hd['sensor.consommation_ferme']||0);
-  const asicEstimee  = parseFloat(hd['sensor.asic_puissance_estimee']||0);
-  const consoMaison  = Math.max(fermeReal - asicEstimee, 0);
-  const surplusReel  = Math.round(prodNow - consoMaison - 50);
-  // Fallback : si surplus_solaire HA est plus pessimiste (= on importe vraiment), le prendre
-  const surplusHa    = parseFloat(hd['sensor.surplus_solaire']||0);
-  const consoGridNow = parseFloat(hd['sensor.consommation_reseau']||0);
-  // Si on importe (consoGridNow > 50W) ET le calcul donne du surplus,
-  // c'est qu'on est dans la phase de démarrage des ASIC → forcer surplus à 0
-  const surplus      = (consoGridNow > 50)
-                       ? Math.min(surplusReel, 0)
-                       : Math.max(surplusReel, surplusHa);
+  // surplus_potentiel = -grid + pwr_small_on - buffer (si on coupait les smalls)
+  const pwr_small_on = small_on_count * V36_SMALL_W;
+  const surplus_potentiel = Math.max((-gridReal) + pwr_small_on - V36_BUFFER, 0);
 
-  const asicsOn    = ASICS.filter(a=>a.on).length; // source unique
-  const maxCanRun  = calcMaxCanRun(surplus); // pour démarrage uniquement
+  // ─── Tracker les conditions persistantes V36 ──────────────────
+  const cond_s19_on   = (!s19_on) && s19_available && (gridReal < V36_S19_ON_GRID) && (surplus_potentiel >= V36_S19_W);
+  const cond_reduce   = (gridReal > V36_REDUCE_GRID) && (small_on_count > 0);
+  const cond_s19_off  = s19_on && (gridReal > V36_S19_OFF_GRID);
+  const cond_night    = (!s19_on) && (gridReal > V36_NIGHT_GRID) && (small_on_count > 0);
+  const cond_add      = (surplus_actuel >= V36_SMALL_W) && (al0_off_count > 0 || (!al_on && surplus_actuel >= V36_AL_W) || (!kd_on && surplus_actuel >= V36_KD_W));
 
-  // ─── Calcul ARRÊT basé sur production solaire réelle (CT) ────────
-  // Ne PAS utiliser surplus ici: les ASIC ON faussent le surplus
-  // On recalcule combien d'ASIC peuvent tourner sur le solaire réel
-  const solarNow  = Math.max(hd['_prodCalc']||0, 0); // production CT calculée dans update()
-  const fermeNow  = parseFloat(hd['sensor.consommation_ferme'])||0;
-  const asicWNow  = ASICS.filter(a=>a.on).reduce((s,a)=>s+a.w, 0);
-  const baseLoad  = Math.max(fermeNow - asicWNow, 0); // conso hors ASIC
-  const solarBudget = Math.max(solarNow - baseLoad - 50, 0);
-  // Combien d'ASIC peuvent tourner avec ce budget solaire? (logique V17)
-  // S19 reste actif tant que solaire ≥ 3200W (seuil_off_s19)
-  // Sinon mode petits seuls jusqu'à 120W (1 dernier petit ASIC)
-  let maxOnSolar = 0, remBudget = solarBudget;
-  const s19_max = ASICS.find(a => a.name === 'Antminer S19');
-  const s19_av  = s19_max && hd[s19_max.entity] !== 'unavailable' && hd[s19_max.entity] !== 'unknown';
-  if(s19_av && remBudget >= 3200){
-    // Mode S19 : S19 prend sa place, petits avec le reste
-    maxOnSolar++; remBudget -= 3400;
-    if(remBudget < 0) remBudget = 0;
-    const iceriver = ASICS.filter(a => a.w === 100);
-    const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
-    const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
-    for(const a of [...iceriver, ...goldKd, ...goldAl]){
-      const st = hd[a.entity];
-      if(st==='unavailable'||st==='unknown') continue;
-      if(remBudget >= a.w){ maxOnSolar++; remBudget -= a.w; }
-    }
-  } else {
-    // Mode petits seuls, descendre jusqu'à 120W minimum
-    const iceriver = ASICS.filter(a => a.w === 100);
-    const goldKd   = ASICS.filter(a => a.name === 'Goldsh KD');
-    const goldAl   = ASICS.filter(a => a.name === 'Goldsh AL');
-    for(const a of [...iceriver, ...goldKd, ...goldAl]){
-      const st = hd[a.entity];
-      if(st==='unavailable'||st==='unknown') continue;
-      if(remBudget >= a.w && remBudget >= 120){ maxOnSolar++; remBudget -= a.w; }
-    }
-  }
-  const toStart   = Math.max(0, maxCanRun - asicsOn);
-  const toStop    = Math.max(0, asicsOn - maxOnSolar);
-  const consGrid  = parseFloat(hd['sensor.consommation_reseau'])||0;
+  const ts_s19_on   = _trackCondition('s19_on',   cond_s19_on,   now);
+  const ts_reduce   = _trackCondition('reduce',   cond_reduce,   now);
+  const ts_s19_off  = _trackCondition('s19_off',  cond_s19_off,  now);
+  const ts_night    = _trackCondition('night',    cond_night,    now);
 
-  // ─── CAS TERMINAL : tous les ASIC possibles sont ON ─────────────
-  if(surplus >= THRESH_UP && toStart === 0 && maxCanRun > 0){
-    chronoState = 'idle'; chronoSince = null;
-    localStorage.removeItem('mining_chrono_since');
-    localStorage.removeItem('mining_chrono_state');
-    localStorage.removeItem('mining_chrono_cooldown');
-    box.className = 'chrono-box chrono-wait';
-    label.textContent = t('all_active');
-    timeEl.textContent = '--:--';
-    bar.style.width = '100%';
-    sub.textContent = asicsOn + '/' + ASICS.length + ' '+t('running')+' — surplus ' + Math.round(surplus) + 'W';
+  // ─── Helpers ──────────────────────────────────────────────────
+  const fmtMS = (sec) => {
+    const m = Math.floor(sec/60), s = Math.floor(sec%60);
+    return m + ':' + String(s).padStart(2,'0');
+  };
+  const setBox = (cls, lbl, tim, pct, subTxt) => {
+    box.className = 'chrono-box ' + cls;
+    label.textContent = lbl;
+    timeEl.textContent = tim;
+    bar.style.width = Math.min(100, Math.max(0, pct)) + '%';
+    sub.textContent = subTxt;
+  };
+
+  // ─── Priorité des événements (le plus imminent / impactant) ──
+  // 1. Si S19 va démarrer (cond_s19_on)
+  if(cond_s19_on && ts_s19_on){
+    const elapsed = (now - ts_s19_on) / 1000;
+    const remaining = Math.max(0, V36_S19_ON_DELAY - elapsed);
+    const pct = (elapsed / V36_S19_ON_DELAY) * 100;
+    setBox('chrono-start', t('chrono_prio_start'), fmtMS(remaining), pct,
+      t('chrono_sub_inject').replace('{w}', Math.round(-gridReal)).replace('{s}', Math.round(surplus_potentiel)));
     return;
   }
 
-  // ─── CAS TERMINAL : aucun ASIC actif et surplus insuffisant ─────
-  if(surplus <= THRESH_DOWN && asicsOn === 0){
-    chronoState = 'idle'; chronoSince = null;
-    localStorage.removeItem('mining_chrono_since');
-    localStorage.removeItem('mining_chrono_state');
-    localStorage.removeItem('mining_chrono_cooldown');
-    box.className = 'chrono-box chrono-wait';
-    label.textContent = 'AUCUN ASIC ACTIF';
-    timeEl.textContent = '--:--';
-    bar.style.width = '0%';
-    sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — en attente du soleil';
+  // 2. Si REDUCE imminent (grid > 250W pendant 5 min)
+  if(cond_reduce && ts_reduce){
+    const elapsed = (now - ts_reduce) / 1000;
+    const remaining = Math.max(0, V36_REDUCE_DELAY - elapsed);
+    const pct = (elapsed / V36_REDUCE_DELAY) * 100;
+    setBox('chrono-stop', t('chrono_reduce'), fmtMS(remaining), pct,
+      t('chrono_sub_import').replace('{w}', Math.round(gridReal)));
     return;
   }
 
-  // ─── CAS TERMINAL : surplus suffisant mais AUCUN ASIC disponible ─
-  // (tous unavailable — ex: coupure wifi) → attente silencieuse
-  if(surplus >= THRESH_UP && maxCanRun === 0){
-    chronoState = 'idle'; chronoSince = null;
-    localStorage.removeItem('mining_chrono_since');
-    localStorage.removeItem('mining_chrono_state');
-    localStorage.removeItem('mining_chrono_cooldown');
-    box.className = 'chrono-box chrono-wait';
-    label.textContent = t('asic_offline');
-    timeEl.textContent = '--:--';
-    bar.style.width = '0%';
-    sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — aucun ASIC joignable';
+  // 3. Si S19 va s'arrêter (grid > 50W pendant 5 min + S19 ON)
+  if(cond_s19_off && ts_s19_off){
+    const elapsed = (now - ts_s19_off) / 1000;
+    const remaining = Math.max(0, V36_S19_OFF_DELAY - elapsed);
+    const pct = (elapsed / V36_S19_OFF_DELAY) * 100;
+    setBox('chrono-stop', t('chrono_prio_stop'), fmtMS(remaining), pct,
+      t('chrono_sub_prod').replace('{w}', Math.round(gridReal)));
     return;
   }
 
-  // ─── Chargement localStorage ─────────────────────────────────────
-  if(chronoSince === null){
-    const savedSince = localStorage.getItem('mining_chrono_since');
-    const savedState = localStorage.getItem('mining_chrono_state');
-    if(savedSince !== null && savedState !== null){
-      chronoSince = parseInt(savedSince);
-      chronoState = savedState;
-    }
+  // 4. Si endofday_cleanup imminent (S19 OFF + grid > 50W pendant 10 min)
+  if(cond_night && ts_night){
+    const elapsed = (now - ts_night) / 1000;
+    const remaining = Math.max(0, V36_NIGHT_DELAY - elapsed);
+    const pct = (elapsed / V36_NIGHT_DELAY) * 100;
+    setBox('chrono-stop', t('chrono_night'), fmtMS(remaining), pct,
+      t('chrono_sub_night').replace('{n}', small_on_count).replace('{w}', Math.round(gridReal)));
+    return;
   }
 
-  // ─── Cooldown anti-loop ──────────────────────────────────────────
-  const COOLDOWN_MS = 5 * 60 * 1000;
-  const cooldownTs  = parseInt(localStorage.getItem('mining_chrono_cooldown')||'0');
-  const inCooldown  = (now - cooldownTs) < COOLDOWN_MS;
-
-  if(inCooldown && chronoState === 'idle'){
-    // Pendant le cooldown: vérifier si un ASIC est devenu disponible
-    // Si oui → annuler le cooldown et repartir immédiatement
-    const availableNow = ASICS.filter(a=>{
-      const st = hd[a.entity];
-      return st !== 'unavailable' && st !== 'unknown' && st === 'off';
-    }).length;
-
-    // Exclure les ASIC qui ont échoué dans le cycle précédent
-    let failedEntities = [];
-    try{
-      const failedData = JSON.parse(localStorage.getItem('mining_chrono_failed')||'null');
-      if(failedData && (now - failedData.ts) < COOLDOWN_MS){
-        failedEntities = failedData.entities || [];
-      }
-    }catch(e){}
-
-    // Recalculer toStart en excluant les ASIC en échec
-    function calcMaxCanRunExcluding(surplusW, excluded){
-      let b = Math.max(surplusW - 50, 0), n = 0;
-      for(const a of ASICS){
-        if(excluded.includes(a.entity)) continue;
-        const st = hd[a.entity];
-        if(st === 'unavailable' || st === 'unknown') continue;
-        if(b >= a.w){ n++; b -= a.w; }
-      }
-      return n;
-    }
-    const maxCanRunExcl = calcMaxCanRunExcluding(surplus, failedEntities);
-    const toStartExcl = Math.max(0, maxCanRunExcl - asicsOn);
-
-    // Si de nouveaux ASIC sont disponibles (pas dans la liste d'échec) → relancer
-    if(toStartExcl > 0){
-      localStorage.removeItem('mining_chrono_cooldown');
-      localStorage.removeItem('mining_chrono_failed');
-    } else if(availableNow > 0 && toStart > 0){
-      // Nouvel ASIC disponible (ex: wifi revenu) → annuler cooldown
-      localStorage.removeItem('mining_chrono_cooldown');
-      localStorage.removeItem('mining_chrono_failed');
-    } else {
-      // Toujours en cooldown
-      const coolRemain = Math.ceil((COOLDOWN_MS - (now - cooldownTs)) / 1000);
-      const cm = Math.floor(coolRemain/60), cs = coolRemain%60;
-      box.className = 'chrono-box chrono-wait';
-      label.textContent = 'PAUSE ANTI-LOOP';
-      timeEl.textContent = cm + ':' + String(cs).padStart(2,'0');
-      bar.style.width = '0%';
-      sub.textContent = 'Reprise dans ' + cm + 'm' + String(cs).padStart(2,'0') + 's';
+  // 5. Si ADD imminent (cycle 5s, prochain démarrage)
+  if(cond_add){
+    const addList = _v36CalcAdd(surplus_actuel, al_on, kd_on, al0_off_count);
+    if(addList.length > 0){
+      setBox('chrono-start',
+        addList.length + ' ' + t('chrono_add_soon'),
+        '0:05',
+        80,
+        t('chrono_sub_add').replace('{w}', Math.round(surplus_actuel)).replace('{list}', addList.join(' +')));
       return;
     }
   }
-  if(!inCooldown && cooldownTs > 0) localStorage.removeItem('mining_chrono_cooldown');
 
-  // ─── Transitions d'état ──────────────────────────────────────────
-  if(surplus >= THRESH_UP && toStart > 0){
-    if(chronoState !== 'start'){
-      chronoState = 'start'; chronoSince = now;
-      localStorage.setItem('mining_chrono_since', now);
-      localStorage.setItem('mining_chrono_state', 'start');
-    }
-  } else if(toStop > 0 && consGrid > 30){ // EDF importe = confirmation arrêt
-
-    if(chronoState !== 'stop'){
-      chronoState = 'stop'; chronoSince = now;
-      localStorage.setItem('mining_chrono_since', now);
-      localStorage.setItem('mining_chrono_state', 'stop');
-    }
-  } else {
-    if(chronoState !== 'idle'){
-      chronoState = 'idle'; chronoSince = null;
-      localStorage.removeItem('mining_chrono_since');
-      localStorage.removeItem('mining_chrono_state');
-    }
+  // 6. Cas TERMINAL : tous les ASIC OK
+  const total_on = ASICS.filter(a=>a.on).length;
+  if(total_on >= ASICS.length){
+    setBox('chrono-wait', t('all_active'), '--:--', 100,
+      t('chrono_sub_all').replace('{n}', total_on).replace('{t}', ASICS.length));
+    return;
   }
-
-  // ─── État IDLE ───────────────────────────────────────────────────
-  if(chronoState === 'idle' || !chronoSince){
-    box.className = 'chrono-box chrono-wait';
-    label.textContent = t('waiting');
-    timeEl.textContent = '--:--';
-    bar.style.width = '0%';
-    sub.textContent = t('surplus_seuil').replace('{w}', Math.round(surplus)).replace('{s}', THRESH_UP);
+  if(total_on === 0 && surplus_actuel < V36_SMALL_W){
+    setBox('chrono-wait', t('chrono_no_asic'), '--:--', 0,
+      t('chrono_sub_none').replace('{w}', Math.round(surplus_actuel)));
     return;
   }
 
-  // ─── Calcul temps ─────────────────────────────────────────────────
-  const elapsed   = now - chronoSince;
-  const remaining = Math.max(0, DELAY_MS - elapsed);
-  const pct       = Math.min(100, (elapsed / DELAY_MS) * 100);
-  const rm  = Math.floor(remaining / 60000);
-  const rs  = Math.floor((remaining % 60000) / 1000);
-  const em  = Math.floor(elapsed / 60000);
-  const es  = Math.floor((elapsed % 60000) / 1000);
-  const POST_DELAY   = 5000;
-  const totalElapsed = Math.max(0, elapsed - DELAY_MS);
-
-  // ─── Auto-reset 5s après expiration ──────────────────────────────
-  if(remaining <= 0 && totalElapsed > POST_DELAY){
-    // Snapshot des ASIC qui étaient censés démarrer dans ce cycle
-    const expectedOn  = maxCanRun;
-    const actualOn    = asicsOn;
-    const asicsMissed = expectedOn - actualOn;
-
-    chronoState = 'idle'; chronoSince = null;
-    localStorage.removeItem('mining_chrono_since');
-    localStorage.removeItem('mining_chrono_state');
-
-    if(asicsMissed > 0){
-      // Mémoriser les ASIC non joignables (off + unavailable) pour les exclure
-      const failedAsics = ASICS
-        .filter(a => {
-          const st = hd[a.entity];
-          return st === 'off' || st === 'unavailable' || st === 'unknown';
-        })
-        .map(a => a.entity);
-      localStorage.setItem('mining_chrono_failed', JSON.stringify({
-        ts: now,
-        entities: failedAsics
-      }));
-      localStorage.setItem('mining_chrono_cooldown', now);
-      box.className = 'chrono-box chrono-wait';
-      label.textContent = 'PAUSE — ' + asicsMissed + ' ASIC SANS REPONSE';
-      timeEl.textContent = '05:00';
-      bar.style.width = '0%';
-      sub.textContent = asicsMissed + ' ASIC ignores pendant 5 min';
-    } else {
-      localStorage.removeItem('mining_chrono_failed');
-      box.className = 'chrono-box chrono-wait';
-      label.textContent = t('waiting');
-      timeEl.textContent = '--:--';
-      bar.style.width = '0%';
-      sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — cycle termine';
-    }
-    return;
-  }
-
-  // ─── Affichage DÉMARRAGE ─────────────────────────────────────────
-  if(chronoState === 'start'){
-    box.className = 'chrono-box chrono-start';
-    bar.style.width = Math.min(100, pct) + '%';
-    if(remaining > 0){
-      label.textContent = toStart > 1 ? toStart + ' ' + t('asics_start_in') : t('asic_starts_in');
-      timeEl.textContent = rm + ':' + String(rs).padStart(2,'0');
-      sub.textContent = 'Surplus ' + Math.round(surplus) + 'W — +' + toStart + ' ASIC depuis ' + em + 'm' + String(es).padStart(2,'0') + 's';
-    } else {
-      const postSec = Math.max(0, Math.ceil((POST_DELAY - totalElapsed) / 1000));
-      label.textContent = 'DEMARRAGE EN COURS';
-      timeEl.textContent = '00:0' + postSec;
-      sub.textContent = 'Reset dans ' + postSec + 's...';
-    }
-  }
-
-  // ─── Affichage ARRÊT ─────────────────────────────────────────────
-  if(chronoState === 'stop'){
-    box.className = 'chrono-box chrono-stop';
-    bar.style.width = Math.min(100, pct) + '%';
-    if(remaining > 0){
-      label.textContent = toStop > 1 ? toStop + ' ' + t('asics_stop_in') : '1 ' + t('asic_stops_in');
-      timeEl.textContent = rm + ':' + String(rs).padStart(2,'0');
-      sub.textContent = 'Solaire ' + Math.round(solarNow) + 'W | EDF ' + Math.round(consGrid) + 'W — -' + toStop + ' ASIC depuis ' + em + 'm' + String(es).padStart(2,'0') + 's';
-    } else {
-      const postSec = Math.max(0, Math.ceil((POST_DELAY - totalElapsed) / 1000));
-      label.textContent = 'ARRET EN COURS';
-      timeEl.textContent = '00:0' + postSec;
-      sub.textContent = 'Reset dans ' + postSec + 's...';
-    }
-  }
+  // 7. IDLE par défaut
+  setBox('chrono-wait', t('waiting'), '--:--', 0,
+    t('chrono_sub_idle').replace('{w}', Math.round(surplus_actuel)).replace('{g}', Math.round(gridReal)));
 }
 
 
@@ -1638,8 +1542,8 @@ function update(){
   document.getElementById('fin-cost-sub').textContent=fK(todayImport)+' · 0.20€/kWh';
   const realKwh=todayFermeKwh>0?todayFermeKwh:asicKwhToday;
   document.getElementById('fin-asic').textContent=fK(realKwh);
-  const sourceLabel = todayFermeKwh > 0 ? t('ct_real') : t('power_est');
-  document.getElementById('fin-asic-sub').textContent=t('value_lbl')+' '+fE(realKwh*PRIX)+' · '+sourceLabel;
+  const sourceLabel = '';
+  document.getElementById('fin-asic-sub').textContent=t('value_lbl')+' '+fE(realKwh*PRIX)+' · 0.20€/kWh';
   document.getElementById('nval-solar').textContent=fmt(prod);
   document.getElementById('nval-home').textContent=fmt(ferme); // prises réelles
   document.getElementById('nval-grid').textContent=fmt(inject>0?inject:consGrid);
@@ -1711,10 +1615,16 @@ function downsample(arr, maxPts){
 function drawChart(arrP,arrI,arrA,arrEDF,arrASIC){
   const ph = document.getElementById('chart-placeholder');
   if(ph) ph.style.display='none';
+
+  // Si le bar chart a remplacé le SVG, restaurer la structure ligne/aire
+  if(!document.getElementById('ca-p')){
+    const svgEl = document.getElementById('chart-svg');
+    if(svgEl) svgEl.innerHTML = _chartSvgOriginal || '';
+  }
   arrEDF = arrEDF || new Array((arrP||[]).length).fill(0);
   arrASIC = arrASIC || new Array((arrP||[]).length).fill(0);
   // Downsampling si trop de points (perf SVG)
-  const MAX_PTS = 200;
+  const MAX_PTS = 400;
   arrP = downsample(arrP, MAX_PTS); arrI = downsample(arrI, MAX_PTS);
   arrA = downsample(arrA, MAX_PTS); arrEDF = downsample(arrEDF, MAX_PTS);
   arrASIC = downsample(arrASIC, MAX_PTS);
@@ -1889,7 +1799,9 @@ async function loadDayHistory(){
   const liveAsic = parseInt(hd['sensor.asic_allumes_count'])||0; // sensor HA temps réel
   const aeDay = resampleDaySimple(hedf, liveEdf);
   const anDay = resampleDaySimple(hasic, liveAsic).map(v=>Math.round(v));
-  drawChart(resampleDay(hp), resampleDay(hi), resampleDay(ha), aeDay, anDay);
+  // Filtre bruit CT : import < 20W → 0 (offset Refoss ~16W)
+    const aeFiltered = aeDay.map(v => v < 20 ? 0 : v);
+    drawChart(resampleDay(hp), resampleDay(hi), resampleDay(ha), aeFiltered, anDay);
   ['00h','06h','12h','18h','24h'].forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
   }finally{ historyRefreshing = false; }
 }
@@ -2108,97 +2020,241 @@ async function drawMeteoOverlay(hours, tStart, W, H){
   });
 }
 
+// ═══════════════════════════════════════════════════════════════
+// BAR CHART — kWh quotidien (pour vues Semaine et Mois)
+// Style Solarman : barres groupées par jour
+// ═══════════════════════════════════════════════════════════════
+function drawBarChart(dailyProd, dailyInject, dailyFerme, dailyImport, labels){
+  const ph = document.getElementById('chart-placeholder');
+  if(ph) ph.style.display = 'none';
+
+  const W = 560, H = 110, PAD_B = 20; // hauteur utile = H - PAD_B
+  const days = dailyProd.length;
+  if(days < 1) return;
+
+  // Auto-scale Y (kWh)
+  const allVals = [...dailyProd, ...dailyFerme, ...dailyImport, ...dailyInject];
+  const maxKwh = Math.max(...allVals, 1);
+  const yScale = (H - PAD_B) / maxKwh;
+
+  // Géométrie des barres
+  const groupW = W / days;
+  const barW = Math.max(2, (groupW - 4) / 4); // 4 barres + gap
+  const gap = Math.max(1, (groupW - barW * 4) / 5);
+
+  // Couleurs (matchent le dashboard)
+  const colors = [
+    { data: dailyProd,   fill: '#f59e0b', label: t('prod_sol') },
+    { data: dailyFerme,  fill: '#0ea5e9', label: t('farm_kwh_col') },
+    { data: dailyImport, fill: '#ef4444', label: t('import_kwh_col') },
+    { data: dailyInject, fill: '#10b981', label: t('inject_edf') },
+  ];
+
+  // Construire le SVG (on remplace le contenu du chart existant)
+  let svg = '';
+  // Grille Y horizontale (3 lignes) — labels à GAUCHE pour ne pas chevaucher les barres
+  const ySteps = [0.25, 0.5, 0.75, 1.0];
+  ySteps.forEach(pct => {
+    const y = (H - PAD_B) - pct * (H - PAD_B);
+    const val = (maxKwh * pct).toFixed(maxKwh > 100 ? 0 : 1);
+    svg += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4 4"/>`;
+    svg += `<text x="2" y="${y-3}" style="font-family:var(--mono);font-size:7px;fill:var(--text3);text-anchor:start;">${val} kWh</text>`;
+  });
+
+  // Barres
+  for(let d = 0; d < days; d++){
+    const x0 = d * groupW + gap;
+    colors.forEach((c, ci) => {
+      const val = c.data[d] || 0;
+      const barH = Math.max(0, val * yScale);
+      const x = x0 + ci * (barW + 1);
+      const y = (H - PAD_B) - barH;
+      svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="${c.fill}" rx="1" opacity="0.85">`;
+      svg += `<title>${labels[d]} — ${c.label}: ${val.toFixed(1)} kWh</title></rect>`;
+    });
+  }
+
+  // Labels X (jours) — le dernier jour affiche "Auj" au lieu de la date
+  const step = days <= 10 ? 1 : (days <= 15 ? 2 : 3);
+  for(let d = 0; d < days; d += step){
+    const isLast = (d >= days - step); // dernier label visible
+    const x = d * groupW + groupW / 2;
+    if(isLast){
+      // Dernier : afficher la date + "Auj" espacés
+      svg += `<text x="${(x - groupW*0.3).toFixed(1)}" y="${H - 2}" style="font-family:var(--mono);font-size:${days<=10?'8':'6'}px;fill:var(--text3);text-anchor:middle;">${labels[d]}</text>`;
+      svg += `<text x="${(x + groupW*0.5).toFixed(1)}" y="${H - 2}" style="font-family:var(--mono);font-size:${days<=10?'9':'7'}px;fill:var(--text3);text-anchor:middle;font-weight:700;">Auj</text>`;
+    } else {
+      svg += `<text x="${x.toFixed(1)}" y="${H - 2}" style="font-family:var(--mono);font-size:${days<=10?'9':'7'}px;fill:var(--text3);text-anchor:middle;">${labels[d]}</text>`;
+    }
+  }
+
+  // Axe X (ligne de base)
+  svg += `<line x1="0" y1="${H - PAD_B}" x2="${W}" y2="${H - PAD_B}" stroke="var(--border)" stroke-width="1"/>`;
+
+  // Crosshair et hover area pour tooltip
+  svg += `<line id="chart-crosshair" x1="0" y1="0" x2="0" y2="${H-PAD_B}" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>`;
+  svg += `<rect id="chart-hover-area" x="0" y="0" width="${W}" height="${H}" fill="transparent" cursor="crosshair"/>`;
+
+  const svgEl = document.getElementById('chart-svg');
+  svgEl.innerHTML = svg;
+
+  // Masquer les labels X statiques (cx0-cx4) — remplacés par labels dynamiques
+  for(let i = 0; i < 5; i++){
+    const el = document.getElementById('cx' + i);
+    if(el) el.textContent = '';
+  }
+
+  // Tooltip hover
+  const tip = document.getElementById('chart-tooltip');
+  const hoverArea = document.getElementById('chart-hover-area');
+  if(hoverArea && tip){
+    hoverArea.addEventListener('mousemove', function(e){
+      const rect = svgEl.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      const dayIdx = Math.min(days - 1, Math.floor(pct * days));
+      const x = pct * W;
+
+      const cross = document.getElementById('chart-crosshair');
+      if(cross){ cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.setAttribute('opacity', 1); }
+
+      document.getElementById('tt-time').textContent = labels[dayIdx] || '';
+      document.getElementById('tt-solar').textContent = t('tt_prod') + ': ' + (dailyProd[dayIdx]||0).toFixed(1) + ' kWh';
+      document.getElementById('tt-inject').textContent = t('tt_inject') + ': ' + (dailyInject[dayIdx]||0).toFixed(1) + ' kWh';
+      document.getElementById('tt-asic').textContent = t('tt_ferme') + ': ' + (dailyFerme[dayIdx]||0).toFixed(1) + ' kWh';
+      document.getElementById('tt-edf').textContent = t('tt_import') + ': ' + (dailyImport[dayIdx]||0).toFixed(1) + ' kWh';
+      const asicNEl = document.getElementById('tt-asic-n');
+      if(asicNEl) asicNEl.textContent = '';
+      tip.style.display = 'block';
+      tip.style.left = Math.min(e.clientX - rect.left + 12, rect.width - 150) + 'px';
+      tip.style.top = Math.max(e.clientY - rect.top - 70, 4) + 'px';
+    });
+    hoverArea.addEventListener('mouseleave', function(){
+      const cross = document.getElementById('chart-crosshair');
+      if(cross) cross.setAttribute('opacity', 0);
+      tip.style.display = 'none';
+    });
+  }
+
+  // Sauvegarder pour le tooltip du chart (compat chartData)
+  chartData = {p: dailyProd, i: dailyInject, a: dailyFerme, e: dailyImport, n: []};
+  // Y-axis labels (réutilise les éléments existants s'ils existent encore)
+  const ytop = document.getElementById('chart-ytop');
+  const ymid = document.getElementById('chart-ymid');
+  const ybot = document.getElementById('chart-ybot');
+  if(ytop) ytop.textContent = '';
+  if(ymid) ymid.textContent = '';
+  if(ybot) ybot.textContent = '';
+}
+
 async function loadPeriodCached(hours){
-  // Récupère les données depuis l'API historique HA sur 7j ou 30j
-  // (rééchantillonnage à 1 bucket par jour pour limiter le volume)
+  // ═══ V5 — Barres kWh quotidiennes (style Solarman) ═══
   if(historyRefreshing){ console.log('loadPeriodCached: déjà en cours, ignoré'); return; }
   historyRefreshing = true;
 
   try{
     const days = hours <= 168 ? 7 : 30;
-    const BUCKETS = days; // 1 point par jour
     const now = Date.now();
-    const t0  = new Date(now - days * 24 * 3600 * 1000);
-    t0.setHours(0,0,0,0);
+    const dayMs = 24 * 3600 * 1000;
+    // Commence à minuit il y a N-1 jours (aujourd'hui = dernier bar)
+    const t0 = new Date(); t0.setHours(0,0,0,0); t0.setDate(t0.getDate() - days + 1);
     const startTs = t0.getTime();
 
-    // Helper : rééchantillonne sur N buckets de 24h
-    function resamplePeriod(raw){
-      const valid = raw.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
-      // Pour les sensors de puissance instantanée, on calcule la MOYENNE par bucket
-      const sums = new Array(BUCKETS).fill(0);
-      const cnts = new Array(BUCKETS).fill(0);
-      valid.forEach(s=>{
-        const t = new Date(s.lu||s.last_changed).getTime();
-        const idx = Math.floor((t - startTs) / (24*3600*1000));
-        if(idx >= 0 && idx < BUCKETS){
-          sums[idx] += +s.state;
-          cnts[idx] += 1;
-        }
+    // Fetch depuis HA
+    async function fetchPeriod(id){
+      try{
+        const startDate = new Date(startTs).toISOString();
+        const endDate = new Date(now).toISOString();
+        const params = 'filter_entity_id=' + id + '&minimal_response=true&no_attributes=true&significant_changes_only=1&end_time=' + endDate;
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 60000);
+        const r = await fetch(HA_URL + '/api/history/period/' + startDate + '?' + params,
+          { headers: {'Authorization': 'Bearer ' + HA_TOKEN}, signal: ctrl.signal });
+        clearTimeout(timer);
+        if(!r.ok) return [];
+        const d = await r.json();
+        if(!Array.isArray(d) || !d.length) return [];
+        let arr = [];
+        for(const series of d){ if(Array.isArray(series) && series.length > arr.length) arr = series; }
+        console.log('fetchPeriod', id, '=>', arr.length, 'pts');
+        return arr;
+      }catch(e){ console.warn('fetchPeriod', id, e.message); return []; }
+    }
+
+    // Convertir les points bruts en kWh quotidien
+    // Méthode : intégration trapézoïdale (W × heures → Wh → /1000 → kWh)
+    function toDailyKwh(raw){
+      const valid = raw.filter(s => s.state != 'unavailable' && s.state != 'unknown' && !isNaN(+s.state));
+      if(valid.length < 2) return new Array(days).fill(0);
+
+      // Parser les timestamps et trier
+      const pts = valid.map(s => ({
+        ts: new Date(s.lu || s.last_changed || 0).getTime(),
+        w: Math.max(0, +s.state)
+      })).filter(p => !isNaN(p.ts) && p.ts >= startTs && p.ts <= now)
+        .sort((a, b) => a.ts - b.ts);
+
+      if(pts.length < 2) return new Array(days).fill(0);
+
+      // DEBUG : distribution des points par jour
+      const dayDist = new Array(days).fill(0);
+      pts.forEach(p => {
+        const di = Math.floor((p.ts - startTs) / dayMs);
+        if(di >= 0 && di < days) dayDist[di]++;
       });
-      const out = sums.map((s,i)=> cnts[i] > 0 ? s/cnts[i] : 0);
+      console.log('toDailyKwh: pts=' + pts.length + ' distribution=' + JSON.stringify(dayDist)
+        + ' startTs=' + new Date(startTs).toISOString()
+        + ' first=' + new Date(pts[0].ts).toISOString()
+        + ' last=' + new Date(pts[pts.length-1].ts).toISOString());
+
+      // Intégration trapézoïdale par jour
+      const out = new Array(days).fill(0);
+      for(let i = 1; i < pts.length; i++){
+        const dt = (pts[i].ts - pts[i-1].ts) / 3600000; // heures
+        if(dt > 6) continue; // ignorer les gaps > 6h (nuit, déconnexion)
+        const avgW = (pts[i].w + pts[i-1].w) / 2;
+        const wh = avgW * dt; // Wh
+        const dayIdx = Math.floor((pts[i].ts - startTs) / dayMs);
+        if(dayIdx >= 0 && dayIdx < days) out[dayIdx] += wh / 1000; // kWh
+      }
       return out;
     }
 
-    // Fetch parallèle (mais limité, sur 7-30 jours on prend ce qu'on peut)
-    const hp    = await fetchHistBest(['sensor.production_solaire'],  days * 24);
-    const hi    = await fetchHistBest(['sensor.injection_reseau'],    days * 24);
-    const ha    = await fetchHistBest(['sensor.consommation_ferme'],  days * 24);
-    const hedf  = await fetchHistBest(['sensor.consommation_reseau'], days * 24);
-    const hasic = await fetchHistBest(['sensor.asic_allumes_count'],  days * 24);
+    // Fetch séquentiel
+    const hp    = await fetchPeriod('sensor.production_solaire');
+    const hi    = await fetchPeriod('sensor.injection_reseau');
+    const ha    = await fetchPeriod('sensor.consommation_ferme');
+    const hedf  = await fetchPeriod('sensor.consommation_reseau');
 
-    const ap = resamplePeriod(hp);
-    const ai = resamplePeriod(hi);
-    const aa = resamplePeriod(ha);
-    const ae = resamplePeriod(hedf);
-    // Pour les ASIC: on prend le max par bucket (count)
-    const an = (function(){
-      const valid = hasic.filter(s=>s.state!='unavailable'&&s.state!='unknown'&&!isNaN(+s.state));
-      const maxes = new Array(BUCKETS).fill(0);
-      valid.forEach(s=>{
-        const t = new Date(s.lu||s.last_changed).getTime();
-        const idx = Math.floor((t - startTs) / (24*3600*1000));
-        if(idx >= 0 && idx < BUCKETS){
-          maxes[idx] = Math.max(maxes[idx], +s.state);
-        }
-      });
-      return maxes;
-    })();
+    const prodD   = toDailyKwh(hp);
+    const injectD = toDailyKwh(hi);
+    const fermeD  = toDailyKwh(ha);
+    const importD = toDailyKwh(hedf).map(v => v < 0.1 ? 0 : v); // filtre bruit CT
 
-    // Vérifier qu'on a au moins quelques points non-nuls
-    const totalDataPoints = ap.filter(v=>v>0).length + ai.filter(v=>v>0).length + aa.filter(v=>v>0).length;
-    if(totalDataPoints < 2){
+    // Labels X = dates
+    const labels = [];
+    for(let d = 0; d < days; d++){
+      const dt = new Date(startTs + d * dayMs);
+      labels.push(dt.getDate() + '/' + (dt.getMonth() + 1));
+    }
+
+    // Vérif données
+    const totalKwh = prodD.reduce((s, v) => s + v, 0) + fermeD.reduce((s, v) => s + v, 0);
+    if(totalKwh < 0.1){
       const ph = document.getElementById('chart-placeholder');
-      if(ph){
-        ph.style.display='block';
-        ph.textContent = days === 7
-          ? 'Pas encore assez de données — revenez dans quelques jours'
-          : 'Pas encore assez de données — revenez dans quelques semaines';
-      }
-      console.warn('Pas assez de points HA sur '+days+'j');
+      if(ph){ ph.style.display = 'block'; ph.textContent = days <= 7
+        ? 'Pas de données sur les 7 derniers jours'
+        : 'Pas de données sur les 30 derniers jours'; }
       return;
     }
 
-    // Labels X = dates réelles (4 points équirépartis + Auj)
-    function dayLabel(ts){ const d=new Date(ts); return d.getDate()+'/'+(d.getMonth()+1); }
-    const dayMs = 24*3600*1000;
-    const lx = [
-      dayLabel(startTs),
-      dayLabel(startTs + Math.floor(days*0.25)*dayMs),
-      dayLabel(startTs + Math.floor(days*0.5)*dayMs),
-      dayLabel(startTs + Math.floor(days*0.75)*dayMs),
-      'Auj'
-    ];
-    lx.forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
-
-    chartMeta = {dataStart:startTs, dataEnd:now, period:days<=7?'week':'month', buckets:BUCKETS};
-    drawChart(ap, ai, aa, ae, an);
-    console.log('Graphique '+days+'j depuis HA history ('+BUCKETS+' buckets)');
+    chartMeta = {dataStart: startTs, dataEnd: now, period: days <= 7 ? 'week' : 'month', buckets: days};
+    drawBarChart(prodD, injectD, fermeD, importD, labels);
+    console.log('✅ Barres ' + days + 'j: prod=' + prodD.reduce((s,v)=>s+v,0).toFixed(1) + 'kWh (' + hp.length + ' pts bruts)');
 
   }catch(e){
     console.warn('loadPeriodCached erreur:', e.message);
     const ph = document.getElementById('chart-placeholder');
-    if(ph){ ph.style.display='block'; ph.textContent='Erreur de chargement'; }
+    if(ph){ ph.style.display = 'block'; ph.textContent = 'Erreur: ' + e.message; }
   }finally{
     historyRefreshing = false;
   }
@@ -2209,7 +2265,7 @@ function setPeriod(p,el){
   document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   const lx={day:['00h','06h','12h','18h','24h'],week:['J-7','J-5','J-3','J-1','Auj'],month:['J-30','J-22','J-15','J-7','Auj']};
-  lx[p].forEach((v,i)=>document.getElementById('cx'+i).textContent=v);
+  if(p === 'day') lx[p].forEach((v,i)=>{ const el=document.getElementById('cx'+i); if(el) el.textContent=v; });
   // Jour: immédiat. Semaine/Mois: petit délai pour ne pas bloquer le Pi 3B
   if(!historyRefreshing){
     if(p==='day'){
@@ -2509,9 +2565,12 @@ async function loadYearStats(){
   try{ localStorage.setItem('mining_monthly_stats', JSON.stringify(monthly)); }catch(e){}
 }
 
+
+// ── BANNIERE CAROUSEL PILOTEE A DISTANCE ──
 let bannerData=[], bannerIdx=0, bannerTimer=null;
 
 function getLangVal(val, fallback=''){
+  // Supporte les strings simples ET les objets {fr:'...', en:'...', de:'...', es:'...'}
   if(!val) return fallback;
   if(typeof val === 'string') return val;
   if(typeof val === 'object'){
@@ -2527,7 +2586,7 @@ function buildSlide(b){
   const titre  = getLangVal(b.titre,  '');
   const texte  = getLangVal(b.texte,  '');
   const bouton = getLangVal(b.bouton, t('banner_btn') || 'En savoir plus');
-  const image  = getLangVal(b.image,  ''); 
+  const image  = getLangVal(b.image,  ''); // supporte string ET objet {fr, en, de, es}
   let html = '';
   if(image && image !== ''){
     html += `<a href="${b.url||'#'}" target="_blank" class="banner-img-wrap">
@@ -2565,7 +2624,7 @@ async function loadBanner(){
   try{
     let BANNER_URL = (typeof BANNER_JSON_URL !== 'undefined' && BANNER_JSON_URL)
       ? BANNER_JSON_URL
-      : window.location.origin + '/local/banner_local.json';
+      : '';  // Set BANNER_JSON_URL in secrets.js
     const r = await fetch(BANNER_URL + '?t=' + Date.now());
     if(!r.ok) return;
     const b = await r.json();
@@ -2582,6 +2641,7 @@ async function loadBanner(){
     slidesDiv.innerHTML = '';
     dotsDiv.innerHTML = '';
 
+    // Build slides
     bannerData.forEach((ban, i) => {
       const slide = buildSlide(ban);
       slidesDiv.appendChild(slide);
@@ -2592,11 +2652,13 @@ async function loadBanner(){
       dotsDiv.appendChild(dot);
     });
 
+    // Show nav only if multiple banners
     if(bannerData.length > 1){
       dotsDiv.style.display = 'flex';
       arrowsDiv.style.display = 'flex';
       document.getElementById('banner-prev').onclick = () => { prevSlide(); resetTimer(); };
       document.getElementById('banner-next').onclick = () => { nextSlide(); resetTimer(); };
+      // Auto-rotate every 5 seconds
       function resetTimer(){
         if(bannerTimer) clearInterval(bannerTimer);
         bannerTimer = setInterval(nextSlide, 5000);
@@ -2621,6 +2683,19 @@ function toggleTheme(){
 // ═══ REVENUS MINAGE F2POOL ════════════════════════════════════
 let miningPrices = {}, miningCache = {}, miningCacheTs = 0;
 let dailyRevEur = 0; // revenus jour en € (pour calcul rentabilité)
+let yesterdayRevEur = 0; // revenus J-1 en € (source de vérité, pools donnent value_last_day)
+
+// Récupère le snapshot d'hier depuis localStorage (mining_monthly_stats)
+function getYesterdayStats(){
+  const yest = new Date(); yest.setDate(yest.getDate() - 1);
+  const yKey = yest.toISOString().slice(0,10);
+  const moKey = yest.getFullYear() + '-' + yest.getMonth();
+  try{
+    const monthly = JSON.parse(localStorage.getItem('mining_monthly_stats') || '{}');
+    return (monthly[moKey] && monthly[moKey].dailySnap && monthly[moKey].dailySnap[yKey]) || null;
+  }catch(e){ return null; }
+}
+
 
 async function fetchCoinPrices(){
   if(Date.now() - miningCacheTs < 5*60*1000 && Object.keys(miningPrices).length) return miningPrices;
@@ -2808,16 +2883,6 @@ async function fetchF2PoolCoin(coin){
           if(r3.ok){
             const s3 = await r3.json();
             const dataO = (s3.attributes && s3.attributes.data) || {};
-            const errO  = s3.attributes && s3.attributes._error;
-            if(!window._kdaOverviewDebugged){
-              window._kdaOverviewDebugged = true;
-              console.log('[KDA overview] state:', s3.state, 'attributes:', s3.attributes);
-              if(errO) console.warn('[KDA overview] _error from script:', errO);
-              if(!dataO || Object.keys(dataO).length === 0){
-                console.warn('[KDA overview] data attribute is EMPTY. Check /config/scripts/antpool_kda_overview.py works:');
-                console.warn('  ssh into HA: python3 /config/scripts/antpool_kda_overview.py');
-              }
-            }
             const hsRaw = dataO.hsLast10m ?? dataO.hsLast1h ?? dataO.hsLast1d ?? 0;
             if(hsRaw){
               hashrate = parseFloat(hsRaw) || 0;
@@ -2830,9 +2895,7 @@ async function fetchF2PoolCoin(coin){
               }
             }
           }
-        }catch(e){
-          console.warn('[KDA overview] fetch error:', e.message);
-        }
+        }catch(e){}
 
         // 2) Si toujours rien, essayer les sensors dérivés (antpool_kda_hashrate, etc.)
         if(hashrate === 0){
@@ -2853,37 +2916,17 @@ async function fetchF2PoolCoin(coin){
               if(r2.ok){
                 const s2 = await r2.json();
                 const val = s2.state;
-                if(val && val !== 'unavailable' && val !== 'unknown' && val !== '0' && val !== '0.0'){
+                if(val && val !== 'unavailable' && val !== 'unknown'){
                   const unit = (s2.attributes && s2.attributes.unit_of_measurement) || '';
                   hashrate = parseHR(val + ' ' + unit);
                   if(hashrate > 0){
-                    console.log(`[KDA HR] Trouvé via ${candidate}: ${val} ${unit} = ${hashrate} H/s`);
+                    console.log(`[KDA HR] Trouvé via ${candidate}: ${hashrate} H/s`);
                     break;
                   }
                 }
               }
             }catch(e){}
           }
-        }
-
-        // 3) Lire aussi sensor.antpool_kda_workers (Template HA) si workers = 0
-        if(!workers){
-          try{
-            const ctrl4 = new AbortController();
-            const tmr4 = setTimeout(()=>ctrl4.abort(), 3000);
-            const r4 = await fetch(`${HA_URL}/api/states/sensor.antpool_kda_workers`, {
-              headers:{'Authorization':'Bearer '+HA_TOKEN}, signal:ctrl4.signal
-            });
-            clearTimeout(tmr4);
-            if(r4.ok){
-              const s4 = await r4.json();
-              const val = parseInt(s4.state);
-              if(!isNaN(val) && val > 0){
-                workers = val;
-                console.log(`[KDA workers] Trouvé via sensor.antpool_kda_workers: ${workers}`);
-              }
-            }
-          }catch(e){}
         }
       }
     }catch(e){}
@@ -2982,21 +3025,83 @@ async function loadMiningRevenue(){
     const yest = d ? (d.yesterday_amount || 0) : 0;
     totalYestEur += yest * price;
   });
+  yesterdayRevEur = totalYestEur; // ← exposé global pour la notif 20h
 
   // ── Badge Pool LIVE ─────────────────────────────────────────
   const badge = document.getElementById('mining-total-eur');
   if(badge) badge.textContent = totalYestEur > 0.001 ? totalYestEur.toFixed(2)+' €/'+t('hier') : '— €/hier';
 
-  // ── Bilan net ──────────────────────────────────────────────
-  // todayImport = kWh importés depuis Refoss (valeur journalière)
-  const costEdf    = todayImport * 0.20;  // 0.20€/kWh
-  const net        = totalYestEur - costEdf;
-  const netEl      = document.getElementById('mining-net-profit');
+  // ── Bilan HIER (revenus + coût EDF, tout en J-1) ─────────────
+  const yStats = getYesterdayStats();
+  let costEdfYest = null;
+
+  if(yStats && yStats.importEdf >= 0){
+    // Snapshot localStorage dispo
+    costEdfYest = (yStats.importEdf || 0) * 0.20;
+  } else {
+    // Pas de snapshot → fetch depuis HA history (energy yesterday)
+    // On utilise les sensors Refoss today_energy d'hier (qui ont été reset à minuit)
+    // Alternative : fetch l'historique du sensor à minuit-1s pour avoir le total J-1
+    try{
+      const yest = new Date(); yest.setDate(yest.getDate() - 1);
+      const yStart = new Date(yest); yStart.setHours(0,0,0,0);
+      const yEnd   = new Date(yest); yEnd.setHours(23,59,59,999);
+      // Chercher la dernière valeur de sensor.consommation_reseau hier → intégrer en kWh
+      // Plus simple : utiliser les sensors Refoss channel_X_today_energy à 23:59 d'hier
+      const sensorIds = [
+        'sensor.refoss_smart_energy_monitor_em_channel_1_today_energy',
+        'sensor.refoss_smart_energy_monitor_em_channel_2_today_energy',
+        'sensor.refoss_smart_energy_monitor_em_channel_3_today_energy'
+      ].join(',');
+      const ctrl = new AbortController();
+      const tmr = setTimeout(()=>ctrl.abort(), 10000);
+      const r = await fetch(
+        `${HA_URL}/api/history/period/${yStart.toISOString()}?end_time=${yEnd.toISOString()}&filter_entity_id=${sensorIds}&minimal_response=true&no_attributes=true`,
+        { headers: {'Authorization': 'Bearer ' + HA_TOKEN}, signal: ctrl.signal }
+      );
+      clearTimeout(tmr);
+      if(r.ok){
+        const data = await r.json();
+        let importYestKwh = 0;
+        if(Array.isArray(data)){
+          for(const series of data){
+            if(!Array.isArray(series) || series.length === 0) continue;
+            // Prendre la dernière valeur de la série (= total kWh à 23:59)
+            const last = series[series.length - 1];
+            const val = parseFloat(last.state);
+            if(!isNaN(val) && val > 0) importYestKwh += val;
+          }
+        }
+        if(importYestKwh > 0){
+          costEdfYest = importYestKwh * 0.20;
+          // Sauvegarder dans le snapshot pour la prochaine fois
+          const yKey = yest.toISOString().slice(0,10);
+          const moKey = yest.getFullYear() + '-' + yest.getMonth();
+          try{
+            let monthly = JSON.parse(localStorage.getItem('mining_monthly_stats') || '{}');
+            if(!monthly[moKey]) monthly[moKey] = {dailySnap:{}};
+            if(!monthly[moKey].dailySnap) monthly[moKey].dailySnap = {};
+            if(!monthly[moKey].dailySnap[yKey]) monthly[moKey].dailySnap[yKey] = {};
+            monthly[moKey].dailySnap[yKey].importEdf = importYestKwh;
+            localStorage.setItem('mining_monthly_stats', JSON.stringify(monthly));
+          }catch(e){}
+        }
+      }
+    }catch(e){ console.warn('Fetch EDF hier:', e.message); }
+  }
+
+  const netEl = document.getElementById('mining-net-profit');
   if(netEl){
-    if(totalYestEur > 0){
-      netEl.textContent = t('bilan')+' : '+t('revenues')+' '+totalYestEur.toFixed(2)+' € − '+t('edf_cost')+' '+costEdf.toFixed(2)+' € = '+(net>=0?'+':'')+net.toFixed(2)+' €';
+    if(totalYestEur > 0 && costEdfYest !== null){
+      const net = totalYestEur - costEdfYest;
+      netEl.textContent = t('bilan') + ' : ' + t('revenues') + ' '
+        + totalYestEur.toFixed(2) + ' € − ' + t('edf_cost') + ' '
+        + costEdfYest.toFixed(2) + ' € = ' + (net>=0?'+':'') + net.toFixed(2) + ' €';
+    } else if(totalYestEur > 0){
+      // Revenus OK mais pas de données EDF hier → afficher juste les revenus
+      netEl.textContent = t('bilan') + ' : ' + t('revenues') + ' ' + totalYestEur.toFixed(2) + ' €';
     } else {
-      netEl.textContent = '<span data-i18n="bilan_waiting">Bilan hier : en attente…</span>';
+      netEl.textContent = t('bilan_waiting');
     }
   }
 }
@@ -3146,110 +3251,15 @@ async function toggleNotif(channel, btn){
 // Appliquer l'état des boutons au chargement de la page
 setTimeout(applyNotifButtons, 500);
 
-// ─── Notifications automatiques sur événements ────────────────
-let _lastNotifState = '';
-
-// Stats journalières accumulées (reset auto à minuit)
-function getDailyStats(){
-  const today = new Date().toISOString().slice(0,10);
-  let s = {};
-  try{ s = JSON.parse(localStorage.getItem('daily_stats_notif') || '{}'); }catch(e){}
-  if(s.day !== today){
-    // Nouveau jour → reset complet
-    s = { day: today,
-          maxAsicsOn: 0,           // pic ASICs simultanés
-          asicMinutesCumul: 0,     // total ASIC-minutes (ex: 3 ASIC × 60min = 180)
-          totalRunMinutes: 0,      // minutes pendant lesquelles ≥1 ASIC tournait
-          maxS19On: false,         // S19 a tourné aujourd'hui ?
-          s19Minutes: 0,           // minutes où S19 a tourné
-          lastTick: Date.now() };
-  }
-  return s;
-}
-
-function updateDailyStats(){
-  if(!ASICS || !ASICS.length) return null;
-  const s = getDailyStats();
-  const now = Date.now();
-  // Delta en minutes, cap à 5 min (évite gros saut si onglet inactif)
-  const elapsedMin = Math.max(0, Math.min(5, (now - (s.lastTick||now)) / 60000));
-
-  const asicsOnNow = ASICS.filter(a=>a.on).length;
-  const s19On = ASICS.some(a => a.name === 'Antminer S19' && a.on);
-
-  if(asicsOnNow > s.maxAsicsOn) s.maxAsicsOn = asicsOnNow;
-  if(asicsOnNow > 0) s.totalRunMinutes = (s.totalRunMinutes||0) + elapsedMin;
-  s.asicMinutesCumul = (s.asicMinutesCumul||0) + (asicsOnNow * elapsedMin);
-  if(s19On){
-    s.maxS19On = true;
-    s.s19Minutes = (s.s19Minutes||0) + elapsedMin;
-  }
-  s.lastTick = now;
-  try{ localStorage.setItem('daily_stats_notif', JSON.stringify(s)); }catch(e){}
-  return s;
-}
-
+// ─── Notifications de bilan : GÉRÉES PAR HOME ASSISTANT ───
+// L'automation "Bilan Solar ASIC - Quotidien 20h" (côté HA) envoie le
+// bilan via Telegram/ntfy/HA Companion avec des durées fiables (HA tourne
+// 24/7). Le dashboard ne gère plus aucune notification automatique pour
+// éviter les doublons et les chiffres faux (navigateur pas toujours ouvert).
+// Les boutons NOTIFS du dashboard servent juste à tester les canaux.
 async function checkNotifEvents(){
-  if(!ASICS.length) return;
-  // Accumule les stats du jour à chaque appel
-  const dailyStats = updateDailyStats() || getDailyStats();
-  const asicsOn = ASICS.filter(a=>a.on).length;
-  const solar = Math.round(parseFloat(hd['_prodCalc']||0));
-  const surplus = Math.round(parseFloat(hd['sensor.surplus_solaire']||0));
-  const importEdf = Math.round(parseFloat(hd['sensor.consommation_reseau']||0));
-
-  // Clé d'état: évite de renvoyer la même notif en boucle
-  const stateKey = `${asicsOn}-${solar > 100 ? 'solar' : 'nosolar'}`;
-  if(stateKey === _lastNotifState) return;
-
-  const now = new Date();
-  const hour = now.getHours();
-
-  // Notif bilan de fin de journée (20h-21h) — utilise les vraies stats du jour
-  if(hour === 20 && !_lastNotifState.includes('bilan20h')){
-    const asicHours    = (dailyStats.asicMinutesCumul / 60).toFixed(1); // équivalent 1-ASIC-h
-    const runHours     = (dailyStats.totalRunMinutes / 60).toFixed(1);  // durée totale avec ≥1 ASIC
-    const s19Hours     = (dailyStats.s19Minutes / 60).toFixed(1);
-    const revEur       = dailyRevEur.toFixed(2);
-    const costEdf      = (todayImport * 0.20).toFixed(2);
-    const gainEdf      = (todayInject * 0.04).toFixed(2);
-    const net          = (parseFloat(revEur) - parseFloat(costEdf) + parseFloat(gainEdf)).toFixed(2);
-
-    let msg = `📊 Bilan du jour:\n`
-      + `\n`
-      + `☀️ Solaire produit: ${todayProd.toFixed(1)} kWh\n`
-      + `⛏️ Conso ASIC: ${todayFermeKwh.toFixed(1)} kWh\n`
-      + `📥 Import EDF: ${todayImport.toFixed(1)} kWh (${costEdf} €)\n`
-      + `📤 Injection EDF: ${todayInject.toFixed(1)} kWh (${gainEdf} €)\n`
-      + `\n`
-      + `⚡ Pic ASICs: ${dailyStats.maxAsicsOn}/${ASICS.length} simultanés\n`
-      + `🕐 Durée totale minage: ${runHours} h\n`
-      + `📊 ASIC·heures cumulées: ${asicHours} h\n`;
-    if(dailyStats.maxS19On){
-      msg += `🚀 Antminer S19: ${s19Hours} h\n`;
-    } else {
-      msg += `🚀 Antminer S19: non activé\n`;
-    }
-    msg += `\n`
-      + `💰 Revenus minage: ${revEur} €\n`
-      + `📈 Net (revenus - coût + injection): ${parseFloat(net) >= 0 ? '+' : ''}${net} €`;
-
-    await sendNotif(msg, '☀️ Bilan Solar ASIC', 'default', ['chart_increasing','solar_energy']);
-    _lastNotifState = stateKey + '-bilan20h';
-    return;
-  }
-
-  // Notif import EDF anormal (> 500W depuis plus de 20 cycles = ~7 min)
-  if(importEdf > 500 && !_lastNotifState.includes('importHigh')){
-    await sendNotif(
-      `⚠️ Import EDF élevé: ${importEdf}W\nVérifier la ferme (${asicsOn} ASIC actifs, ${solar}W solaire)`,
-      '⚠️ Import EDF anormal', 'high', ['warning','electric_plug']
-    );
-    _lastNotifState = stateKey + '-importHigh';
-    return;
-  }
-
-  _lastNotifState = stateKey;
+  // No-op volontaire — voir commentaire ci-dessus.
+  return;
 }
 
 // revenus lancés ci-dessous
