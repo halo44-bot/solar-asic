@@ -30,7 +30,8 @@ actions:
         {{ conso_asic_kwh + inject_kwh - import_kwh }}
       # ── Durées ASIC (history_stats) ──────────────────────────
       minage_heures: "{{ states('sensor.asic_minage_actif_heures_jour') | float(0) }}"
-      big_1_heures: "{{ states('sensor.asic_big_1_heures_jour') | float(0) }}"
+      asic_resume: "{{ states('sensor.asic_heures_resume') }}"
+      asic_cumul: "{{ states('sensor.asic_heures_cumulees') | float(0) }}"
       # ── Revenus ──────────────────────────────────────────────
       rev_hier: "{{ states('sensor.mining_revenue_yesterday_eur') | float(0) }}"
       cout_edf: "{{ (import_kwh * 0.20) | round(2) }}"
@@ -50,9 +51,9 @@ actions:
         📤 Injection EDF: {{ inject_kwh | round(1) }} kWh
 
 
-        🕐 Durée minage: {{ minage_heures | round(1) }} h
+        🕐 Durée minage: {{ minage_heures | round(1) }} h ({{ asic_cumul | round(1) }} ASIC·h cumulées)
 
-        🚀 Big ASIC: {{ big_1_heures | round(1) }} h
+        ⛏️ {{ asic_resume }}
 
 
         💰 Revenus minage (hier J-1): {{ rev_hier | round(2) }} €
