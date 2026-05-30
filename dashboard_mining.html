@@ -683,9 +683,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
       <span class="conn-status conn-err" id="conn-status"><span data-i18n="loading">Chargement…</span></span>
       <div style="display:flex;gap:4px;align-items:center;flex-shrink:0;">
         <span style="font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1px;white-space:nowrap;">NOTIF:</span>
-        <button class="notif-btn" id="notif-btn-telegram" onclick="toggleNotif('telegram',this)" title="Tester l'envoi Telegram (les bilans auto sont gérés par Home Assistant)">✈ TG</button>
-        <button class="notif-btn" id="notif-btn-ntfy" onclick="toggleNotif('ntfy',this)" title="Tester l'envoi ntfy (les bilans auto sont gérés par Home Assistant)">📳 ntfy</button>
-        <button class="notif-btn" id="notif-btn-ha" onclick="toggleNotif('ha',this)" title="Tester l'envoi HA Companion (les bilans auto sont gérés par Home Assistant)">🏠 HA</button>
+        <button class="notif-btn" id="notif-btn-telegram" onclick="toggleNotif('telegram',this)" title="Notifications Telegram (ASIC démarre/s'arrête, import anormal). Le bilan 20h est géré par Home Assistant.">✈ TG</button>
+        <button class="notif-btn" id="notif-btn-ntfy" onclick="toggleNotif('ntfy',this)" title="Notifications ntfy (ASIC démarre/s'arrête, import anormal). Le bilan 20h est géré par Home Assistant.">📳 ntfy</button>
+        <button class="notif-btn" id="notif-btn-ha" onclick="toggleNotif('ha',this)" title="Notifications HA Companion (ASIC démarre/s'arrête, import anormal). Le bilan 20h est géré par Home Assistant.">🏠 HA</button>
       </div>
       <div class="live-pill"><div class="live-dot"></div>LIVE</div>
     </div>
@@ -3251,15 +3251,59 @@ async function toggleNotif(channel, btn){
 // Appliquer l'état des boutons au chargement de la page
 setTimeout(applyNotifButtons, 500);
 
-// ─── Notifications de bilan : GÉRÉES PAR HOME ASSISTANT ───
-// L'automation "Bilan Solar ASIC - Quotidien 20h" (côté HA) envoie le
-// bilan via Telegram/ntfy/HA Companion avec des durées fiables (HA tourne
-// 24/7). Le dashboard ne gère plus aucune notification automatique pour
-// éviter les doublons et les chiffres faux (navigateur pas toujours ouvert).
-// Les boutons NOTIFS du dashboard servent juste à tester les canaux.
+// ─── Notifications d'événements (le BILAN 20h est géré par HA) ───
+// Le dashboard notifie les CHANGEMENTS en temps réel : ASIC qui démarre /
+// s'arrête, import EDF anormal, retour en injection. Le bilan quotidien
+// reste géré par l'automation HA (durées fiables 24/7).
+let _notifPrev = null;            // état précédent pour détecter les transitions
+let _lastImportNotif = 0;         // timestamp dernière notif import (anti-spam)
+
 async function checkNotifEvents(){
-  // No-op volontaire — voir commentaire ci-dessus.
-  return;
+  if(!ASICS.length) return;
+
+  const asicsOn   = ASICS.filter(a=>a.on).length;
+  const onNames   = ASICS.filter(a=>a.on).map(a=>a.name);
+  const importEdf = Math.round(parseFloat(hd['sensor.consommation_reseau']||0));
+  const surplus   = Math.round(parseFloat(hd['sensor.surplus_solaire']||0));
+  const now       = Date.now();
+
+  // Premier passage : on mémorise sans notifier (évite un flot au chargement)
+  if(_notifPrev === null){
+    _notifPrev = { onNames: onNames.slice(), asicsOn };
+    return;
+  }
+
+  // ── ASIC qui DÉMARRENT (présents maintenant, absents avant) ──
+  const started = onNames.filter(n => !_notifPrev.onNames.includes(n));
+  // ── ASIC qui S'ARRÊTENT (absents maintenant, présents avant) ──
+  const stopped = _notifPrev.onNames.filter(n => !onNames.includes(n));
+
+  if(started.length > 0){
+    const lbl = started.length === 1 ? started[0] : started.length + ' ASIC';
+    await sendNotif(
+      `${lbl} ${started.length === 1 ? 'démarre' : 'démarrent'} | ${asicsOn}/${ASICS.length} actifs | surplus ${surplus}W`,
+      '🟢 ASIC démarré', 'default', ['green_circle','pick']
+    );
+  }
+  if(stopped.length > 0){
+    const lbl = stopped.length === 1 ? stopped[0] : stopped.length + ' ASIC';
+    await sendNotif(
+      `${lbl} ${stopped.length === 1 ? 's\'arrête' : 's\'arrêtent'} | ${asicsOn}/${ASICS.length} actifs | surplus ${surplus}W`,
+      '🔴 ASIC arrêté', 'default', ['red_circle','pick']
+    );
+  }
+
+  // ── Import EDF anormal (> 500W) : 1 notif max toutes les 15 min ──
+  if(importEdf > 500 && (now - _lastImportNotif) > 15*60*1000){
+    await sendNotif(
+      `Import EDF ${importEdf}W détecté\n${asicsOn} ASIC actifs — l'automation devrait réduire la charge`,
+      '⚠️ Import EDF anormal', 'high', ['warning','electric_plug']
+    );
+    _lastImportNotif = now;
+  }
+
+  // Mémoriser l'état courant pour le prochain cycle
+  _notifPrev = { onNames: onNames.slice(), asicsOn };
 }
 
 // revenus lancés ci-dessous
