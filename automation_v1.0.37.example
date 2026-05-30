@@ -1,4 +1,4 @@
-alias: ASIC V1.0.37 - solar asic
+alias: ASIC V1.0.37 - solar asic 
 description: >-
   Automation générique pour ASIC solaires : petits ASIC en cascade le matin,
   puis bascule sur les ASIC prioritaires (gros mineurs) quand la production
