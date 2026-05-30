@@ -1,4 +1,4 @@
-# ☀️ Solar ASIC — Solar Mining Dashboard for Home Assistant
+# ☀️ Solar ASIC — Solar Mining Dashboard for Home Assistant 
 
 <p align="center">
   <a href="README.fr.md">Français</a> | 
