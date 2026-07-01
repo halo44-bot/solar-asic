@@ -10,7 +10,7 @@
 **Solar ASIC** connects your photovoltaic installation to your ASIC mining farm via Home Assistant.
 Result: your solar surplus – the one that you sell for a few cents or that you simply lose – becomes a productive resource, automatically, without ever drawing on the electricity grid.
 
-![Solar ASIC Dashboard](docs/dashboard_FR.png)
+![Solar ASIC Dashboard](docs/dashboard_EN.png)
 
 ---
 
