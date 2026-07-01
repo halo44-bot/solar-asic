@@ -1,30 +1,33 @@
-# ☀️ Solar ASIC — Solar Mining Dashboard for Home Assistant 
+# ☀️ Solar ASIC — Turn your excess solar into automated mining power
 
-<p align="center">
-  <a href="README.fr.md">Français</a> | 
-  <a href="README.md">English</a> | 
-  <a href="README.es.md">Español</a> | 
-  <a href="README.de.md">Deutsch</a>
+<p align="center"> 
+<a href="README.fr.md">French</a> | 
+<a href="README.md">English</a> | 
+<a href="README.es.md">Español</a> | 
+<a href="README.de.md">Deutsch</a>
 </p>
 
-**A standalone HTML dashboard** that connects your solar installation to your ASIC mining farm via Home Assistant. Designed to maximize the use of solar surplus and **mine cryptocurrencies for free** — without touching the national electricity grid.
+**Solar ASIC** connects your photovoltaic installation to your ASIC mining farm via Home Assistant.
+Result: your solar surplus – the one that you sell for a few cents or that you simply lose – becomes a productive resource, automatically, without ever drawing on the electricity grid.
 
-![Solar ASIC Dashboard](docs/dashboard_EN.png)
+![Solar ASIC Dashboard](docs/dashboard_FR.png)
 
 ---
 
 ## 🎯 Why this project?
 
-In a **bear market**, cryptocurrency prices drop. Mining becomes unprofitable: mining revenues no longer cover electricity costs. The solution: **use a solar installation** to power the ASICs.
+A solar installation often produces more than what the home consumes. This surplus is generally:
+- resold to the network at a ridiculous price (often < €0.05/kWh),
+- or simply lost if the installation is not connected to the injection.
 
-> **Simple logic**: if the sun produces excess energy, it's better to turn it into cryptocurrencies rather than injecting it into the grid at 4 cents per kWh.
+**Solar ASIC solves this automatically**: as soon as there is a surplus, the system starts your ASICs. As soon as there are no more, he stops them. Without manual intervention, without network overconsumption, 100% controllable and open source.
 
-With this project:
-- ⛏️ Your ASICs run **when there's sun** — electricity cost = €0
-- 📈 You **accumulate crypto** during the bear market
-- 💰 When the bull market returns, your accumulated crypto is worth much more
-- 🔋 You **don't consume grid electricity** for mining (or very little)
+> Bonus for Bitcoin enthusiasts: during a bear market, mining with 0€ electricity completely changes profitability — you accumulate without incurring the cost of energy.
 
+- ⛏️ Your ASICs run **when there is sunshine** — electrical cost = 0€
+- 🔋 **Zero** or near-zero network consumption for mining
+- 📊 Real-time dashboard, automatic daily reports, notifications
+- 🧩 100% open source, 100% Home Assistant, adaptable to your hardware
 ---
 
 ## ✨ Features
