@@ -1,4 +1,4 @@
-# ☀️ Solar ASIC — Dashboard de minage solaire pour Home Assistant
+# ☀️ Solar ASIC — Transformez votre surplus solaire en puissance de minage automatisée
 
 <p align="center">
   <a href="README.fr.md">Français</a> | 
@@ -7,7 +7,8 @@
   <a href="README.de.md">Deutsch</a>
 </p>
 
-**Un dashboard HTML standalone** qui connecte votre installation solaire à votre ferme de minage ASIC via Home Assistant. Conçu pour maximiser l'utilisation du surplus solaire et **miner des cryptomonnaies gratuitement** — sans toucher au réseau national d'électricité.
+**Solar ASIC** connecte votre installation photovoltaïque à votre ferme de minage ASIC via Home Assistant.  
+Résultat : votre surplus solaire — celui que vous revendez pour quelques centimes ou que vous perdez tout simplement — devient une ressource productive, automatiquement, sans jamais tirer sur le réseau électrique.
 
 ![Solar ASIC Dashboard](docs/dashboard_FR.png)
 
@@ -15,16 +16,18 @@
 
 ## 🎯 Pourquoi ce projet ?
 
-En **bear market**, le cours des cryptomonnaies chute. Miner devient déficitaire : les revenus de minage ne couvrent plus le coût de l'électricité. La solution : **utiliser une installation solaire** pour alimenter les ASIC.
+Une installation solaire produit souvent plus que ce que le foyer consomme. Ce surplus est généralement :
+- revendu au réseau à un prix dérisoire (souvent < 0,05 €/kWh),
+- ou tout simplement perdu si l'installation n'est pas raccordée à l'injection.
 
-> **Logique simple** : si le soleil produit de l'énergie excédentaire, autant la transformer en cryptomonnaies plutôt que de l'injecter dans le réseau à 4 centimes d'euro le kWh.
+**Solar ASIC résout ça automatiquement** : dès qu'il y a un surplus, le système démarre vos ASIC. Dès qu'il n'y en a plus, il les arrête. Sans intervention manuelle, sans surconsommation réseau, 100% pilotable et open source.
 
-Avec ce projet :
-- ⛏️ Tes ASIC tournent **quand il y a du soleil** — coût électricité = 0€
-- 📈 Tu **accumules des crypto** pendant le bear market
-- 💰 Quand le bull market revient, tes crypto accumulées valent beaucoup plus
-- 🔋 Tu **ne consommes pas de réseau EDF** pour le minage (ou très peu)
+> Bonus pour les passionnés Bitcoin : en période de bear market, miner avec une électricité à 0€ change complètement la rentabilité — vous accumulez sans subir le coût de l'énergie.
 
+- ⛏️ Vos ASIC tournent **quand il y a du soleil** — coût électrique = 0€
+- 🔋 **Zéro** ou quasi-zéro consommation réseau pour le minage
+- 📊 Dashboard temps réel, bilans quotidiens automatiques, notifications
+- 🧩 100% open source, 100% Home Assistant, adaptable à votre matériel
 ---
 
 ## ✨ Fonctionnalités
