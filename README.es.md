@@ -1,30 +1,33 @@
-# ☀️ Solar ASIC — Panel de minería solar para Home Assistant
+# ☀️ Solar ASIC: convierta su exceso de energía solar en energía minera automatizada
 
-<p align="center">
-  <a href="README.fr.md">Français</a> | 
-  <a href="README.md">English</a> | 
-  <a href="README.es.md">Español</a> | 
-  <a href="README.de.md">Deutsch</a>
+<p align="centro">
+<a href="README.fr.md">francés</a> | 
+<a href="README.md">Inglés</a> | 
+<a href="README.es.md">Español</a> | 
+<a href="README.de.md">alemán</a>
 </p>
 
-**Un panel HTML independiente** que conecta tu instalación solar a tu granja de minería ASIC a través de Home Assistant. Diseñado para maximizar el uso del excedente solar y **minar criptomonedas gratis** — sin tocar la red eléctrica nacional.
+**Solar ASIC** conecta su instalación fotovoltaica a su granja minera ASIC a través de Home Assistant.
+Resultado: su excedente solar (el que vende por unos céntimos o el que simplemente pierde) se convierte en un recurso productivo, automáticamente, sin necesidad de recurrir a la red eléctrica.
 
-![Solar ASIC Dashboard](docs/dashboard_ES.png)
+![Panel de control solar ASIC](docs/dashboard_ES.png)
 
 ---
 
 ## 🎯 ¿Por qué este proyecto?
 
-En un **mercado bajista**, los precios de las criptomonedas caen. Minar se vuelve deficitario: los ingresos de minería ya no cubren los costes de electricidad. La solución: **usar una instalación solar** para alimentar los ASICs.
+Una instalación solar suele producir más de lo que consume la casa. Este excedente es generalmente:
+- revendido a la red a un precio ridículo (a menudo < 0,05 €/kWh),
+- o simplemente se pierde si la instalación no está conectada a la inyección.
 
-> **Lógica simple**: si el sol produce energía excedente, es mejor convertirla en criptomonedas que inyectarla a la red por 4 céntimos el kWh.
+**Solar ASIC resuelve esto automáticamente**: tan pronto como hay un excedente, el sistema inicia sus ASIC. En cuanto no quedan más, los detiene. Sin intervención manual, sin sobreconsumo de red, 100% controlable y de código abierto.
 
-Con este proyecto:
-- ⛏️ Tus ASICs funcionan **cuando hay sol** — coste eléctrico = 0€
-- 📈 **Acumulas cripto** durante el mercado bajista
-- 💰 Cuando vuelve el mercado alcista, tus cripto acumuladas valen mucho más
-- 🔋 **No consumes electricidad de la red** para minar (o muy poco)
+> Bonificación para los entusiastas de Bitcoin: durante un mercado bajista, minar con 0€ de electricidad cambia completamente la rentabilidad: acumulas sin incurrir en el coste de la energía.
 
+- ⛏️ Tus ASIC funcionan **cuando hay sol** — coste eléctrico = 0€
+- 🔋 Consumo de red **cero** o casi nulo para minería
+- 📊 Panel de control en tiempo real, informes diarios automáticos, notificaciones
+- 🧩 100% código abierto, 100% Home Assistant, adaptable a tu hardware
 ---
 
 ## ✨ Características
