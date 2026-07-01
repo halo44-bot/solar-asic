@@ -1,30 +1,33 @@
-# ☀️ Solar ASIC — Solar-Mining-Dashboard für Home Assistant
+# ☀️ Solar-ASIC – Verwandeln Sie Ihre überschüssige Solarenergie in automatisierten Mining-Strom
 
 <p align="center">
-  <a href="README.fr.md">Français</a> | 
-  <a href="README.md">English</a> | 
-  <a href="README.es.md">Español</a> | 
-  <a href="README.de.md">Deutsch</a>
+<a href="README.fr.md">Französisch</a> | 
+<a href="README.md">Englisch</a> | 
+<a href="README.es.md">Español</a> | 
+<a href="README.de.md">Deutsch</a>
 </p>
 
-**Ein eigenständiges HTML-Dashboard**, das deine Solaranlage über Home Assistant mit deiner ASIC-Mining-Farm verbindet. Entwickelt, um den Solarüberschuss zu maximieren und **Kryptowährungen kostenlos zu schürfen** — ohne das öffentliche Stromnetz zu belasten.
+**Solar ASIC** verbindet Ihre Photovoltaikanlage über Home Assistant mit Ihrer ASIC-Mining-Farm.
+Ergebnis: Ihr Solarüberschuss – den Sie für ein paar Cent verkaufen oder den Sie einfach verlieren – wird automatisch zu einer produktiven Ressource, ohne jemals auf das Stromnetz zurückzugreifen.
 
-![Solar ASIC Dashboard](docs/dashboard_DE.png)
+![Solar-ASIC-Dashboard](docs/dashboard_DE.png)
 
 ---
 
 ## 🎯 Warum dieses Projekt?
 
-Im **Bärenmarkt** fallen die Kryptokurse. Mining wird unrentabel: Die Mining-Einnahmen decken die Stromkosten nicht mehr. Die Lösung: **eine Solaranlage** nutzen, um die ASICs zu betreiben.
+Eine Solaranlage produziert oft mehr, als das Haus verbraucht. Dieser Überschuss beträgt im Allgemeinen:
+- zu einem lächerlichen Preis (oft < 0,05 €/kWh) an das Netz weiterverkauft werden,
+- oder einfach verloren gehen, wenn die Installation nicht an die Einspritzung angeschlossen ist.
 
-> **Einfache Logik**: Wenn die Sonne überschüssige Energie produziert, ist es besser, sie in Kryptowährungen umzuwandeln, als sie für 4 Cent pro kWh ins Netz einzuspeisen.
+**Solar ASIC löst das automatisch**: Sobald ein Überschuss vorhanden ist, startet das System Ihre ASICs. Sobald keine mehr da sind, stoppt er sie. Ohne manuelle Eingriffe, ohne Netzwerküberlastung, 100 % kontrollierbar und Open Source.
 
-Mit diesem Projekt:
-- ⛏️ Deine ASICs laufen **wenn die Sonne scheint** — Stromkosten = 0€
-- 📈 Du **sammelst Krypto** während des Bärenmarkts
-- 💰 Wenn der Bullenmarkt zurückkommt, sind deine angesammelten Kryptos viel mehr wert
-- 🔋 Du **verbrauchst keinen Netzstrom** fürs Mining (oder sehr wenig)
+> Bonus für Bitcoin-Enthusiasten: Während eines Bärenmarktes verändert das Mining mit 0€ Strom die Rentabilität völlig – Sie akkumulieren, ohne dass Energiekosten anfallen.
 
+- ⛏️ Ihre ASICs laufen **bei Sonnenschein** – Stromkosten = 0 €
+- 🔋 **Null** oder nahezu null Netzwerkverbrauch für das Mining
+- 📊 Echtzeit-Dashboard, automatische Tagesberichte, Benachrichtigungen
+- 🧩 100 % Open Source, 100 % Home Assistant, anpassbar an Ihre Hardware
 ---
 
 ## ✨ Funktionen
